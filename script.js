@@ -175,7 +175,8 @@ class DesktopPortfolio {
             { name: 'Projects', action: () => this.openFile('projects') },
             { name: 'Skills', action: () => this.openFile('skills') },
             { name: 'Contact', action: () => this.openFile('contact') },
-            { name: 'Social', action: () => this.openFile('social') }
+            { name: 'Social', action: () => this.openFile('social') },
+            { name: 'Browser', action: () => this.openFile('browser') }
         ];
         
         const results = searchableItems.filter(item => 
@@ -1429,9 +1430,55 @@ class DesktopPortfolio {
             }
         };
         
+        // Browser is handled specially — isBrowser flag triggers different window creation
+        windowData['browser'] = {
+            title: 'Browser',
+            isBrowser: true,
+            startUrl: 'https://yep.com',
+            content: this.getBrowserContent(),
+            width: 960,
+            height: 680
+        };
+
         return windowData[fileType] || null;
     }
     
+    getBrowserContent() {
+        return `
+            <div class="browser-chrome">
+                <div class="browser-toolbar">
+                    <button class="nav-btn back-btn" title="Back">&#8592;</button>
+                    <button class="nav-btn fwd-btn" title="Forward">&#8594;</button>
+                    <button class="nav-btn reload-btn" title="Reload">&#8635;</button>
+                    <input class="url-bar" type="text" spellcheck="false" placeholder="Enter a URL or search...">
+                    <a class="nav-btn newtab-btn" href="#" target="_blank" rel="noopener noreferrer" title="Open in new tab">&#8599;</a>
+                </div>
+                <div class="browser-bookmarks">
+                    <button class="bm-chip" data-url="https://andreped.dev">&#127968; My Site</button>
+                    <button class="bm-chip" data-url="https://yep.com">&#128269; Yep</button>
+                    <button class="bm-chip" data-url="https://en.wikipedia.org/wiki/Artificial_intelligence">&#128218; Wikipedia</button>
+                    <button class="bm-chip" data-url="https://www.vg.no">&#128240; VG</button>
+                    <button class="bm-chip" data-url="https://andreped-aeropath.hf.space">&#129978; AeroPath</button>
+                    <button class="bm-chip" data-url="https://andreped-lynos.hf.space">&#129704; LyNoS</button>
+                    <button class="bm-chip" data-url="https://andreped-livermask.hf.space">&#128138; livermask</button>
+                </div>
+                <div class="browser-viewport">
+                    <iframe class="browser-iframe"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                        referrerpolicy="no-referrer"></iframe>
+                    <div class="browser-blocked">
+                        <div class="blocked-icon">&#128683;</div>
+                        <p>This site doesn&#39;t allow embedding.</p>
+                        <a class="blocked-newtab" href="#" target="_blank" rel="noopener noreferrer">Open in new tab &#8599;</a>
+                    </div>
+                    <div class="browser-loading">
+                        <div class="browser-spinner"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
     getAboutContent() {
         return `
             <div class="content-section">
@@ -1854,6 +1901,103 @@ class DesktopPortfolio {
         `;
     }
 
+    setupBrowserWindow(winEl, startUrl) {
+        const iframe    = winEl.querySelector('.browser-iframe');
+        const urlBar    = winEl.querySelector('.url-bar');
+        const backBtn   = winEl.querySelector('.back-btn');
+        const fwdBtn    = winEl.querySelector('.fwd-btn');
+        const reloadBtn = winEl.querySelector('.reload-btn');
+        const newtabBtn = winEl.querySelector('.newtab-btn');
+        const blocked   = winEl.querySelector('.browser-blocked');
+        const loading   = winEl.querySelector('.browser-loading');
+        const blockedLink = winEl.querySelector('.blocked-newtab');
+
+        if (!iframe) return;
+
+        const nav = { history: [], index: -1 };
+
+        const normaliseUrl = (raw) => {
+            const s = raw.trim();
+            if (!s) return '';
+            if (/^https?:\/\//i.test(s)) return s;
+            // looks like a domain
+            if (/^[\w-]+\.\w{2,}/.test(s)) return 'https://' + s;
+            // treat as search query
+            return 'https://yep.com/web?q=' + encodeURIComponent(s);
+        };
+
+        const navigate = (url) => {
+            if (!url) return;
+            // Truncate forward history on new navigation
+            nav.history = nav.history.slice(0, nav.index + 1);
+            nav.history.push(url);
+            nav.index = nav.history.length - 1;
+            load(url);
+        };
+
+        const load = (url) => {
+            if (urlBar) urlBar.value = url;
+            if (newtabBtn) newtabBtn.href = url;
+            if (blockedLink) blockedLink.href = url;
+            if (blocked) blocked.style.display = 'none';
+            if (loading) loading.style.display = 'flex';
+            iframe.src = url;
+            updateNavButtons();
+        };
+
+        const updateNavButtons = () => {
+            if (backBtn) backBtn.disabled = nav.index <= 0;
+            if (fwdBtn)  fwdBtn.disabled  = nav.index >= nav.history.length - 1;
+        };
+
+        // Detect blocked (X-Frame-Options / CSP frame-ancestors)
+        iframe.addEventListener('load', () => {
+            if (loading) loading.style.display = 'none';
+            try {
+                const doc = iframe.contentDocument || iframe.contentWindow.document;
+                const isBlocked = !doc || !doc.body || doc.body.innerHTML.trim() === '';
+                if (blocked) blocked.style.display = isBlocked ? 'flex' : 'none';
+            } catch (e) {
+                // Cross-origin success — page loaded fine
+                if (blocked) blocked.style.display = 'none';
+            }
+        });
+
+        // Navigation buttons
+        if (backBtn) backBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (nav.index > 0) { nav.index--; load(nav.history[nav.index]); }
+        });
+        if (fwdBtn) fwdBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (nav.index < nav.history.length - 1) { nav.index++; load(nav.history[nav.index]); }
+        });
+        if (reloadBtn) reloadBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            iframe.src = iframe.src; // eslint-disable-line no-self-assign
+        });
+
+        // URL bar
+        if (urlBar) {
+            urlBar.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.stopPropagation(); navigate(normaliseUrl(urlBar.value)); }
+            });
+            urlBar.addEventListener('click', (e) => { e.stopPropagation(); urlBar.select(); });
+            urlBar.addEventListener('mousedown', (e) => e.stopPropagation());
+        }
+
+        // Bookmark chips
+        winEl.querySelectorAll('.bm-chip').forEach(chip => {
+            chip.addEventListener('click', (e) => {
+                e.stopPropagation();
+                navigate(chip.dataset.url);
+            });
+        });
+
+        // Initial load
+        navigate(startUrl);
+    }
+
     createWindow(windowData) {
         const windowId = `window-${++this.windowCounter}`;
         const window = document.createElement('div');
@@ -1890,6 +2034,7 @@ class DesktopPortfolio {
         
         const windowsContainer = domCache.windowsContainer;
         if (!windowsContainer) return;
+        if (windowData.isBrowser) window.classList.add('browser-window');
         windowsContainer.appendChild(window);
         
         this.scheduleUpdate(() => {
@@ -1916,6 +2061,9 @@ class DesktopPortfolio {
         this.setupWindowListeners(window, windowId);
         this.makeWindowDraggable(window);
         this.makeWindowResizable(window, windowId);
+        if (windowData.isBrowser) {
+            this.setupBrowserWindow(window, windowData.startUrl || 'https://andreped.dev');
+        }
         this.addSoundEffect('open');
     }
     
