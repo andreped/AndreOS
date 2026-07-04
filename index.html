@@ -53,15 +53,6 @@
         <audio id="backgroundMusic" loop preload="auto">
         </audio>
         
-        <div class="audio-controls">
-            <button id="musicToggle" class="audio-btn" title="Toggle Background Music">
-                <span class="music-icon">🎵</span>
-            </button>
-            <div class="volume-control">
-                <input type="range" id="volumeSlider" min="0" max="100" value="100" class="volume-slider">
-            </div>
-        </div>
-
         <div class="desktop-background">
             <div class="particles-container">
                 <div class="particle"></div>
@@ -148,7 +139,28 @@
                 <div class="hidden-icons-chevron" title="Show hidden icons">^</div>
                 <div class="tray-icons">
                     <span class="tray-icon" title="Security">🛡️</span>
-                    <span class="tray-icon" title="Volume">🔊</span>
+                    <div class="tray-volume-area">
+                        <span id="volumeTrayIcon" class="tray-icon" title="Music &amp; Volume">🎵</span>
+                        <div id="volumePopup" class="volume-popup">
+                            <div class="volume-popup-section">
+                                <span class="volume-popup-label">Music</span>
+                                <div class="volume-row">
+                                    <button id="musicToggle" class="vol-toggle" title="Toggle Music"><span class="vol-toggle-icon">🎵</span></button>
+                                    <input type="range" id="musicVolumeSlider" min="0" max="100" value="30" class="volume-slider">
+                                    <span class="vol-pct" id="musicPct">30%</span>
+                                </div>
+                            </div>
+                            <div class="volume-popup-divider"></div>
+                            <div class="volume-popup-section">
+                                <span class="volume-popup-label">Sound Effects</span>
+                                <div class="volume-row">
+                                    <button id="sfxToggle" class="vol-toggle" title="Toggle Sound Effects"><span class="vol-toggle-icon">🔔</span></button>
+                                    <input type="range" id="sfxVolumeSlider" min="0" max="100" value="60" class="volume-slider">
+                                    <span class="vol-pct" id="sfxPct">60%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <span class="tray-icon" title="Network">📶</span>
                     <span class="tray-icon" title="Battery">🔋</span>
                 </div>

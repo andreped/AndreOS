@@ -1,6 +1,8 @@
 const domCache = {
     musicToggle: null,
-    volumeSlider: null,
+    sfxToggle: null,
+    musicVolumeSlider: null,
+    sfxVolumeSlider: null,
     desktop: null,
     windowsContainer: null,
     taskbar: null,
@@ -24,6 +26,8 @@ class DesktopPortfolio {
         this.musicPlaying = false;
         this.backgroundMusic = null;
         this.musicGainNode = null;
+        this.sfxGainNode = null;
+        this.sfxMuted = false;
         this.windowZIndex = 400;
         this.windowSwitcherOpen = false;
         this.windowSwitcherIndex = 0;
@@ -36,7 +40,9 @@ class DesktopPortfolio {
         this.throttledFunctions = new Map();
         
         domCache.musicToggle = document.getElementById('musicToggle');
-        domCache.volumeSlider = document.getElementById('volumeSlider');
+        domCache.sfxToggle = document.getElementById('sfxToggle');
+        domCache.musicVolumeSlider = document.getElementById('musicVolumeSlider');
+        domCache.sfxVolumeSlider = document.getElementById('sfxVolumeSlider');
         domCache.desktop = document.querySelector('.desktop');
         domCache.windowsContainer = document.querySelector('.windows-container');
         domCache.taskbar = document.querySelector('.taskbar');
@@ -562,8 +568,11 @@ class DesktopPortfolio {
         try {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
             this.musicGainNode = this.audioContext.createGain();
-            this.musicGainNode.gain.value = (domCache.volumeSlider ? domCache.volumeSlider.value : 30) / 100;
+            this.musicGainNode.gain.value = (domCache.musicVolumeSlider ? domCache.musicVolumeSlider.value : 30) / 100;
             this.musicGainNode.connect(this.audioContext.destination);
+            this.sfxGainNode = this.audioContext.createGain();
+            this.sfxGainNode.gain.value = (domCache.sfxVolumeSlider ? domCache.sfxVolumeSlider.value : 60) / 100;
+            this.sfxGainNode.connect(this.audioContext.destination);
             this.setupAudioControls();
         } catch (error) {
             this.setupAudioControls();
@@ -741,22 +750,157 @@ class DesktopPortfolio {
     
     setupAudioControls() {
         const musicToggle = domCache.musicToggle;
-        const volumeSlider = domCache.volumeSlider;
-        const audioControls = document.querySelector('.audio-controls');
-        
+        const sfxToggle = domCache.sfxToggle;
+        const musicVolumeSlider = domCache.musicVolumeSlider;
+        const sfxVolumeSlider = domCache.sfxVolumeSlider;
+        const volumeTrayIcon = document.getElementById('volumeTrayIcon');
+        const volumePopup = document.getElementById('volumePopup');
+
+        // Restore persisted settings before wiring events
+        this.applyAudioSettings(this.loadAudioSettings());
+
+        // Music toggle
         if (musicToggle) {
-            musicToggle.addEventListener('click', () => {
-                this.toggleMusic();
+            musicToggle.addEventListener('click', () => this.toggleMusic());
+        }
+
+        // SFX toggle
+        if (sfxToggle) {
+            sfxToggle.addEventListener('click', () => this.toggleSfx());
+        }
+
+        // Music slider
+        if (musicVolumeSlider) {
+            this.updateSliderTrack(musicVolumeSlider);
+            this.updatePct('musicPct', musicVolumeSlider.value);
+            musicVolumeSlider.addEventListener('input', (e) => {
+                const v = e.target.value / 100;
+                this.updateSliderTrack(e.target);
+                this.updatePct('musicPct', e.target.value);
+                if (this.musicGainNode && this.musicPlaying) {
+                    this.musicGainNode.gain.value = v;
+                }
+                this.saveAudioSettings();
             });
         }
-        if (volumeSlider) {
-            volumeSlider.addEventListener('input', (e) => {
-                this.setVolume(e.target.value / 100);
+
+        // SFX slider
+        if (sfxVolumeSlider) {
+            this.updateSliderTrack(sfxVolumeSlider);
+            this.updatePct('sfxPct', sfxVolumeSlider.value);
+            sfxVolumeSlider.addEventListener('input', (e) => {
+                const v = e.target.value / 100;
+                this.updateSliderTrack(e.target);
+                this.updatePct('sfxPct', e.target.value);
+                if (this.sfxGainNode && !this.sfxMuted) {
+                    this.sfxGainNode.gain.value = v;
+                }
+                this.saveAudioSettings();
             });
         }
-        
-        if (audioControls) {
-            this.makeDraggable(audioControls);
+
+        // Tray popup open/close
+        if (volumeTrayIcon && volumePopup) {
+            volumeTrayIcon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                volumePopup.classList.toggle('open');
+            });
+            document.addEventListener('click', (e) => {
+                if (!volumePopup.contains(e.target) && e.target !== volumeTrayIcon) {
+                    volumePopup.classList.remove('open');
+                }
+            });
+        }
+    }
+
+    updatePct(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = Math.round(value) + '%';
+    }
+
+    toggleSfx() {
+        this.sfxMuted = !this.sfxMuted;
+        const sfxToggle = domCache.sfxToggle;
+        const sfxVolumeSlider = domCache.sfxVolumeSlider;
+        if (sfxToggle) {
+            sfxToggle.classList.toggle('muted', this.sfxMuted);
+        }
+        if (this.sfxGainNode) {
+            this.sfxGainNode.gain.value = this.sfxMuted
+                ? 0
+                : (sfxVolumeSlider ? sfxVolumeSlider.value / 100 : 0.6);
+        }
+        this.saveAudioSettings();
+    }
+
+    updateSliderTrack(slider) {
+        const pct = slider.value / slider.max * 100;
+        slider.style.background = `linear-gradient(to right,
+            rgba(255, 107, 107, 0.9) 0%,
+            rgba(78, 205, 196, 0.9) ${pct}%,
+            rgba(255, 255, 255, 0.15) ${pct}%,
+            rgba(255, 255, 255, 0.15) 100%)`;
+    }
+
+    saveAudioSettings() {
+        try {
+            const musicVolumeSlider = domCache.musicVolumeSlider;
+            const sfxVolumeSlider = domCache.sfxVolumeSlider;
+            localStorage.setItem('andreOS_audio', JSON.stringify({
+                musicVolume: musicVolumeSlider ? Number(musicVolumeSlider.value) : 30,
+                sfxVolume:   sfxVolumeSlider   ? Number(sfxVolumeSlider.value)   : 60,
+                musicMuted:  !this.musicPlaying,
+                sfxMuted:    this.sfxMuted
+            }));
+        } catch (e) { /* localStorage unavailable */ }
+    }
+
+    loadAudioSettings() {
+        try {
+            const raw = localStorage.getItem('andreOS_audio');
+            if (!raw) return null;
+            return JSON.parse(raw);
+        } catch (e) { return null; }
+    }
+
+    applyAudioSettings(settings) {
+        if (!settings) return;
+        const musicVolumeSlider = domCache.musicVolumeSlider;
+        const sfxVolumeSlider   = domCache.sfxVolumeSlider;
+        const musicToggle       = domCache.musicToggle;
+        const sfxToggle         = domCache.sfxToggle;
+
+        if (musicVolumeSlider) {
+            musicVolumeSlider.value = settings.musicVolume;
+            this.updateSliderTrack(musicVolumeSlider);
+            this.updatePct('musicPct', settings.musicVolume);
+            if (this.musicGainNode) {
+                this.musicGainNode.gain.value = settings.musicMuted ? 0 : settings.musicVolume / 100;
+            }
+        }
+
+        if (sfxVolumeSlider) {
+            sfxVolumeSlider.value = settings.sfxVolume;
+            this.updateSliderTrack(sfxVolumeSlider);
+            this.updatePct('sfxPct', settings.sfxVolume);
+            if (this.sfxGainNode) {
+                this.sfxGainNode.gain.value = settings.sfxMuted ? 0 : settings.sfxVolume / 100;
+            }
+        }
+
+        // Mute states
+        this.sfxMuted = !!settings.sfxMuted;
+        if (sfxToggle) sfxToggle.classList.toggle('muted', this.sfxMuted);
+
+        if (settings.musicMuted) {
+            // Don't call stopMusic (suspends audioContext); just reflect the UI state
+            this.musicPlaying = false;
+            if (musicToggle) {
+                musicToggle.classList.remove('playing');
+                musicToggle.classList.add('muted');
+            }
+            const trayIcon = document.getElementById('volumeTrayIcon');
+            if (trayIcon) trayIcon.textContent = '🔇';
         }
     }
 
@@ -777,6 +921,9 @@ class DesktopPortfolio {
             musicToggle.classList.add('playing');
             musicToggle.classList.remove('muted');
         }
+        const volumeTrayIcon = document.getElementById('volumeTrayIcon');
+        if (volumeTrayIcon) volumeTrayIcon.textContent = '🎵';
+        this.saveAudioSettings();
         
         if (desktop) {
             desktop.classList.add('music-playing');
@@ -798,6 +945,8 @@ class DesktopPortfolio {
             musicToggle.classList.remove('playing');
             musicToggle.classList.add('muted');
         }
+        const volumeTrayIconStop = document.getElementById('volumeTrayIcon');
+        if (volumeTrayIconStop) volumeTrayIconStop.textContent = '🔇';
         if (desktop) {
             desktop.classList.remove('music-playing');
         }
@@ -818,17 +967,8 @@ class DesktopPortfolio {
     }
     
     setVolume(volume) {
-        const volumeSlider = domCache.volumeSlider;
-        if (volumeSlider) {
-            volumeSlider.style.background = `linear-gradient(to right, 
-                rgba(255, 107, 107, 0.8) 0%, 
-                rgba(78, 205, 196, 0.8) ${volume * 100}%, 
-                rgba(255, 255, 255, 0.2) ${volume * 100}%, 
-                rgba(255, 255, 255, 0.2) 100%)`;
-        }
-        if (this.musicGainNode) {
-            this.musicGainNode.gain.value = volume;
-        }
+        // Legacy helper — prefer direct slider input handlers
+        if (this.musicGainNode) this.musicGainNode.gain.value = Math.max(0, Math.min(1, volume));
     }
     
     makeDraggable(element) {
@@ -1012,7 +1152,7 @@ class DesktopPortfolio {
                 const gain = this.audioContext.createGain();
                 
                 osc.connect(gain);
-                gain.connect(this.audioContext.destination);
+                gain.connect(this.sfxGainNode || this.audioContext.destination);
                 
                 osc.frequency.setValueAtTime(80, now);
                 osc.frequency.exponentialRampToValueAtTime(200, now + 0.3);
@@ -1089,7 +1229,7 @@ class DesktopPortfolio {
                 const osc1 = this.audioContext.createOscillator();
                 const gain1 = this.audioContext.createGain();
                 osc1.connect(gain1);
-                gain1.connect(this.audioContext.destination);
+                gain1.connect(this.sfxGainNode || this.audioContext.destination);
                 osc1.frequency.setValueAtTime(349.23, now);
                 osc1.type = 'sine';
                 gain1.gain.setValueAtTime(0, now);
@@ -1100,7 +1240,7 @@ class DesktopPortfolio {
                 const osc2 = this.audioContext.createOscillator();
                 const gain2 = this.audioContext.createGain();
                 osc2.connect(gain2);
-                gain2.connect(this.audioContext.destination);
+                gain2.connect(this.sfxGainNode || this.audioContext.destination);
                 osc2.frequency.setValueAtTime(440.00, now + 0.3);
                 osc2.type = 'sine';
                 gain2.gain.setValueAtTime(0, now + 0.3);
@@ -1111,7 +1251,7 @@ class DesktopPortfolio {
                 const osc3 = this.audioContext.createOscillator();
                 const gain3 = this.audioContext.createGain();
                 osc3.connect(gain3);
-                gain3.connect(this.audioContext.destination);
+                gain3.connect(this.sfxGainNode || this.audioContext.destination);
                 osc3.frequency.setValueAtTime(587.33, now + 0.6);
                 osc3.type = 'sine';
                 gain3.gain.setValueAtTime(0, now + 0.6);
@@ -2021,19 +2161,19 @@ class DesktopPortfolio {
     
     addSoundEffect(type) {
         const soundIndicator = document.createElement('div');
-        
-        const audioControls = document.querySelector('.audio-controls');
+
+        const trayIcon = document.getElementById('volumeTrayIcon');
         let indicatorTop = '10px';
         let indicatorLeft = '50%';
         let useLeft = false;
-        
-        if (audioControls) {
-            const rect = audioControls.getBoundingClientRect();
-            indicatorTop = (rect.top - 10) + 'px';
+
+        if (trayIcon) {
+            const rect = trayIcon.getBoundingClientRect();
+            indicatorTop = (rect.top - 30) + 'px';
             indicatorLeft = (rect.left + rect.width / 2 - 12) + 'px';
             useLeft = true;
         }
-        
+
         soundIndicator.style.position = 'fixed';
         soundIndicator.style.top = indicatorTop;
         if (useLeft) {
@@ -2098,7 +2238,7 @@ class DesktopPortfolio {
         const gainNode = this.audioContext.createGain();
         
         oscillator.connect(gainNode);
-        gainNode.connect(this.audioContext.destination);
+        gainNode.connect(this.sfxGainNode || this.audioContext.destination);
         
         let frequency;
         let duration = 0.2;
