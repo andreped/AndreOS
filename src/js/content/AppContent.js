@@ -532,6 +532,31 @@ export function getGameContent() {
     `;
 }
 
+export function getResearchContent() {
+    return `
+        <div class="research-root">
+            <div class="research-status">
+                <div class="research-loading">
+                    <div class="research-spinner"></div>
+                    <p>Loading publications&hellip;</p>
+                </div>
+            </div>
+            <div class="research-body" style="display:none;flex-direction:column;gap:12px;">
+                <div class="research-stats"></div>
+                <div class="research-toolbar">
+                    <input type="search" class="research-search" placeholder="Search publications&hellip;" />
+                    <select class="research-sort">
+                        <option value="cited">Most cited</option>
+                        <option value="date">Newest first</option>
+                        <option value="asc">Oldest first</option>
+                    </select>
+                </div>
+                <div class="research-list"></div>
+            </div>
+        </div>
+    `;
+}
+
 /**
  * Returns the window configuration object for a given file type,
  * or null if unknown.
@@ -595,6 +620,13 @@ export function getWindowData(fileType) {
             content: getGameContent(),
             width:  960,
             height: 680,
+        },
+        research: {
+            title:      'Research',
+            isResearch: true,
+            content:    getResearchContent(),
+            width:      750,
+            height:     620,
         },
     };
 

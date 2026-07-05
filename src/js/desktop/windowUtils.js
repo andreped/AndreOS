@@ -9,6 +9,7 @@ export function getWindowIcon(title) {
     if (title.includes('Skills'))   return '⚙️';
     if (title.includes('Contact'))  return '📧';
     if (title.includes('Cast'))     return '🎮';
+    if (title.includes('Research')) return '🔬';
     return '🗂️';
 }
 
@@ -22,5 +23,6 @@ export function getAppType(title) {
     if (title.includes('Browser'))  return 'browser';
     if (title.includes('André') || title.includes('Andre') || title.includes('Ask')) return 'chat';
     if (title.includes('Cast'))     return 'game';
+    if (title.includes('Research')) return 'research';
     return 'unknown';
 }

@@ -9,6 +9,7 @@ import { SearchOverlay }        from './desktop/SearchOverlay.js';
 import { setupBrowserWindow }   from './windows/BrowserWindow.js';
 import { setupChatWindow }      from './windows/ChatWindow.js';
 import { setupGameWindow }      from './windows/GameWindow.js';
+import { setupResearchWindow }  from './windows/ResearchWindow.js';
 
 class DesktopPortfolio {
     constructor() {
@@ -22,9 +23,10 @@ class DesktopPortfolio {
             eventBus:            this.eventBus,
             audioManager:        this.audio,
             windowSetupHandlers: {
-                browser: setupBrowserWindow,
-                chat:    setupChatWindow,
-                game:    setupGameWindow,
+                browser:  setupBrowserWindow,
+                chat:     setupChatWindow,
+                game:     setupGameWindow,
+                research: setupResearchWindow,
             },
         });
 

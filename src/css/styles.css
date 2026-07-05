@@ -4239,3 +4239,365 @@ body {
 .game-blocked {
     background: rgba(15, 15, 28, 0.97);
 }
+
+/* ── Research Window ──────────────────────────────────────────────────────── */
+
+.research-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    color: #666;
+}
+
+.research-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    color: #888;
+    font-size: 14px;
+}
+
+.research-spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid rgba(102, 126, 234, 0.2);
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: researchSpin 0.8s linear infinite;
+}
+
+@keyframes researchSpin {
+    to { transform: rotate(360deg); }
+}
+
+.research-error {
+    text-align: center;
+    color: #e05;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.research-retry {
+    margin-top: 10px;
+    padding: 6px 18px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.research-retry:hover { opacity: 0.85; }
+
+.research-body {
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Stats bar */
+.research-stats {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1));
+    border: 1px solid rgba(102,126,234,0.2);
+    border-radius: 12px;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 70px;
+}
+
+.stat-val {
+    font-size: 22px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-lbl {
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+}
+
+.scholar-link {
+    margin-left: auto;
+    font-size: 12px;
+    color: #667eea;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+}
+
+.scholar-link:hover { opacity: 0.75; }
+
+/* Toolbar */
+.research-toolbar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.research-search {
+    flex: 1;
+    padding: 8px 14px;
+    border: 1px solid rgba(102,126,234,0.3);
+    border-radius: 20px;
+    font-size: 13px;
+    background: rgba(255,255,255,0.9);
+    color: #333;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.research-search:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102,126,234,0.15);
+}
+
+.research-sort {
+    padding: 8px 12px;
+    border: 1px solid rgba(102,126,234,0.3);
+    border-radius: 20px;
+    font-size: 13px;
+    background: rgba(255,255,255,0.9);
+    color: #333;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23667eea'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
+    transition: border-color 0.2s;
+}
+
+.research-sort:focus { border-color: #667eea; }
+
+/* Paper list */
+.research-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 4px;
+}
+
+.research-paper {
+    background: rgba(255,255,255,0.85);
+    border: 1px solid rgba(102,126,234,0.12);
+    border-radius: 10px;
+    padding: 14px 16px;
+    transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.research-paper:hover {
+    box-shadow: 0 4px 16px rgba(102,126,234,0.15);
+    border-color: rgba(102,126,234,0.3);
+    transform: translateY(-1px);
+}
+
+.paper-title {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.5;
+    color: #222;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.paper-title a {
+    color: #3a5fd8;
+    text-decoration: none;
+    transition: color 0.15s;
+}
+
+.paper-title a:hover { color: #764ba2; text-decoration: underline; }
+
+.paper-title span { flex: 1; }
+
+.paper-oa-badge {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: #27ae60;
+    color: white;
+    text-decoration: none !important;
+    white-space: nowrap;
+    margin-top: 2px;
+    transition: opacity 0.2s;
+}
+
+.paper-oa-badge:hover { opacity: 0.8; }
+
+.paper-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.paper-year {
+    font-weight: 700;
+    color: #667eea;
+    min-width: 36px;
+}
+
+.paper-venue {
+    color: #555;
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.paper-type {
+    background: rgba(102,126,234,0.12);
+    color: #667eea;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.paper-cites {
+    color: #888;
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.research-empty {
+    color: #999;
+    font-size: 14px;
+    text-align: center;
+    padding: 40px 0;
+}
+
+.paper-header { cursor: pointer; }
+
+.paper-expand-btn {
+    font-size: 10px;
+    color: #667eea;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.2s;
+    margin-left: 4px;
+}
+
+.paper-abstract {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(102, 126, 234, 0.15);
+    font-size: 13px;
+    line-height: 1.65;
+    color: #444;
+    animation: abstractFadeIn 0.2s ease;
+}
+
+@keyframes abstractFadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.paper-expanded {
+    border-color: rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.12);
+}
+
+.scholar-aside {
+    margin-left: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.stats-source {
+    font-size: 11px;
+    color: #aaa;
+    font-style: italic;
+    text-align: right;
+}
+
+/* research-root fills the window-content area with no extra margin */
+.research-root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 4px 2px 0;
+    box-sizing: border-box;
+}
+
+.research-root .research-body {
+    flex: 1;
+    min-height: 0;
+}
+
+.research-root .research-list {
+    flex: 1;
+    min-height: 0;
+}
+
+/* Fix: only the title link should flex-grow, not the OA badge */
+.paper-title a:not(.paper-oa-badge) {
+    flex: 1;
+}
+
+/* Compact stats bar (replaces tall card) */
+.research-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 14px;
+    background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08));
+    border: 1px solid rgba(102,126,234,0.18);
+    border-radius: 10px;
+}
+
+.stats-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.stats-row--right {
+    gap: 10px;
+}
+
+.stat-pill {
+    font-size: 13px;
+    color: #555;
+}
+
+.stat-pill strong {
+    color: #667eea;
+    font-weight: 700;
+}
+
+.stat-dot {
+    color: #ccc;
+    font-size: 13px;
+}

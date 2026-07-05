@@ -117,9 +117,10 @@ export class WindowManager {
         this._makeWindowDraggable(el);
         this._makeWindowResizable(el);
 
-        if (windowData.isBrowser) this._setupHandlers.browser(el, windowData.startUrl ?? 'https://andreped.dev');
-        if (windowData.isChat)    this._setupHandlers.chat(el);
-        if (windowData.isGame)    this._setupHandlers.game(el);
+        if (windowData.isBrowser)  this._setupHandlers.browser(el, windowData.startUrl ?? 'https://andreped.dev');
+        if (windowData.isChat)     this._setupHandlers.chat(el);
+        if (windowData.isGame)     this._setupHandlers.game(el);
+        if (windowData.isResearch) this._setupHandlers.research(el);
 
         this._audio.addSoundEffect('open');
         this._eventBus.emit('window:created', { id, title: windowData.title });
