@@ -302,9 +302,9 @@ class DesktopPortfolio {
                 }
                 setTimeout(() => {
                     this.desktop.animateIcons();
+                    this.desktop.setupIconListeners();
                     window.__desktopReady = true;
                     document.dispatchEvent(new CustomEvent('andreos:desktop-ready'));
-                    setTimeout(() => this.desktop.setupIconListeners(), 1000);
                 }, 300);
 
                 this.audio.startMusic();
