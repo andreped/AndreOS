@@ -4396,6 +4396,44 @@ body {
     align-items: center;
 }
 
+.research-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.type-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(102,126,234,0.35);
+    background: rgba(255,255,255,0.85);
+    color: #555;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+
+.type-pill:hover {
+    background: rgba(102,126,234,0.1);
+    border-color: #667eea;
+    color: #3a4abf;
+}
+
+.type-pill.active {
+    background: #667eea;
+    border-color: #667eea;
+    color: #fff;
+}
+
+.type-pill-count {
+    font-size: 11px;
+    opacity: 0.75;
+}
+
 .research-search {
     flex: 1;
     padding: 8px 14px;

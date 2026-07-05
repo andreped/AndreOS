@@ -551,6 +551,7 @@ export function getResearchContent() {
                         <option value="asc">Oldest first</option>
                     </select>
                 </div>
+                <div class="research-filters"></div>
                 <div class="research-list"></div>
             </div>
         </div>

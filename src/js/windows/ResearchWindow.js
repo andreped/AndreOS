@@ -88,7 +88,7 @@ function renderPaper(p) {
     const oaUrl = p.open_access?.oa_url ?? null;
     const type  = typeLabel(p.type);
     const cite  = p.cited_by_count ?? 0;
-    const title = p.title ?? 'Untitled';
+    const title = (p.title ?? 'Untitled').replace(/\s+/g, ' ').trim();
 
     const titleEl = doi
         ? `<a href="${doi}" target="_blank" rel="noopener noreferrer">${title}</a>`
@@ -116,7 +116,7 @@ function renderPaper(p) {
         </div>`;
 }
 
-function applyFilters(listEl, papers, query, sort) {
+function applyFilters(listEl, papers, query, sort, typeFilter = 'all') {
     const q = query.trim().toLowerCase();
 
     let filtered = q
@@ -124,6 +124,10 @@ function applyFilters(listEl, papers, query, sort) {
             (p.title ?? '').toLowerCase().includes(q) ||
             (p.primary_location?.source?.display_name ?? '').toLowerCase().includes(q))
         : [...papers];
+
+    if (typeFilter !== 'all') {
+        filtered = filtered.filter(p => (p.type ?? '') === typeFilter);
+    }
 
     if      (sort === 'cited') filtered.sort((a, b) => (b.cited_by_count ?? 0) - (a.cited_by_count ?? 0));
     else if (sort === 'asc')   filtered.sort((a, b) => (a.publication_year ?? 0) - (b.publication_year ?? 0));
@@ -140,9 +144,10 @@ export function setupResearchWindow(winEl) {
     const statusEl = winEl.querySelector('.research-status');
     const bodyEl   = winEl.querySelector('.research-body');
     const statsEl  = winEl.querySelector('.research-stats');
-    const listEl   = winEl.querySelector('.research-list');
-    const searchEl = winEl.querySelector('.research-search');
-    const sortEl   = winEl.querySelector('.research-sort');
+    const listEl    = winEl.querySelector('.research-list');
+    const searchEl  = winEl.querySelector('.research-search');
+    const sortEl    = winEl.querySelector('.research-sort');
+    const filtersEl = winEl.querySelector('.research-filters');
 
     if (!statusEl || !bodyEl) return;
 
@@ -164,12 +169,39 @@ export function setupResearchWindow(winEl) {
                     </a>
                 </div>`;
 
+            // Build type-filter pills from the actual data
+            let activeType = 'all';
+            const typeCounts = {};
+            for (const p of data.papers) {
+                const t = p.type ?? '';
+                if (t) typeCounts[t] = (typeCounts[t] ?? 0) + 1;
+            }
+            const typeOrder = ['journal-article','proceedings-article','preprint','book-chapter','dissertation','dataset'];
+            const presentTypes = typeOrder.filter(t => typeCounts[t]);
+
+            if (filtersEl && presentTypes.length > 1) {
+                const allBtn = `<button class="type-pill active" data-type="all">All <span class="type-pill-count">${data.papers.length}</span></button>`;
+                const typeBtns = presentTypes.map(t =>
+                    `<button class="type-pill" data-type="${t}">${typeLabel(t)} <span class="type-pill-count">${typeCounts[t]}</span></button>`
+                ).join('');
+                filtersEl.innerHTML = allBtn + typeBtns;
+
+                filtersEl.addEventListener('click', (e) => {
+                    const btn = e.target.closest('.type-pill');
+                    if (!btn) return;
+                    filtersEl.querySelectorAll('.type-pill').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    activeType = btn.dataset.type;
+                    applyFilters(listEl, data.papers, searchEl.value, sortEl.value, activeType);
+                });
+            }
+
             applyFilters(listEl, data.papers, '', 'cited');
             statusEl.style.display = 'none';
             bodyEl.style.display   = 'flex';
 
-            searchEl.addEventListener('input',  () => applyFilters(listEl, data.papers, searchEl.value, sortEl.value));
-            sortEl.addEventListener('change',   () => applyFilters(listEl, data.papers, searchEl.value, sortEl.value));
+            searchEl.addEventListener('input',  () => applyFilters(listEl, data.papers, searchEl.value, sortEl.value, activeType));
+            sortEl.addEventListener('change',   () => applyFilters(listEl, data.papers, searchEl.value, sortEl.value, activeType));
 
             // Abstract expand/collapse via event delegation
             listEl.addEventListener('click', (e) => {
