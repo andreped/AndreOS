@@ -65,6 +65,7 @@ class DesktopPortfolio {
         this.taskbar.enhance();
         this.setupKeyboardShortcuts();
         this.setupTaskbarFeatures();
+        this.initBattery();
     }
     
     // ── Taskbar features (search, task view, notification, clock) ────────────
@@ -260,6 +261,40 @@ class DesktopPortfolio {
         const now = new Date();
         if (this.dom.timeElem) this.dom.timeElem.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         if (this.dom.dateElem) this.dom.dateElem.textContent = now.toLocaleDateString();
+    }
+
+    // ── Battery ──────────────────────────────────────────────────────────────
+
+    async initBattery() {
+        if (!navigator.getBattery) return;
+        const battery = await navigator.getBattery();
+        this._battery = battery;
+        this._updateBatteryIcon(battery);
+        battery.addEventListener('levelchange',   () => this._updateBatteryIcon(battery));
+        battery.addEventListener('chargingchange', () => this._updateBatteryIcon(battery));
+
+        document.getElementById('batteryTrayIcon')?.addEventListener('click', () => {
+            const b   = this._battery;
+            const pct = Math.round(b.level * 100);
+            const msg = b.charging
+                ? `Battery: ${pct}% — charging`
+                : `Battery: ${pct}%`;
+            this.notifications.show(msg, 'info');
+        });
+    }
+
+    _updateBatteryIcon(battery) {
+        const el = document.getElementById('batteryTrayIcon');
+        if (!el) return;
+        const pct    = Math.round(battery.level * 100);
+        const charge = battery.charging;
+        let icon;
+        if (charge)      icon = '⚡';
+        else if (pct > 80) icon = '🔋';
+        else if (pct > 20) icon = '🪫';
+        else               icon = '🪫';
+        el.textContent = `${icon} ${pct}%`;
+        el.title       = charge ? `Battery: ${pct}% (charging)` : `Battery: ${pct}%`;
     }
 
     // ── Boot & loading screen ─────────────────────────────────────────────────
