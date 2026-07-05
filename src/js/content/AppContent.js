@@ -162,6 +162,34 @@ export function getProjectsContent() {
                 </div>
 
                 <div class="project-card">
+                    <h4><a href="https://github.com/andreped/IronFlow" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">IronFlow ↗</a></h4>
+                    <p>Cross-platform mobile app for private, offline strength training progress tracking. Logs exercises with weight, reps & sets in a local SQLite database, visualises progress over time, and notifies on new personal records. Available for Android & iOS.</p>
+                    <div class="project-tech">
+                        <span class="tech-tag">Flutter</span>
+                        <span class="tech-tag">Dart</span>
+                        <span class="tech-tag">SQLite</span>
+                        <span class="tech-tag">Android</span>
+                        <span class="tech-tag">iOS</span>
+                        <span class="tech-tag">GitHub Actions</span>
+                        <span class="tech-tag">Maestro</span>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <h4><a href="https://github.com/andreped/super-ml-pets" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">super-ml-pets ↗</a></h4>
+                    <p>Framework for training and deploying reinforcement learning AIs for the game Super Auto Pets. Trains agents in a simulated environment via RL, then deploys them against real opponents using a machine vision system to read the live game screen.</p>
+                    <div class="project-tech">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">Reinforcement Learning</span>
+                        <span class="tech-tag">Stable-Baselines3</span>
+                        <span class="tech-tag">OpenCV</span>
+                        <span class="tech-tag">scikit-learn</span>
+                        <span class="tech-tag">PyAutoGUI</span>
+                        <span class="tech-tag">GitHub Actions</span>
+                    </div>
+                </div>
+
+                <div class="project-card">
                     <h4><a href="https://github.com/AICAN-Research/FAST-Pathology" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">FastPathology ↗</a></h4>
                     <p>Open-source C++/Qt5 desktop platform for deep learning-based research and clinical decision support in digital pathology. Published in IEEE Access (2021).</p>
                     <div class="project-tech">
