@@ -2576,6 +2576,7 @@ body {
 
 .content-section h3 {
     color: #555;
+    margin-top: 24px;
     margin-bottom: 12px;
     font-size: 16px;
 }
@@ -3867,4 +3868,19 @@ body {
 
 .nc-item-live .nc-item-title {
     color: rgba(78, 205, 196, 0.9);
+}
+
+/* ── Brand SVG icons in social links ─────────────────────────────────────── */
+.si-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+}
+
+.si-brand svg {
+    display: block;
 }
