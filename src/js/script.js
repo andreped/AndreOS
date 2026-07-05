@@ -301,7 +301,7 @@ class DesktopPortfolio {
         }
     }
 
-    pushNotification(title, message, icon = 'ℹ️', type = 'info') {
+    pushNotification(title, message, icon = 'ℹ️', type = 'info', onClick = null) {
         // 1 — Persist in notification centre
         const list  = document.getElementById('ncList');
         if (list) {
@@ -338,7 +338,7 @@ class DesktopPortfolio {
         this._updateNcBadge();
 
         // 3 — Toast
-        this._showToast(icon, title, message, type);
+        this._showToast(icon, title, message, type, onClick);
     }
 
     _updateNcBadge() {
@@ -352,9 +352,10 @@ class DesktopPortfolio {
         }
     }
 
-    _showToast(icon, title, message, type = 'info') {
+    _showToast(icon, title, message, type = 'info', onClick = null) {
         const toast = document.createElement('div');
         toast.className = `nc-toast nc-toast-${type}`;
+        if (onClick) toast.style.cursor = 'pointer';
         toast.innerHTML = `
             <div class="nc-toast-icon">${icon}</div>
             <div class="nc-toast-body">
@@ -363,9 +364,13 @@ class DesktopPortfolio {
             </div>
             <button class="nc-toast-close">✕</button>
         `;
-        toast.querySelector('.nc-toast-close').addEventListener('click', () => toast.remove());
+        if (onClick) {
+            toast.addEventListener('click', (e) => {
+                if (!e.target.closest('.nc-toast-close')) { onClick(); toast.remove(); }
+            });
+        }
+        toast.querySelector('.nc-toast-close').addEventListener('click', (e) => { e.stopPropagation(); toast.remove(); });
         document.body.appendChild(toast);
-        // Stagger multiple toasts
         const existing = document.querySelectorAll('.nc-toast').length;
         toast.style.bottom = (70 + (existing - 1) * 90) + 'px';
         setTimeout(() => {
@@ -430,10 +435,10 @@ class DesktopPortfolio {
         if (msgEl && message) msgEl.textContent = message;
     }
 
-    completeLiveNotification(id, title, message, icon = '✅', type = 'success') {
+    completeLiveNotification(id, title, message, icon = '✅', type = 'success', onClick = null) {
         const list = document.getElementById('ncList');
         const item = document.getElementById(`nc-live-${id}`);
-        if (!item) { this.pushNotification(title, message, icon, type); return; }
+        if (!item) { this.pushNotification(title, message, icon, type, onClick); return; }
         // Swap progress bar out, update text
         item.querySelector('.nc-live-progress')?.remove();
         const iconEl  = item.querySelector('.nc-item-icon');
@@ -448,7 +453,7 @@ class DesktopPortfolio {
         item.dataset.completedType = type;
         this._ncUnread = (this._ncUnread || 0) + 1;
         this._updateNcBadge();
-        this._showToast(icon, title, message, type);
+        this._showToast(icon, title, message, type, onClick);
     }
     
     toggleHiddenIcons() {

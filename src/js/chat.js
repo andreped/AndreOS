@@ -213,20 +213,9 @@ async function loadEngine() {
         engineState = 'ready';
         console.log('[AndreChat] Model ready ✓');
         whenReady(() => window.__AndreOSApp?.completeLiveNotification(
-            'ai-model', 'AI Model ready', 'Ask André is ready to chat!', '✅', 'success'
+            'ai-model', 'AI Model ready', 'Ask André is ready to chat!', '✅', 'success',
+            () => window.__AndreOSApp?.openFile('chat')
         ));
-
-        // Toast with launch button
-        whenReady(() => showToast('🤖 AI model ready — Ask André anything!', {
-            type: 'success',
-            duration: 8000,
-            action: {
-                label: 'Open chat',
-                fn: () => {
-                    if (window.__AndreOSApp) window.__AndreOSApp.openFile('chat');
-                }
-            }
-        }));
 
         registeredWindows.forEach(winEl => transitionToChat(winEl));
 
