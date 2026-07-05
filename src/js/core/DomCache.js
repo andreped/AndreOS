@@ -4,8 +4,10 @@
  */
 export function buildDomCache() {
     return {
+        masterToggle:      document.getElementById('masterToggle'),
         musicToggle:       document.getElementById('musicToggle'),
         sfxToggle:         document.getElementById('sfxToggle'),
+        masterVolumeSlider: document.getElementById('masterVolumeSlider'),
         musicVolumeSlider: document.getElementById('musicVolumeSlider'),
         sfxVolumeSlider:   document.getElementById('sfxVolumeSlider'),
         desktop:           document.querySelector('.desktop'),

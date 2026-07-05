@@ -6,24 +6,29 @@
  */
 export class AudioManager {
     constructor(dom) {
-        this._dom          = dom;
-        this.audioContext  = null;
-        this.musicPlaying  = false;
-        this.musicGainNode = null;
-        this.sfxGainNode   = null;
-        this.sfxMuted      = false;
+        this._dom           = dom;
+        this.audioContext   = null;
+        this.musicPlaying   = false;
+        this.masterGainNode = null;
+        this.masterMuted    = false;
+        this.musicGainNode  = null;
+        this.sfxGainNode    = null;
+        this.sfxMuted       = false;
     }
 
     /** Initialise AudioContext and wire up UI controls. */
     init() {
         try {
-            this.audioContext  = new (window.AudioContext || window.webkitAudioContext)();
+            this.audioContext   = new (window.AudioContext || window.webkitAudioContext)();
+            this.masterGainNode = this.audioContext.createGain();
+            this.masterGainNode.gain.value = (this._dom.masterVolumeSlider?.value ?? 80) / 100;
+            this.masterGainNode.connect(this.audioContext.destination);
             this.musicGainNode = this.audioContext.createGain();
             this.musicGainNode.gain.value = (this._dom.musicVolumeSlider?.value ?? 30) / 100;
-            this.musicGainNode.connect(this.audioContext.destination);
+            this.musicGainNode.connect(this.masterGainNode);
             this.sfxGainNode = this.audioContext.createGain();
             this.sfxGainNode.gain.value = (this._dom.sfxVolumeSlider?.value ?? 60) / 100;
-            this.sfxGainNode.connect(this.audioContext.destination);
+            this.sfxGainNode.connect(this.masterGainNode);
         } catch (_) { /* audio unavailable */ }
 
         this._setupControls();
@@ -276,15 +281,40 @@ export class AudioManager {
 
     // ── Private helpers ───────────────────────────────────────────────────────
 
+    toggleMaster() {
+        this.masterMuted = !this.masterMuted;
+        this._dom.masterToggle?.classList.toggle('muted', this.masterMuted);
+        if (this.masterGainNode) {
+            this.masterGainNode.gain.value = this.masterMuted
+                ? 0
+                : (this._dom.masterVolumeSlider?.value ?? 80) / 100;
+        }
+        this._saveSettings();
+    }
+
     _setupControls() {
-        const { musicToggle, sfxToggle, musicVolumeSlider, sfxVolumeSlider } = this._dom;
+        const { masterToggle, musicToggle, sfxToggle, masterVolumeSlider, musicVolumeSlider, sfxVolumeSlider } = this._dom;
         const volumeTrayIcon = document.getElementById('volumeTrayIcon');
         const volumePopup    = document.getElementById('volumePopup');
 
         this._applySettings(this._loadSettings());
 
+        if (masterToggle)      masterToggle.addEventListener('click', () => this.toggleMaster());
         if (musicToggle)       musicToggle.addEventListener('click',  () => this.toggleMusic());
         if (sfxToggle)         sfxToggle.addEventListener('click',    () => this.toggleSfx());
+
+        if (masterVolumeSlider) {
+            this._updateSliderTrack(masterVolumeSlider);
+            this._updatePct('masterPct', masterVolumeSlider.value);
+            masterVolumeSlider.addEventListener('input', (e) => {
+                this._updateSliderTrack(e.target);
+                this._updatePct('masterPct', e.target.value);
+                if (this.masterGainNode && !this.masterMuted) {
+                    this.masterGainNode.gain.value = e.target.value / 100;
+                }
+                this._saveSettings();
+            });
+        }
 
         if (musicVolumeSlider) {
             this._updateSliderTrack(musicVolumeSlider);
@@ -349,12 +379,14 @@ export class AudioManager {
 
     _saveSettings() {
         try {
-            const { musicVolumeSlider, sfxVolumeSlider } = this._dom;
+            const { masterVolumeSlider, musicVolumeSlider, sfxVolumeSlider } = this._dom;
             localStorage.setItem('andreOS_audio', JSON.stringify({
-                musicVolume: musicVolumeSlider ? Number(musicVolumeSlider.value) : 30,
-                sfxVolume:   sfxVolumeSlider   ? Number(sfxVolumeSlider.value)   : 60,
-                musicMuted:  !this.musicPlaying,
-                sfxMuted:    this.sfxMuted,
+                masterVolume: masterVolumeSlider ? Number(masterVolumeSlider.value) : 80,
+                musicVolume:  musicVolumeSlider  ? Number(musicVolumeSlider.value)  : 30,
+                sfxVolume:    sfxVolumeSlider    ? Number(sfxVolumeSlider.value)    : 60,
+                masterMuted:  this.masterMuted,
+                musicMuted:   !this.musicPlaying,
+                sfxMuted:     this.sfxMuted,
             }));
         } catch (_) {}
     }
@@ -368,7 +400,19 @@ export class AudioManager {
 
     _applySettings(settings) {
         if (!settings) return;
-        const { musicVolumeSlider, sfxVolumeSlider, musicToggle, sfxToggle } = this._dom;
+        const { masterVolumeSlider, musicVolumeSlider, sfxVolumeSlider, masterToggle, musicToggle, sfxToggle } = this._dom;
+
+        if (masterVolumeSlider && settings.masterVolume != null) {
+            masterVolumeSlider.value = settings.masterVolume;
+            this._updateSliderTrack(masterVolumeSlider);
+            this._updatePct('masterPct', settings.masterVolume);
+            if (this.masterGainNode) {
+                this.masterGainNode.gain.value = settings.masterMuted ? 0 : settings.masterVolume / 100;
+            }
+        }
+
+        this.masterMuted = !!settings.masterMuted;
+        masterToggle?.classList.toggle('muted', this.masterMuted);
 
         if (musicVolumeSlider) {
             musicVolumeSlider.value = settings.musicVolume;

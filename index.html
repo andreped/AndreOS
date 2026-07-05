@@ -164,6 +164,15 @@
                         <span id="volumeTrayIcon" class="tray-icon" title="Music &amp; Volume">🎵</span>
                         <div id="volumePopup" class="volume-popup">
                             <div class="volume-popup-section">
+                                <span class="volume-popup-label">Master</span>
+                                <div class="volume-row">
+                                    <button id="masterToggle" class="vol-toggle" title="Toggle Master"><span class="vol-toggle-icon">🔊</span></button>
+                                    <input type="range" id="masterVolumeSlider" min="0" max="100" value="80" class="volume-slider">
+                                    <span class="vol-pct" id="masterPct">80%</span>
+                                </div>
+                            </div>
+                            <div class="volume-popup-divider"></div>
+                            <div class="volume-popup-section">
                                 <span class="volume-popup-label">Music</span>
                                 <div class="volume-row">
                                     <button id="musicToggle" class="vol-toggle" title="Toggle Music"><span class="vol-toggle-icon">🎵</span></button>
