@@ -13,6 +13,25 @@ let lastProgress  = { text: 'Starting model download…', pct: 0 };
 const registeredWindows = new Set();
 const messageHistory    = [];
 
+// ── Desktop-ready gate ────────────────────────────────────────────────────────
+// Notifications are buffered until the OS signals the desktop is visible,
+// so toasts never appear over the loading screen.
+let desktopReady = false;
+const notifQueue = [];
+
+function onDesktopReady() {
+    desktopReady = true;
+    notifQueue.forEach(fn => fn());
+    notifQueue.length = 0;
+}
+
+function whenReady(fn) {
+    if (desktopReady) fn();
+    else notifQueue.push(fn);
+}
+
+document.addEventListener('andreos:desktop-ready', onDesktopReady, { once: true });
+
 // ── Toast notification ────────────────────────────────────────────────────────
 function showToast(message, { type = 'info', duration = 5000, action = null } = {}) {
     const el = document.createElement('div');
@@ -154,10 +173,14 @@ async function loadEngine() {
     engineState = 'loading';
     console.log('[AndreChat] Starting model load:', MODEL_ID);
 
-    // Show NC card immediately — shader compilation happens before any callback fires
-    window.__AndreOSApp?.createLiveNotification(
-        'ai-model', 'Loading AI Model', 'Compiling WebGPU shaders… this takes ~30s the first time.', '⚙️'
-    );
+    // Show NC card — but only if model isn't already done by the time desktop is ready
+    whenReady(() => {
+        if (engineState !== 'ready') {
+            window.__AndreOSApp?.createLiveNotification(
+                'ai-model', 'Loading AI Model', 'Compiling WebGPU shaders… this takes ~30s the first time.', '⚙️'
+            );
+        }
+    });
     updateAll('Compiling WebGPU shaders…', 0);
 
     try {
@@ -189,12 +212,12 @@ async function loadEngine() {
 
         engineState = 'ready';
         console.log('[AndreChat] Model ready ✓');
-        window.__AndreOSApp?.completeLiveNotification(
+        whenReady(() => window.__AndreOSApp?.completeLiveNotification(
             'ai-model', 'AI Model ready', 'Ask André is ready to chat!', '✅', 'success'
-        );
+        ));
 
         // Toast with launch button
-        showToast('🤖 AI model ready — Ask André anything!', {
+        whenReady(() => showToast('🤖 AI model ready — Ask André anything!', {
             type: 'success',
             duration: 8000,
             action: {
@@ -203,7 +226,7 @@ async function loadEngine() {
                     if (window.__AndreOSApp) window.__AndreOSApp.openFile('chat');
                 }
             }
-        });
+        }));
 
         registeredWindows.forEach(winEl => transitionToChat(winEl));
 
@@ -211,13 +234,15 @@ async function loadEngine() {
         engineState = 'error';
         const msg = err?.message || String(err);
         console.error('[AndreChat] Load error:', err);
-        window.__AndreOSApp?.completeLiveNotification(
-            'ai-model', 'AI Model failed', msg, '❌', 'error'
-        );
-showToast('❌ Failed to load AI model', {
+        whenReady(() => {
+            window.__AndreOSApp?.completeLiveNotification(
+                'ai-model', 'AI Model failed', msg, '❌', 'error'
+            );
+            showToast('❌ Failed to load AI model', {
             type: 'error',
             duration: 10000,
             action: { label: 'Retry', fn: () => window.AndreChat?.retry() }
+            });
         });
 
         registeredWindows.forEach(winEl => {
