@@ -3890,3 +3890,27 @@ body {
 .si-brand[style*="background: #fff"] {
     border: 1px solid rgba(0, 0, 0, 0.1);
 }
+
+/* ── Game window ─────────────────────────────────────────────────────────── */
+.game-window-wrap .window-content {
+    padding: 0;
+    overflow: hidden;
+}
+
+.game-viewport {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.game-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+    background: #000;
+}
+
+.game-blocked {
+    background: rgba(15, 15, 28, 0.97);
+}
