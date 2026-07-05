@@ -10,6 +10,8 @@ import { setupBrowserWindow }   from './windows/BrowserWindow.js';
 import { setupChatWindow }      from './windows/ChatWindow.js';
 import { setupGameWindow }      from './windows/GameWindow.js';
 import { setupResearchWindow }  from './windows/ResearchWindow.js';
+import { VoiceCommandManager }  from './system/VoiceCommandManager.js';
+import { VoiceMicButton }       from './desktop/VoiceMicButton.js';
 
 class DesktopPortfolio {
     constructor() {
@@ -39,6 +41,16 @@ class DesktopPortfolio {
         this.desktop = new Desktop({
             domCache:   this.dom,
             openFileCb: (fileType) => this.windowManager.openFile(fileType),
+        });
+
+        this.voiceMicBtn = new VoiceMicButton({
+            onToggle: () => this.voice.toggleRecording(),
+        });
+
+        this.voice = new VoiceCommandManager({
+            windowManager: this.windowManager,
+            notifications: this.notifications,
+            onStateChange: (state) => this.voiceMicBtn.setState(state),
         });
 
         this.startMenuOpen = false;
@@ -75,6 +87,9 @@ class DesktopPortfolio {
 
     setupTaskbarFeatures() {
         new SearchOverlay((fileType) => this.windowManager.openFile(fileType));
+
+        // Mount mic button immediately before the notification bell
+        this.voiceMicBtn.mount(document.querySelector('.notification-button'));
 
         document.querySelector('.task-view-button')?.addEventListener('click', () => {
             const opened = this.windowManager.showTaskView();

@@ -6,8 +6,9 @@ An interactive desktop OS experience serving as my personal portfolio — built 
 
 - **Frontend:** Vanilla HTML · CSS · JavaScript
 - **Build tool:** [Vite](https://vitejs.dev/)
-- **AI (in-browser):** [@mlc-ai/web-llm](https://github.com/mlc-ai/web-llm) — SmolLM2-135M running on WebGPU
-- **Browser requirement:** Chrome / Edge 113+ for the AI chat feature (WebGPU)
+- **AI chat (in-browser):** [@mlc-ai/web-llm](https://github.com/mlc-ai/web-llm) — SmolLM2-135M running on WebGPU
+- **Voice dictation (in-browser):** [@xenova/transformers](https://github.com/xenova/transformers.js) + [ONNX Runtime Web](https://onnxruntime.ai/docs/get-started/with-javascript/web.html) — Whisper base (multilingual) running in a Web Worker; model cached via browser Cache API after first load (~74 MB)
+- **Browser requirement:** Chrome / Edge 113+ for the AI chat feature (WebGPU); Voice dictation works in any browser with `MediaRecorder` and WASM support (Chrome, Edge, Firefox, Safari 16+)
 
 ---
 
@@ -62,6 +63,29 @@ The `public/_headers` file in this repo automatically sets the required COOP/COE
 > **GitHub Pages** does not support custom response headers, so the **Ask André** AI feature will not work there without a workaround.
 
 </details>
+
+---
+
+## Voice Dictation
+
+Click the mic icon (🎤) in the taskbar system tray to activate voice control. On first use, the Whisper base model (~74 MB) is downloaded and cached — subsequent loads are instant.
+
+**Supported commands (English and Norwegian):**
+
+| Intent | English examples | Norwegian examples |
+|---|---|---|
+| Open app | `"open resume"`, `"show projects"`, `"ask André"` | `"åpne CV"`, `"prosjekter"`, `"snakk med André"` |
+| Close window | `"close window"`, `"shut down"` | `"lukk vinduet"`, `"avslutt"` |
+| Minimize | `"minimize window"` | `"minimer vinduet"` |
+| Show desktop | `"show desktop"` | `"vis skrivebordet"` |
+| Help | `"help"`, `"list commands"` | `"hjelp"`, `"kommandoer"` |
+
+**Technical details:**
+- Runs entirely in the browser via a Web Worker — no server, no API key
+- Model: `Xenova/whisper-base` (multilingual, supports English + Norwegian + 97 others)
+- ONNX Runtime Web in single-threaded mode — no `SharedArrayBuffer`/COEP requirement
+- Audio decoded and resampled to 16 kHz mono `Float32Array` before inference
+- Model cached in browser Cache API
 
 ---
 

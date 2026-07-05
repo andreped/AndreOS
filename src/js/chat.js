@@ -291,6 +291,37 @@ window.AndreChat = {
         observer.observe(document.body, { childList: true, subtree: true });
     },
 
+    /**
+     * Programmatically send a message to the chat — used by voice commands.
+     * Opens the chat window if it is not already open, then either sends
+     * the message immediately (engine ready) or pre-fills the input and
+     * focuses it so the user can press Enter once the model finishes loading.
+     * @param {string} text
+     */
+    injectMessage(text) {
+        if (!text?.trim()) return;
+
+        // Ensure the chat window is open
+        window.__AndreOSApp?.openFile('chat');
+
+        // Give the window a tick to mount before querying it
+        setTimeout(() => {
+            const winEl = [...registeredWindows][0];
+            if (!winEl) return;
+
+            if (engineState === 'ready') {
+                sendMessage(winEl, text);
+            } else {
+                // Pre-fill the input so it is ready to send once the model loads
+                const input = winEl.querySelector('.chat-input');
+                if (input) {
+                    input.value = text;
+                    input.focus();
+                }
+            }
+        }, 100);
+    },
+
     retry() {
         engineState = 'idle';
         engine = null;
