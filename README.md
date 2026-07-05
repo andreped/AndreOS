@@ -43,16 +43,23 @@ Output goes to `dist/`. The result is a fully static folder with no server-side 
 <details>
 <summary><strong>Deployment</strong></summary>
 
-Below is an example of how to deploy to GitHub Pages.
+[Cloudflare Pages](https://pages.cloudflare.com/) is the recommended host — free tier, global CDN, and supports the custom response headers required for the AI chat feature (WebGPU).
 
-```bash
-npm run build
-npx gh-pages -d dist
-```
+1. Push your code to GitHub
+2. Go to [dash.cloudflare.com](https://dash.cloudflare.com) → **Workers & Pages** → **Create** → **Pages** tab → **Connect to Git**
+3. Select the `AndreOS` repo and configure:
 
-Or configure a GitHub Actions workflow to build and deploy automatically on push to `main`.
+   | Field | Value |
+   |---|---|
+   | Build command | `npm run build` |
+   | Build output directory | `dist` |
+   | Deploy command | *(leave empty)* |
 
-> **Note:** GitHub Pages does not set the COOP/COEP headers required for WebGPU by default, so the **Ask André** AI feature will not work there without additional configuration. Consider [Cloudflare Pages](https://pages.cloudflare.com/) or [Netlify](https://netlify.com/) which support custom response headers.
+4. Click **Deploy**
+
+The `public/_headers` file in this repo automatically sets the required COOP/COEP headers on every deploy — no extra configuration needed.
+
+> **GitHub Pages** does not support custom response headers, so the **Ask André** AI feature will not work there without a workaround.
 
 </details>
 
