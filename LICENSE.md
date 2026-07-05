@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2025 Hoang Le Ngoc
+Copyright (c) 2026 André Pedersen
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
