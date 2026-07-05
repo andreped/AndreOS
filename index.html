@@ -213,7 +213,14 @@
         <div class="start-menu">
             <div class="start-menu-header">
                 <div class="start-menu-brand">
-                    <div class="brand-icon">🖥️</div>
+                    <div class="brand-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" width="22" height="22">
+                            <path fill="#f25022" d="M0 0h42v42H0z"/>
+                            <path fill="#7fba00" d="M46 0h42v42H46z"/>
+                            <path fill="#00a4ef" d="M0 46h42v42H0z"/>
+                            <path fill="#ffb900" d="M46 46h42v42H46z"/>
+                        </svg>
+                    </div>
                     <div class="brand-name">AndreOS</div>
                 </div>
             </div>
@@ -302,9 +309,16 @@
             <div class="start-menu-footer">
                 <div class="start-menu-user">
                     <div class="start-menu-avatar">👤</div>
-                    <span class="start-menu-username">André</span>
+                    <span class="start-menu-username">User</span>
                 </div>
-                <button class="start-menu-power" title="Power options">⏻</button>
+                <div class="power-menu-wrap">
+                    <button class="start-menu-power" title="Power options">⏻</button>
+                    <div class="power-flyout" id="powerFlyout">
+                        <button class="power-flyout-item" id="powerRestart">
+                            <span class="power-flyout-icon">↺</span> Restart
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
