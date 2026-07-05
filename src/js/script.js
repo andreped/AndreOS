@@ -5,6 +5,7 @@ import { AudioManager }         from './system/AudioManager.js';
 import { WindowManager }        from './desktop/WindowManager.js';
 import { Taskbar }              from './desktop/Taskbar.js';
 import { Desktop }              from './desktop/Desktop.js';
+import { SearchOverlay }        from './desktop/SearchOverlay.js';
 import { setupBrowserWindow }   from './windows/BrowserWindow.js';
 import { setupChatWindow }      from './windows/ChatWindow.js';
 import { setupGameWindow }      from './windows/GameWindow.js';
@@ -71,19 +72,7 @@ class DesktopPortfolio {
     // ── Taskbar features (search, task view, notification, clock) ────────────
 
     setupTaskbarFeatures() {
-        const searchInput = document.querySelector('.search-input');
-        const searchBox   = document.querySelector('.search-box');
-
-        if (searchInput) {
-            searchInput.addEventListener('focus', () => searchBox.classList.add('focused'));
-            searchInput.addEventListener('blur',  () => searchBox.classList.remove('focused'));
-            searchInput.addEventListener('input', (e) => {
-                if (e.target.value.length > 0) this._performSearch(e.target.value.toLowerCase());
-            });
-            searchInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && e.target.value.trim()) this._executeSearch(e.target.value.trim());
-            });
-        }
+        new SearchOverlay((fileType) => this.windowManager.openFile(fileType));
 
         document.querySelector('.task-view-button')?.addEventListener('click', () => {
             const opened = this.windowManager.showTaskView();
@@ -108,21 +97,6 @@ class DesktopPortfolio {
                 this._showDesktopContextMenu(e);
             }
         });
-    }
-
-    _performSearch(query) {
-        // Filter searchable items — results could power a future search UI
-        const items = [
-            'About Me', 'Resume', 'Projects', 'Skills',
-            'Contact', 'Social', 'Browser', 'Ask André', 'Cast Arena',
-        ];
-        return items.filter(name => name.toLowerCase().includes(query));
-    }
-
-    _executeSearch(query) {
-        this._performSearch(query);
-        const searchInput = document.querySelector('.search-input');
-        if (searchInput) { searchInput.blur(); searchInput.value = ''; }
     }
 
     _showDesktopContextMenu(event) {
