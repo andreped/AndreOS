@@ -42,6 +42,16 @@ export class Desktop {
             this._openFileCb(icon.dataset.file);
         });
         container._delegated = true;
+
+        const desktop = document.querySelector('.desktop');
+        if (desktop && !desktop._deselDelegated) {
+            desktop.addEventListener('click', (e) => {
+                if (!e.target.closest('.desktop-icon')) {
+                    this.deselectAllIcons();
+                }
+            });
+            desktop._deselDelegated = true;
+        }
     }
 
     selectIcon(icon) {
