@@ -1625,10 +1625,9 @@ class DesktopPortfolio {
                     <button class="bm-chip" data-url="https://andreped.dev">&#127968; My Site</button>
                     <button class="bm-chip" data-url="https://yep.com">&#128269; Yep</button>
                     <button class="bm-chip" data-url="https://en.wikipedia.org/wiki/Artificial_intelligence">&#128218; Wikipedia</button>
-                    <button class="bm-chip" data-url="https://www.vg.no">&#128240; VG</button>
+                    <button class="bm-chip" data-url="https://www.nettavisen.no">&#128240; Nettavisen</button>
                     <button class="bm-chip" data-url="https://andreped-aeropath.hf.space">&#129978; AeroPath</button>
                     <button class="bm-chip" data-url="https://andreped-lynos.hf.space">&#129704; LyNoS</button>
-                    <button class="bm-chip" data-url="https://andreped-livermask.hf.space">&#128138; livermask</button>
                 </div>
                 <div class="browser-viewport">
                     <iframe class="browser-iframe"
