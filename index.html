@@ -205,21 +205,99 @@
         
         <div class="start-menu">
             <div class="start-menu-header">
-                <div class="user-profile">
-                    <div class="profile-pic">🙋</div>
-                    <div class="user-name">Welcome!</div>
+                <div class="start-menu-brand">
+                    <div class="brand-icon">🖥️</div>
+                    <div class="brand-name">AndreOS</div>
                 </div>
             </div>
-            <div class="start-menu-content">
-                <div class="start-menu-item" data-action="about">About Me</div>
-                <div class="start-menu-item" data-action="resume">Resume</div>
-                <div class="start-menu-item" data-action="projects">Projects</div>
-                <div class="start-menu-item" data-action="skills">Skills</div>
-                <div class="start-menu-item" data-action="contact">Contact</div>
-                <div class="start-menu-item" data-action="social">Social Links</div>
-                <div class="start-menu-item" data-action="browser">Browser</div>
-                <div class="start-menu-item" data-action="chat">Ask André</div>
-                <div class="start-menu-item" data-action="game">Cast Arena</div>
+
+            <div class="start-menu-body">
+                <!-- Pinned apps -->
+                <div class="start-menu-section">
+                    <div class="start-menu-section-label">Pinned</div>
+                    <div class="start-menu-pinned">
+                        <div class="pinned-app" data-action="about">
+                            <div class="pinned-icon">👤</div>
+                            <div class="pinned-label">About Me</div>
+                        </div>
+                        <div class="pinned-app" data-action="projects">
+                            <div class="pinned-icon">📁</div>
+                            <div class="pinned-label">Projects</div>
+                        </div>
+                        <div class="pinned-app" data-action="resume">
+                            <div class="pinned-icon">📄</div>
+                            <div class="pinned-label">Resume</div>
+                        </div>
+                        <div class="pinned-app" data-action="skills">
+                            <div class="pinned-icon">⚡</div>
+                            <div class="pinned-label">Skills</div>
+                        </div>
+                        <div class="pinned-app" data-action="browser">
+                            <div class="pinned-icon">🌐</div>
+                            <div class="pinned-label">Browser</div>
+                        </div>
+                        <div class="pinned-app" data-action="chat">
+                            <div class="pinned-icon">🤖</div>
+                            <div class="pinned-label">Ask André</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- All apps tree -->
+                <div class="start-menu-section">
+                    <div class="start-menu-section-label">All apps</div>
+                    <div class="start-menu-tree">
+
+                        <div class="tree-category open">
+                            <div class="tree-category-header">
+                                <span class="tree-arrow">▶</span>
+                                <span class="tree-cat-icon">📋</span>
+                                <span class="tree-cat-label">Portfolio</span>
+                            </div>
+                            <div class="tree-children">
+                                <div class="start-menu-item" data-action="about"><span class="item-icon">👤</span> About Me</div>
+                                <div class="start-menu-item" data-action="resume"><span class="item-icon">📄</span> Resume</div>
+                                <div class="start-menu-item" data-action="projects"><span class="item-icon">📁</span> Projects</div>
+                                <div class="start-menu-item" data-action="skills"><span class="item-icon">⚡</span> Skills</div>
+                                <div class="start-menu-item" data-action="contact"><span class="item-icon">📧</span> Contact</div>
+                                <div class="start-menu-item" data-action="social"><span class="item-icon">🔗</span> Social Links</div>
+                            </div>
+                        </div>
+
+                        <div class="tree-category">
+                            <div class="tree-category-header">
+                                <span class="tree-arrow">▶</span>
+                                <span class="tree-cat-icon">🖥️</span>
+                                <span class="tree-cat-label">Applications</span>
+                            </div>
+                            <div class="tree-children">
+                                <div class="start-menu-item" data-action="browser"><span class="item-icon">🌐</span> Browser</div>
+                                <div class="start-menu-item" data-action="game"><span class="item-icon">🎮</span> Cast Arena</div>
+                            </div>
+                        </div>
+
+                        <div class="tree-category">
+                            <div class="tree-category-header">
+                                <span class="tree-arrow">▶</span>
+                                <span class="tree-cat-icon">💬</span>
+                                <span class="tree-cat-label">Assistant</span>
+                            </div>
+                            <div class="tree-children">
+                                <div class="start-menu-item" data-action="chat"><span class="item-icon">🤖</span> Ask André</div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="start-menu-footer">
+                <div class="start-menu-user">
+                    <div class="start-menu-avatar">👤</div>
+                    <span class="start-menu-username">André</span>
+                </div>
+                <button class="start-menu-power" title="Power options">⏻</button>
             </div>
         </div>
     </div>
