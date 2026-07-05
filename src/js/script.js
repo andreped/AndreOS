@@ -222,6 +222,20 @@ class DesktopPortfolio {
             if (!e.target.closest('.start-button') && !e.target.closest('.start-menu')) {
                 this.closeStartMenu();
             }
+            if (!e.target.closest('.power-menu-wrap')) {
+                document.getElementById('powerFlyout')?.classList.remove('open');
+            }
+        });
+
+        document.querySelector('.start-menu-power')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('powerFlyout')?.classList.toggle('open');
+        });
+
+        document.getElementById('powerRestart')?.addEventListener('click', () => {
+            sessionStorage.removeItem('andreos:booted');
+            sessionStorage.removeItem('andreos:model-loaded');
+            window.location.reload();
         });
 
         this.dom.desktopBackground?.addEventListener('click', () => {
@@ -284,6 +298,29 @@ class DesktopPortfolio {
     // ── Boot & loading screen ─────────────────────────────────────────────────
 
     showLoadingScreen() {
+        const skipBoot = sessionStorage.getItem('andreos:booted');
+
+        const revealDesktop = () => {
+            const screen = document.querySelector('.loading-screen');
+            if (screen) {
+                screen.classList.add('hidden');
+                screen.style.display = 'none';
+                screen.style.pointerEvents = 'none';
+            }
+            setTimeout(() => {
+                this.desktop.animateIcons();
+                this.desktop.setupIconListeners();
+                window.__desktopReady = true;
+                document.dispatchEvent(new CustomEvent('andreos:desktop-ready'));
+            }, 300);
+            this.audio.startMusic();
+        };
+
+        if (skipBoot) {
+            revealDesktop();
+            return;
+        }
+
         const messages = [
             'Initializing system…',
             'Loading user profile…',
@@ -313,20 +350,8 @@ class DesktopPortfolio {
             statusText.textContent = 'Ready to start…';
 
             setTimeout(() => {
-                const screen = document.querySelector('.loading-screen');
-                if (screen) {
-                    screen.classList.add('hidden');
-                    screen.style.display = 'none';
-                    screen.style.pointerEvents = 'none';
-                }
-                setTimeout(() => {
-                    this.desktop.animateIcons();
-                    this.desktop.setupIconListeners();
-                    window.__desktopReady = true;
-                    document.dispatchEvent(new CustomEvent('andreos:desktop-ready'));
-                }, 300);
-
-                this.audio.startMusic();
+                sessionStorage.setItem('andreos:booted', '1');
+                revealDesktop();
             }, 500);
         }, 3200);
     }

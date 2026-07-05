@@ -173,9 +173,10 @@ async function loadEngine() {
     engineState = 'loading';
     console.log('[AndreChat] Starting model load:', MODEL_ID);
 
-    // Show NC card — but only if model isn't already done by the time desktop is ready
+    // Show NC card — but only on the first load (not on refreshes within the same session)
+    const silentLoad = !!sessionStorage.getItem('andreos:model-loaded');
     whenReady(() => {
-        if (engineState !== 'ready') {
+        if (engineState !== 'ready' && !silentLoad) {
             window.__AndreOSApp?.createLiveNotification(
                 'ai-model', 'Loading AI Model', 'Compiling WebGPU shaders… this takes ~30s the first time.', '⚙️'
             );
@@ -198,7 +199,7 @@ async function loadEngine() {
                     : isFetching ? 'Downloading weights…' : 'Compiling WebGPU shaders…';
 
                 updateAll(shortText, pct);
-                window.__AndreOSApp?.updateLiveNotification('ai-model', pct, shortText);
+                if (!silentLoad) window.__AndreOSApp?.updateLiveNotification('ai-model', pct, shortText);
 
                 // Update NC card icon once download actually starts
                 if (isFetching) {
@@ -211,8 +212,9 @@ async function loadEngine() {
         });
 
         engineState = 'ready';
+        sessionStorage.setItem('andreos:model-loaded', '1');
         console.log('[AndreChat] Model ready ✓');
-        whenReady(() => window.__AndreOSApp?.completeLiveNotification(
+        if (!silentLoad) whenReady(() => window.__AndreOSApp?.completeLiveNotification(
             'ai-model', 'AI Model ready', 'Ask André is ready to chat!', '✅', 'success',
             () => window.__AndreOSApp?.openFile('chat')
         ));
