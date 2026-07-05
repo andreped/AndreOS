@@ -9,7 +9,7 @@
 export const ANDRE_INFO = {
     name:     'André Pedersen',
     title:    'Senior AI Engineer · PhD in Medical Technology',
-    location: 'Trondheim / Oslo, Norway',
+    location: 'Oslo, Norway',
     email:    'andrped94@gmail.com',
     website:  'https://andreped.dev',
     github:   'https://github.com/andreped',
@@ -49,7 +49,7 @@ André Pedersen is a Norwegian Senior AI Engineer and researcher specialising in
 - DevOps lead for Raidionics, open clinical software for brain tumour segmentation and clinical reporting.
 - Published gradient-accumulator (TensorFlow 2 Python package) and co-developed torchstain (histopathology stain normalisation for PyTorch/TF/NumPy).
 
-**Researcher / MSc — SINTEF Health Research** (Jan 2019–May 2022)
+**Master of Science — SINTEF Health Research** (Jan 2019–May 2022)
 - Led a SINTEF-funded project for code-free deployment of deep segmentation models.
 - Contributed to multiple successful Norwegian Research Council grant applications.
 

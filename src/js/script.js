@@ -301,7 +301,7 @@ class DesktopPortfolio {
         }
     }
 
-    pushNotification(title, message, icon = 'ℹ️', type = 'info') {
+    pushNotification(title, message, icon = 'ℹ️', type = 'info', onClick = null) {
         // 1 — Persist in notification centre
         const list  = document.getElementById('ncList');
         if (list) {
@@ -338,7 +338,7 @@ class DesktopPortfolio {
         this._updateNcBadge();
 
         // 3 — Toast
-        this._showToast(icon, title, message, type);
+        this._showToast(icon, title, message, type, onClick);
     }
 
     _updateNcBadge() {
@@ -352,9 +352,10 @@ class DesktopPortfolio {
         }
     }
 
-    _showToast(icon, title, message, type = 'info') {
+    _showToast(icon, title, message, type = 'info', onClick = null) {
         const toast = document.createElement('div');
         toast.className = `nc-toast nc-toast-${type}`;
+        if (onClick) toast.style.cursor = 'pointer';
         toast.innerHTML = `
             <div class="nc-toast-icon">${icon}</div>
             <div class="nc-toast-body">
@@ -363,9 +364,13 @@ class DesktopPortfolio {
             </div>
             <button class="nc-toast-close">✕</button>
         `;
-        toast.querySelector('.nc-toast-close').addEventListener('click', () => toast.remove());
+        if (onClick) {
+            toast.addEventListener('click', (e) => {
+                if (!e.target.closest('.nc-toast-close')) { onClick(); toast.remove(); }
+            });
+        }
+        toast.querySelector('.nc-toast-close').addEventListener('click', (e) => { e.stopPropagation(); toast.remove(); });
         document.body.appendChild(toast);
-        // Stagger multiple toasts
         const existing = document.querySelectorAll('.nc-toast').length;
         toast.style.bottom = (70 + (existing - 1) * 90) + 'px';
         setTimeout(() => {
@@ -430,10 +435,10 @@ class DesktopPortfolio {
         if (msgEl && message) msgEl.textContent = message;
     }
 
-    completeLiveNotification(id, title, message, icon = '✅', type = 'success') {
+    completeLiveNotification(id, title, message, icon = '✅', type = 'success', onClick = null) {
         const list = document.getElementById('ncList');
         const item = document.getElementById(`nc-live-${id}`);
-        if (!item) { this.pushNotification(title, message, icon, type); return; }
+        if (!item) { this.pushNotification(title, message, icon, type, onClick); return; }
         // Swap progress bar out, update text
         item.querySelector('.nc-live-progress')?.remove();
         const iconEl  = item.querySelector('.nc-item-icon');
@@ -448,7 +453,7 @@ class DesktopPortfolio {
         item.dataset.completedType = type;
         this._ncUnread = (this._ncUnread || 0) + 1;
         this._updateNcBadge();
-        this._showToast(icon, title, message, type);
+        this._showToast(icon, title, message, type, onClick);
     }
     
     toggleHiddenIcons() {
@@ -679,6 +684,11 @@ class DesktopPortfolio {
         if (contextMenus.length > 0) {
             contextMenus.forEach(menu => menu.remove());
             return;
+        }
+
+        // Close the currently active window
+        if (this.activeWindow) {
+            this.closeWindow(this.activeWindow);
         }
     }
     
@@ -1368,6 +1378,9 @@ class DesktopPortfolio {
                 
                 setTimeout(() => {
                     this.animateDesktopIcons();
+                    // Signal chat.js (and anything else) that the desktop is now visible
+                    window.__desktopReady = true;
+                    document.dispatchEvent(new CustomEvent('andreos:desktop-ready'));
                     setTimeout(() => {
                         this.setupDesktopIconListeners();
                     }, 1000);
@@ -1625,10 +1638,9 @@ class DesktopPortfolio {
                     <button class="bm-chip" data-url="https://andreped.dev">&#127968; My Site</button>
                     <button class="bm-chip" data-url="https://yep.com">&#128269; Yep</button>
                     <button class="bm-chip" data-url="https://en.wikipedia.org/wiki/Artificial_intelligence">&#128218; Wikipedia</button>
-                    <button class="bm-chip" data-url="https://www.vg.no">&#128240; VG</button>
+                    <button class="bm-chip" data-url="https://www.nettavisen.no">&#128240; Nettavisen</button>
                     <button class="bm-chip" data-url="https://andreped-aeropath.hf.space">&#129978; AeroPath</button>
                     <button class="bm-chip" data-url="https://andreped-lynos.hf.space">&#129704; LyNoS</button>
-                    <button class="bm-chip" data-url="https://andreped-livermask.hf.space">&#128138; livermask</button>
                 </div>
                 <div class="browser-viewport">
                     <iframe class="browser-iframe"
@@ -1673,10 +1685,10 @@ class DesktopPortfolio {
         return `
             <div class="content-section">
                 <h2>About Me</h2>
-                <p>Hi, I'm André Pedersen — a Senior AI Engineer and researcher with a PhD in Medical Technology from NTNU. I'm passionate about building practical, real-world AI solutions that make a difference, particularly in healthcare. I currently work at DIPS AS in Oslo, Norway, where I develop AI-augmented software for the Norwegian healthcare system.</p>
+                <p>Hi, I'm André Pedersen! I'm passionate about building practical, real-world AI solutions that make a difference, particularly in healthcare. I currently work at DIPS AS in Oslo, Norway, where I develop AI-augmented software for the Norwegian healthcare system.</p>
 
                 <h3>Background</h3>
-                <p>I hold an MSc in Applied Physics and Mathematics (specializing in Machine Learning & Statistics) from UiT: The Arctic University of Norway, and a PhD in Medical Technology focused on Artificial Intelligence for Computational Pathology from NTNU, Trondheim. Over eight years of experience in software engineering and applied machine learning have taken me from summer internships at SINTEF to leading production AI deployments used across Norwegian hospitals.</p>
+                <p>I hold a PhD in Medical Technology focused on Artificial Intelligence for Computational Pathology from NTNU, Trondheim, and an MSc in Applied Physics and Mathematics (specializing in Machine Learning &amp; Statistics) from UiT: The Arctic University of Norway. Over eight years of experience in software engineering and applied machine learning have taken me from summer internships at SINTEF to leading production AI deployments used across Norwegian hospitals.</p>
 
                 <h3>What I Do</h3>
                 <ul>
@@ -1690,9 +1702,6 @@ class DesktopPortfolio {
 
                 <h3>Research</h3>
                 <p>I have 30+ peer-reviewed publications, 500+ citations, and an h-index of 15. My research spans computational pathology, brain tumour segmentation, high-performance medical image computing, semi-supervised learning, and natural language processing. I have also co-supervised five Master's students and contributed technically to five PhD projects at NTNU.</p>
-
-                <h3>Philosophy</h3>
-                <p>I believe the best technology is invisible — it just works, reliably, for the people who need it most. I aim to bridge the gap between cutting-edge research and production systems, and I'm always looking for the next interesting problem to solve.</p>
             </div>
         `;
     }
@@ -1740,7 +1749,7 @@ class DesktopPortfolio {
                 </div>
 
                 <div style="margin-bottom: 20px;">
-                    <h4>Research Scientist (MSc period)</h4>
+                    <h4>Master of Science</h4>
                     <p><strong>SINTEF, Health Research</strong> | Jan. 2019 – May 2022 &nbsp;·&nbsp; Trondheim, Norway</p>
                     <ul>
                         <li>Led a SINTEF-funded project for code-free development and deployment of deep segmentation models for computational pathology.</li>
@@ -1798,19 +1807,40 @@ class DesktopPortfolio {
 
                 <div class="projects-grid">
                     <div class="project-card">
-                        <h4>DIPS AI &amp; Pasientsamtale</h4>
-                        <p>DIPS' first cloud-based AI platform, now live in two of four Norwegian health regions. Pasientsamtale delivers speech-to-summary/schema at production scale in Western Norway RHF.</p>
+                        <h4><a href="https://dips-ki.no/" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">DIPS KI ↗</a></h4>
+                        <p>DIPS' cloud-based AI platform (dips-ki.no), now live in two of four Norwegian health regions. Serves as the foundation for all AI solutions at DIPS.</p>
                         <div class="project-tech">
-                            <span class="tech-tag">Azure OpenAI</span>
-                            <span class="tech-tag">Azure Speech</span>
                             <span class="tech-tag">React-TypeScript</span>
                             <span class="tech-tag">.NET</span>
-                            <span class="tech-tag">Kubernetes</span>
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">Azure Kubernetes Service</span>
+                            <span class="tech-tag">Argo CD</span>
+                            <span class="tech-tag">GitHub Actions</span>
+                            <span class="tech-tag">GitOps</span>
+                            <span class="tech-tag">Azure OpenAI</span>
+                            <span class="tech-tag">Azure API Management</span>
+                            <span class="tech-tag">PostgreSQL</span>
                         </div>
                     </div>
 
                     <div class="project-card">
-                        <h4>FastPathology</h4>
+                        <h4><a href="https://www.linkedin.com/pulse/vi-introduserer-pasientsamtale-mer-tid-til-pasienten-det-som-betyr-phlbf/" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">Pasientsamtale ↗</a></h4>
+                        <p>Web app running inside DIPS Arena that converts clinical conversations to structured summaries and schemas. Launched at Western Norway RHF with low latency and high accuracy.</p>
+                        <div class="project-tech">
+                            <span class="tech-tag">React-TypeScript</span>
+                            <span class="tech-tag">.NET</span>
+                            <span class="tech-tag">Azure Speech</span>
+                            <span class="tech-tag">Azure OpenAI</span>
+                            <span class="tech-tag">Azure DevOps</span>
+                            <span class="tech-tag">Argo CD</span>
+                            <span class="tech-tag">Kubernetes</span>
+                            <span class="tech-tag">GitOps</span>
+                            <span class="tech-tag">PostgreSQL</span>
+                        </div>
+                    </div>
+
+                    <div class="project-card">
+                        <h4><a href="https://github.com/AICAN-Research/FAST-Pathology" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">FastPathology ↗</a></h4>
                         <p>Open-source C++/Qt5 desktop platform for deep learning-based research and clinical decision support in digital pathology. Published in IEEE Access (2021).</p>
                         <div class="project-tech">
                             <span class="tech-tag">C++</span>
@@ -1822,7 +1852,7 @@ class DesktopPortfolio {
                     </div>
 
                     <div class="project-card">
-                        <h4>Raidionics</h4>
+                        <h4><a href="https://github.com/raidionics/Raidionics" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">Raidionics ↗</a></h4>
                         <p>Open-source clinical software for automatic pre- and postoperative brain tumour segmentation and standardised clinical report generation. Actively maintained DevOps.</p>
                         <div class="project-tech">
                             <span class="tech-tag">Python</span>
@@ -1833,7 +1863,7 @@ class DesktopPortfolio {
                     </div>
 
                     <div class="project-card">
-                        <h4>H2G-Net</h4>
+                        <h4><a href="https://github.com/andreped/H2G-Net" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">H2G-Net ↗</a></h4>
                         <p>Multi-resolution cascaded CNN for breast cancer region segmentation in gigapixel histopathological whole slide images. Dice coefficient of 0.933 on independent test set. Published in Frontiers in Medicine (2022).</p>
                         <div class="project-tech">
                             <span class="tech-tag">PyTorch</span>
@@ -1844,7 +1874,7 @@ class DesktopPortfolio {
                     </div>
 
                     <div class="project-card">
-                        <h4>gradient-accumulator</h4>
+                        <h4><a href="https://github.com/andreped/GradientAccumulator" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">gradient-accumulator ↗</a></h4>
                         <p>Python package enabling gradient accumulation in TensorFlow 2 — fills a key gap for training large models on limited GPU memory. Available on PyPI.</p>
                         <div class="project-tech">
                             <span class="tech-tag">Python</span>
@@ -1855,7 +1885,7 @@ class DesktopPortfolio {
                     </div>
 
                     <div class="project-card">
-                        <h4>torchstain</h4>
+                        <h4><a href="https://github.com/EIDOSLAB/torchstain" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">torchstain ↗</a></h4>
                         <p>Python package for rapid stain normalisation of histopathological images, supporting PyTorch, TensorFlow, and NumPy backends. Co-developed with EIDOS Lab.</p>
                         <div class="project-tech">
                             <span class="tech-tag">Python</span>
@@ -1866,7 +1896,7 @@ class DesktopPortfolio {
                     </div>
 
                     <div class="project-card">
-                        <h4>livermask</h4>
+                        <h4><a href="https://github.com/andreped/livermask" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">livermask ↗</a></h4>
                         <p>Open-source command-line tool for automatic liver segmentation from CT volumes using a pre-trained deep learning model.</p>
                         <div class="project-tech">
                             <span class="tech-tag">Python</span>
@@ -1877,7 +1907,7 @@ class DesktopPortfolio {
                     </div>
 
                     <div class="project-card">
-                        <h4>Open-Source Contributions</h4>
+                        <h4><a href="https://github.com/andreped" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">Open-Source Contributions ↗</a></h4>
                         <p>Contributed to large community GenAI projects: Vanna (20k+ GitHub stars) — AI-powered SQL generation; semantic-router (3k+ stars) — semantic routing for LLM pipelines.</p>
                         <div class="project-tech">
                             <span class="tech-tag">GenAI</span>
@@ -2007,7 +2037,7 @@ class DesktopPortfolio {
                         <div class="contact-icon">📍</div>
                         <div class="contact-details">
                             <h4>Location</h4>
-                            <p>Trondheim / Oslo, Norway</p>
+                            <p>Oslo, Norway</p>
                         </div>
                     </div>
 
@@ -2027,6 +2057,18 @@ class DesktopPortfolio {
     }
     
     getSocialContent() {
+        const icons = {
+            github: `<svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>`,
+            linkedin: `<svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>`,
+            scholar: `<img src="assets/icons/scholar.svg" width="26" height="26" style="object-fit:contain" alt="Google Scholar">`,
+            researchgate: `<img src="assets/icons/rg.svg" width="26" height="26" style="object-fit:contain" alt="ResearchGate">`,
+            website: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+            email: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`,
+        };
+
+        const mkIcon = (key, bg) =>
+            `<div class="social-icon si-brand" style="background:${bg};color:#fff">${icons[key]}</div>`;
+
         return `
             <div class="content-section">
                 <h2>Social &amp; Links</h2>
@@ -2034,7 +2076,7 @@ class DesktopPortfolio {
 
                 <div class="social-links">
                     <a href="https://github.com/andreped" class="social-link" target="_blank">
-                        <div class="social-icon github">💻</div>
+                        ${mkIcon('github', '#24292e')}
                         <div class="social-details">
                             <h4>GitHub</h4>
                             <p>github.com/andreped</p>
@@ -2043,7 +2085,7 @@ class DesktopPortfolio {
                     </a>
 
                     <a href="https://www.linkedin.com/in/andr%C3%A9-pedersen" class="social-link" target="_blank">
-                        <div class="social-icon linkedin">💼</div>
+                        ${mkIcon('linkedin', '#0A66C2')}
                         <div class="social-details">
                             <h4>LinkedIn</h4>
                             <p>linkedin.com/in/andré-pedersen</p>
@@ -2052,7 +2094,7 @@ class DesktopPortfolio {
                     </a>
 
                     <a href="https://scholar.google.com/citations?user=U20zUHQAAAAJ" class="social-link" target="_blank">
-                        <div class="social-icon">🎓</div>
+                        ${mkIcon('scholar', '#fff')}
                         <div class="social-details">
                             <h4>Google Scholar</h4>
                             <p>30+ publications · 500+ citations · h-index 15</p>
@@ -2061,7 +2103,7 @@ class DesktopPortfolio {
                     </a>
 
                     <a href="https://www.researchgate.net/profile/andre-pedersen/" class="social-link" target="_blank">
-                        <div class="social-icon">🔬</div>
+                        ${mkIcon('researchgate', '#fff')}
                         <div class="social-details">
                             <h4>ResearchGate</h4>
                             <p>researchgate.net/profile/andre-pedersen</p>
@@ -2070,7 +2112,7 @@ class DesktopPortfolio {
                     </a>
 
                     <a href="https://andreped.dev" class="social-link" target="_blank">
-                        <div class="social-icon">🌐</div>
+                        ${mkIcon('website', '#6366f1')}
                         <div class="social-details">
                             <h4>Personal Website</h4>
                             <p>andreped.dev</p>
@@ -2079,7 +2121,7 @@ class DesktopPortfolio {
                     </a>
 
                     <a href="mailto:andrped94@gmail.com" class="social-link" target="_blank">
-                        <div class="social-icon email">📧</div>
+                        ${mkIcon('email', '#ff6b6b')}
                         <div class="social-details">
                             <h4>Email</h4>
                             <p>andrped94@gmail.com</p>
@@ -2667,6 +2709,7 @@ class DesktopPortfolio {
         const win = this.windows.find(w => w.id === windowId);
         if (!win) return;
         const window = win.element;
+        const maxBtn = window.querySelector('.window-control.maximize');
         if (win.isMaximized) {
             if (win.prevRect) {
                 window.style.left = win.prevRect.left;
@@ -2676,6 +2719,7 @@ class DesktopPortfolio {
             }
             window.classList.remove('maximized');
             win.isMaximized = false;
+            if (maxBtn) maxBtn.textContent = '□';
         } else {
             win.prevRect = {
                 left: window.style.left,
@@ -2689,6 +2733,7 @@ class DesktopPortfolio {
             window.style.height = 'calc(100vh - 56px)';
             window.classList.add('maximized');
             win.isMaximized = true;
+            if (maxBtn) maxBtn.textContent = '❐';
         }
     }
     
