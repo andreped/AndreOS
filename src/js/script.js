@@ -2709,6 +2709,7 @@ class DesktopPortfolio {
         const win = this.windows.find(w => w.id === windowId);
         if (!win) return;
         const window = win.element;
+        const maxBtn = window.querySelector('.window-control.maximize');
         if (win.isMaximized) {
             if (win.prevRect) {
                 window.style.left = win.prevRect.left;
@@ -2718,6 +2719,7 @@ class DesktopPortfolio {
             }
             window.classList.remove('maximized');
             win.isMaximized = false;
+            if (maxBtn) maxBtn.textContent = '□';
         } else {
             win.prevRect = {
                 left: window.style.left,
@@ -2731,6 +2733,7 @@ class DesktopPortfolio {
             window.style.height = 'calc(100vh - 56px)';
             window.classList.add('maximized');
             win.isMaximized = true;
+            if (maxBtn) maxBtn.textContent = '❐';
         }
     }
     
