@@ -123,6 +123,13 @@
                     </div>
                     <div class="icon-label">Browser</div>
                 </div>
+
+                <div class="desktop-icon" data-file="chat">
+                    <div class="icon-image">
+                        <img src="assets/icons/chat.svg" alt="Ask André">
+                    </div>
+                    <div class="icon-label">Ask André</div>
+                </div>
             </div>
         </div>
         
@@ -173,6 +180,7 @@
                 </div>
                 <div class="notification-button" title="Notifications">
                     <div class="notification-icon">🔔</div>
+                    <span class="nc-badge" id="ncBadge" style="display:none">0</span>
                 </div>
                 <div class="clock">
                     <div class="time"></div>
@@ -196,10 +204,23 @@
                 <div class="start-menu-item" data-action="contact">Contact</div>
                 <div class="start-menu-item" data-action="social">Social Links</div>
                 <div class="start-menu-item" data-action="browser">Browser</div>
+                <div class="start-menu-item" data-action="chat">Ask André</div>
             </div>
         </div>
     </div>
 
+    <!-- Notification Centre panel -->
+    <div id="notificationCenter" class="notification-center">
+        <div class="nc-header">
+            <span class="nc-title">Notifications</span>
+            <button class="nc-clear-all" id="ncClearAll">Clear all</button>
+        </div>
+        <div class="nc-list" id="ncList">
+            <div class="nc-empty">No new notifications</div>
+        </div>
+    </div>
+
     <script src="src/js/script.js" defer></script>
+    <script type="module" src="src/js/chat.js"></script>
 </body>
 </html>

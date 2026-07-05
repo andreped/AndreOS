@@ -86,8 +86,8 @@ class DesktopPortfolio {
     init() {
         this.updateClock();
         this.showLoadingScreen();
-        this.playBootSound();
         this.initBackgroundMusic();
+        this._setupGestureUnlock();
         
         const clockUpdate = () => {
             this.updateClock();
@@ -142,6 +142,16 @@ class DesktopPortfolio {
                 this.showNotificationCenter();
             });
         }
+
+        const ncClearAll = document.getElementById('ncClearAll');
+        if (ncClearAll) {
+            ncClearAll.addEventListener('click', () => {
+                const list = document.getElementById('ncList');
+                if (list) list.innerHTML = '<div class="nc-empty">No new notifications</div>';
+                this._ncUnread = 0;
+                this._updateNcBadge();
+            });
+        }
         
         const hiddenIconsChevron = document.querySelector('.hidden-icons-chevron');
         if (hiddenIconsChevron) {
@@ -176,7 +186,8 @@ class DesktopPortfolio {
             { name: 'Skills', action: () => this.openFile('skills') },
             { name: 'Contact', action: () => this.openFile('contact') },
             { name: 'Social', action: () => this.openFile('social') },
-            { name: 'Browser', action: () => this.openFile('browser') }
+            { name: 'Browser', action: () => this.openFile('browser') },
+            { name: 'Ask André', action: () => this.openFile('chat') }
         ];
         
         const results = searchableItems.filter(item => 
@@ -264,7 +275,180 @@ class DesktopPortfolio {
     }
     
     showNotificationCenter() {
-        this.showNotification('Notification Center opened', 'info');
+        const panel = document.getElementById('notificationCenter');
+        if (!panel) return;
+        const isOpen = panel.classList.contains('nc-open');
+        if (isOpen) {
+            panel.classList.remove('nc-open');
+        } else {
+            panel.classList.add('nc-open');
+            // Mark all as read — clear badge
+            this._ncUnread = 0;
+            this._updateNcBadge();
+        }
+        // Close when clicking outside
+        if (!isOpen) {
+            setTimeout(() => {
+                const closeOutside = (e) => {
+                    if (!panel.contains(e.target) &&
+                        !e.target.closest('.notification-button')) {
+                        panel.classList.remove('nc-open');
+                        document.removeEventListener('click', closeOutside);
+                    }
+                };
+                document.addEventListener('click', closeOutside);
+            }, 50);
+        }
+    }
+
+    pushNotification(title, message, icon = 'ℹ️', type = 'info') {
+        // 1 — Persist in notification centre
+        const list  = document.getElementById('ncList');
+        if (list) {
+            const empty = list.querySelector('.nc-empty');
+            if (empty) empty.remove();
+
+            const now  = new Date();
+            const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const item = document.createElement('div');
+            item.className = 'nc-item';
+            item.innerHTML = `
+                <div class="nc-item-icon">${icon}</div>
+                <div class="nc-item-body">
+                    <div class="nc-item-title">${title}</div>
+                    <div class="nc-item-msg">${message}</div>
+                    <div class="nc-item-time">${time}</div>
+                </div>
+                <button class="nc-item-dismiss" title="Dismiss">✕</button>
+            `;
+            item.querySelector('.nc-item-dismiss').addEventListener('click', () => {
+                item.classList.add('nc-item-out');
+                setTimeout(() => {
+                    item.remove();
+                    if (!list.querySelector('.nc-item')) {
+                        list.innerHTML = '<div class="nc-empty">No new notifications</div>';
+                    }
+                }, 250);
+            });
+            list.prepend(item);
+        }
+
+        // 2 — Badge
+        this._ncUnread = (this._ncUnread || 0) + 1;
+        this._updateNcBadge();
+
+        // 3 — Toast
+        this._showToast(icon, title, message, type);
+    }
+
+    _updateNcBadge() {
+        const badge = document.getElementById('ncBadge');
+        if (!badge) return;
+        if (this._ncUnread > 0) {
+            badge.textContent = this._ncUnread > 9 ? '9+' : this._ncUnread;
+            badge.style.display = 'flex';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    _showToast(icon, title, message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `nc-toast nc-toast-${type}`;
+        toast.innerHTML = `
+            <div class="nc-toast-icon">${icon}</div>
+            <div class="nc-toast-body">
+                <div class="nc-toast-title">${title}</div>
+                <div class="nc-toast-msg">${message}</div>
+            </div>
+            <button class="nc-toast-close">✕</button>
+        `;
+        toast.querySelector('.nc-toast-close').addEventListener('click', () => toast.remove());
+        document.body.appendChild(toast);
+        // Stagger multiple toasts
+        const existing = document.querySelectorAll('.nc-toast').length;
+        toast.style.bottom = (70 + (existing - 1) * 90) + 'px';
+        setTimeout(() => {
+            toast.classList.add('nc-toast-out');
+            setTimeout(() => toast.remove(), 350);
+        }, 5000);
+    }
+
+    showNotification(message, type = 'info') {
+        const iconMap = { info: 'ℹ️', success: '✅', warning: '⚠️', error: '❌' };
+        this.pushNotification('AndreOS', message, iconMap[type] || 'ℹ️', type);
+    }
+
+    // ── Live (progress) notifications ────────────────────────────────────────
+    createLiveNotification(id, title, message, icon = '⬇️') {
+        const list = document.getElementById('ncList');
+        if (!list) return;
+        const empty = list.querySelector('.nc-empty');
+        if (empty) empty.remove();
+        // Remove any previous instance with same id
+        document.getElementById(`nc-live-${id}`)?.remove();
+
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const item = document.createElement('div');
+        item.className = 'nc-item nc-item-live';
+        item.id = `nc-live-${id}`;
+        item.innerHTML = `
+            <div class="nc-item-icon">${icon}</div>
+            <div class="nc-item-body">
+                <div class="nc-item-title">${title}</div>
+                <div class="nc-item-msg">${message}</div>
+                <div class="nc-live-progress">
+                    <div class="nc-live-bar"><div class="nc-live-fill" style="width:0%"></div></div>
+                    <span class="nc-live-pct">0%</span>
+                </div>
+                <div class="nc-item-time">${time}</div>
+            </div>
+            <button class="nc-item-dismiss" title="Dismiss">✕</button>
+        `;
+        item.querySelector('.nc-item-dismiss').addEventListener('click', () => {
+            item.classList.add('nc-item-out');
+            setTimeout(() => {
+                item.remove();
+                if (!list.querySelector('.nc-item')) list.innerHTML = '<div class="nc-empty">No new notifications</div>';
+            }, 250);
+        });
+        list.prepend(item);
+        this._ncUnread = (this._ncUnread || 0) + 1;
+        this._updateNcBadge();
+        // Brief toast to draw attention without being annoying
+        this._showToast(icon, title, message + ' — check notifications for progress.', 'info');
+    }
+
+    updateLiveNotification(id, pct, message) {
+        const item = document.getElementById(`nc-live-${id}`);
+        if (!item) return;
+        const fill  = item.querySelector('.nc-live-fill');
+        const pctEl = item.querySelector('.nc-live-pct');
+        const msgEl = item.querySelector('.nc-item-msg');
+        if (fill)  fill.style.width    = Math.min(100, pct) + '%';
+        if (pctEl) pctEl.textContent   = pct + '%';
+        if (msgEl && message) msgEl.textContent = message;
+    }
+
+    completeLiveNotification(id, title, message, icon = '✅', type = 'success') {
+        const list = document.getElementById('ncList');
+        const item = document.getElementById(`nc-live-${id}`);
+        if (!item) { this.pushNotification(title, message, icon, type); return; }
+        // Swap progress bar out, update text
+        item.querySelector('.nc-live-progress')?.remove();
+        const iconEl  = item.querySelector('.nc-item-icon');
+        const titleEl = item.querySelector('.nc-item-title');
+        const msgEl   = item.querySelector('.nc-item-msg');
+        const timeEl  = item.querySelector('.nc-item-time');
+        if (iconEl)  iconEl.textContent  = icon;
+        if (titleEl) titleEl.textContent = title;
+        if (msgEl)   msgEl.textContent   = message;
+        if (timeEl)  timeEl.textContent  = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        item.classList.remove('nc-item-live');
+        item.dataset.completedType = type;
+        this._ncUnread = (this._ncUnread || 0) + 1;
+        this._updateNcBadge();
+        this._showToast(icon, title, message, type);
     }
     
     toggleHiddenIcons() {
@@ -328,42 +512,7 @@ class DesktopPortfolio {
             });
         }, 100);
     }
-    
-    showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `windows-notification ${type}`;
-        notification.innerHTML = `
-            <div class="notification-content">
-                <div class="notification-message">${message}</div>
-            </div>
-        `;
-        
-        notification.style.cssText = `
-            position: fixed;
-            bottom: 70px;
-            right: 20px;
-            background: rgba(32, 32, 32, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            padding: 12px 16px;
-            color: white;
-            font-size: 13px;
-            z-index: 10001;
-            max-width: 300px;
-            animation: notificationSlideIn 0.3s ease;
-        `;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.style.animation = 'notificationSlideOut 0.3s ease';
-            setTimeout(() => {
-                notification.remove();
-            }, 300);
-        }, 3000);
-    }
-    
+
     setupKeyboardShortcuts() {
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey && e.key === 'Tab') {
@@ -565,6 +714,20 @@ class DesktopPortfolio {
         return 'unknown';
     }
     
+    _setupGestureUnlock() {
+        const unlock = () => {
+            if (this.audioContext && this.audioContext.state === 'suspended') {
+                this.audioContext.resume().then(() => {
+                    this.playBootSound();
+                    if (this.musicPlaying) this.createAmbientMusic();
+                }).catch(() => {});
+            }
+        };
+        document.addEventListener('click',      unlock, { once: true });
+        document.addEventListener('keydown',    unlock, { once: true });
+        document.addEventListener('touchstart', unlock, { once: true });
+    }
+
     initBackgroundMusic() {
         try {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -906,18 +1069,9 @@ class DesktopPortfolio {
     }
 
     startMusic() {
-        if (this.audioContext && this.audioContext.state === 'suspended') {
-            this.audioContext.resume().then(() => {
-                this.createAmbientMusic();
-            }).catch(error => {
-                console.error('Failed to resume audio context:', error);
-            });
-        }
-        
         this.musicPlaying = true;
         const musicToggle = domCache.musicToggle;
         const desktop = domCache.desktop;
-        
         if (musicToggle) {
             musicToggle.classList.add('playing');
             musicToggle.classList.remove('muted');
@@ -925,15 +1079,12 @@ class DesktopPortfolio {
         const volumeTrayIcon = document.getElementById('volumeTrayIcon');
         if (volumeTrayIcon) volumeTrayIcon.textContent = '🎵';
         this.saveAudioSettings();
-        
-        if (desktop) {
-            desktop.classList.add('music-playing');
-        }
-        
+        if (desktop) desktop.classList.add('music-playing');
+        // Only play immediately if audio context is already running (unlocked by gesture).
+        // If still suspended, _setupGestureUnlock will call createAmbientMusic() on first gesture.
         if (this.audioContext && this.audioContext.state === 'running') {
             this.createAmbientMusic();
         }
-        
         this.addSoundEffect('play');
     }
     
@@ -963,6 +1114,10 @@ class DesktopPortfolio {
         if (this.musicPlaying) {
             this.stopMusic();
         } else {
+            // toggleMusic is always called from a user gesture — safe to resume here
+            if (this.audioContext && this.audioContext.state === 'suspended') {
+                this.audioContext.resume().catch(() => {});
+            }
             this.startMusic();
         }
     }
@@ -1384,6 +1539,11 @@ class DesktopPortfolio {
     }
     
     openFile(fileType) {
+        // Only allow one chat window at a time
+        if (fileType === 'chat') {
+            const existing = this.windows.find(w => w.title === 'Ask André');
+            if (existing) { this.setActiveWindow(existing.id); return; }
+        }
         const windowData = this.getWindowData(fileType);
         if (windowData) {
             this.createWindow(windowData);
@@ -1440,6 +1600,14 @@ class DesktopPortfolio {
             height: 680
         };
 
+        windowData['chat'] = {
+            title: 'Ask André',
+            isChat: true,
+            content: this.getChatContent(),
+            width: 500,
+            height: 600
+        };
+
         return windowData[fileType] || null;
     }
     
@@ -1474,6 +1642,27 @@ class DesktopPortfolio {
                     <div class="browser-loading">
                         <div class="browser-spinner"></div>
                     </div>
+                </div>
+            </div>
+        `;
+    }
+
+    getChatContent() {
+        return `
+            <div class="chat-app">
+                <div class="chat-load-overlay">
+                    <div class="chat-load-icon">⚙️</div>
+                    <div class="chat-load-title">SmolLM2-135M</div>
+                    <div class="chat-load-subtitle">Compiling WebGPU shaders…<br><span style="opacity:0.5;font-size:11px">This takes ~30 s the first time, then weights download (~265 MB, cached after).</span></div>
+                    <div class="chat-progress-track">
+                        <div class="chat-progress-fill"></div>
+                    </div>
+                    <div class="chat-load-status">Initializing…</div>
+                </div>
+                <div class="chat-messages-area" style="display:none"></div>
+                <div class="chat-input-row" style="display:none">
+                    <input class="chat-input" type="text" placeholder="Ask anything about André..." autocomplete="off" spellcheck="false">
+                    <button class="chat-send" title="Send">&#8593;</button>
                 </div>
             </div>
         `;
@@ -1901,6 +2090,21 @@ class DesktopPortfolio {
         `;
     }
 
+    setupChatWindow(winEl) {
+        if (window.AndreChat) {
+            window.AndreChat.setupWindow(winEl);
+        } else {
+            // chat.js module may still be loading — poll briefly
+            const retry = setInterval(() => {
+                if (window.AndreChat) {
+                    clearInterval(retry);
+                    window.AndreChat.setupWindow(winEl);
+                }
+            }, 100);
+            setTimeout(() => clearInterval(retry), 5000);
+        }
+    }
+
     setupBrowserWindow(winEl, startUrl) {
         const iframe    = winEl.querySelector('.browser-iframe');
         const urlBar    = winEl.querySelector('.url-bar');
@@ -2035,6 +2239,7 @@ class DesktopPortfolio {
         const windowsContainer = domCache.windowsContainer;
         if (!windowsContainer) return;
         if (windowData.isBrowser) window.classList.add('browser-window');
+        if (windowData.isChat)    window.classList.add('chat-window-wrap');
         windowsContainer.appendChild(window);
         
         this.scheduleUpdate(() => {
@@ -2063,6 +2268,9 @@ class DesktopPortfolio {
         this.makeWindowResizable(window, windowId);
         if (windowData.isBrowser) {
             this.setupBrowserWindow(window, windowData.startUrl || 'https://andreped.dev');
+        }
+        if (windowData.isChat) {
+            this.setupChatWindow(window);
         }
         this.addSoundEffect('open');
     }
@@ -2903,4 +3111,5 @@ class DesktopPortfolio {
 
 document.addEventListener('DOMContentLoaded', () => {
     window.desktopPortfolio = new DesktopPortfolio();
+    window.__AndreOSApp = window.desktopPortfolio;
 });

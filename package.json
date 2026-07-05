@@ -1,0 +1,30 @@
+{
+  "name": "andreos",
+  "version": "1.0.0",
+  "description": "An interactive desktop OS experience serving as my personal portfolio.   Based on the open-source template by **[Justinianus2001 (Hoang Le Ngoc)](https://github.com/Justinianus2001/my-portfolio)** — all credit for the original architecture, visual design, and audio system goes to him.",
+  "main": "index.js",
+  "devDependencies": {
+    "vite": "^8.1.3"
+  },
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andreped/AndreOS.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/andreped/AndreOS/issues"
+  },
+  "homepage": "https://github.com/andreped/AndreOS#readme",
+  "dependencies": {
+    "@mlc-ai/web-llm": "^0.2.84"
+  }
+}
