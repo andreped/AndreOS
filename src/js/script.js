@@ -1802,19 +1802,40 @@ class DesktopPortfolio {
 
                 <div class="projects-grid">
                     <div class="project-card">
-                        <h4>DIPS AI &amp; Pasientsamtale</h4>
-                        <p>DIPS' first cloud-based AI platform, now live in two of four Norwegian health regions. Pasientsamtale delivers speech-to-summary/schema at production scale in Western Norway RHF.</p>
+                        <h4><a href="https://dips-ki.no/" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">DIPS KI ↗</a></h4>
+                        <p>DIPS' cloud-based AI platform (dips-ki.no), now live in two of four Norwegian health regions. Serves as the foundation for all AI solutions at DIPS.</p>
                         <div class="project-tech">
-                            <span class="tech-tag">Azure OpenAI</span>
-                            <span class="tech-tag">Azure Speech</span>
                             <span class="tech-tag">React-TypeScript</span>
                             <span class="tech-tag">.NET</span>
-                            <span class="tech-tag">Kubernetes</span>
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">Azure Kubernetes Service</span>
+                            <span class="tech-tag">Argo CD</span>
+                            <span class="tech-tag">GitHub Actions</span>
+                            <span class="tech-tag">GitOps</span>
+                            <span class="tech-tag">Azure OpenAI</span>
+                            <span class="tech-tag">Azure API Management</span>
+                            <span class="tech-tag">PostgreSQL</span>
                         </div>
                     </div>
 
                     <div class="project-card">
-                        <h4>FastPathology</h4>
+                        <h4><a href="https://www.linkedin.com/pulse/vi-introduserer-pasientsamtale-mer-tid-til-pasienten-det-som-betyr-phlbf/" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">Pasientsamtale ↗</a></h4>
+                        <p>Web app running inside DIPS Arena that converts clinical conversations to structured summaries and schemas. Launched at Western Norway RHF with low latency and high accuracy.</p>
+                        <div class="project-tech">
+                            <span class="tech-tag">React-TypeScript</span>
+                            <span class="tech-tag">.NET</span>
+                            <span class="tech-tag">Azure Speech</span>
+                            <span class="tech-tag">Azure OpenAI</span>
+                            <span class="tech-tag">Azure DevOps</span>
+                            <span class="tech-tag">Argo CD</span>
+                            <span class="tech-tag">Kubernetes</span>
+                            <span class="tech-tag">GitOps</span>
+                            <span class="tech-tag">PostgreSQL</span>
+                        </div>
+                    </div>
+
+                    <div class="project-card">
+                        <h4><a href="https://github.com/AICAN-Research/FAST-Pathology" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">FastPathology ↗</a></h4>
                         <p>Open-source C++/Qt5 desktop platform for deep learning-based research and clinical decision support in digital pathology. Published in IEEE Access (2021).</p>
                         <div class="project-tech">
                             <span class="tech-tag">C++</span>
@@ -1826,7 +1847,7 @@ class DesktopPortfolio {
                     </div>
 
                     <div class="project-card">
-                        <h4>Raidionics</h4>
+                        <h4><a href="https://github.com/raidionics/Raidionics" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">Raidionics ↗</a></h4>
                         <p>Open-source clinical software for automatic pre- and postoperative brain tumour segmentation and standardised clinical report generation. Actively maintained DevOps.</p>
                         <div class="project-tech">
                             <span class="tech-tag">Python</span>
@@ -1837,7 +1858,7 @@ class DesktopPortfolio {
                     </div>
 
                     <div class="project-card">
-                        <h4>H2G-Net</h4>
+                        <h4><a href="https://github.com/andreped/H2G-Net" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">H2G-Net ↗</a></h4>
                         <p>Multi-resolution cascaded CNN for breast cancer region segmentation in gigapixel histopathological whole slide images. Dice coefficient of 0.933 on independent test set. Published in Frontiers in Medicine (2022).</p>
                         <div class="project-tech">
                             <span class="tech-tag">PyTorch</span>
@@ -1848,7 +1869,7 @@ class DesktopPortfolio {
                     </div>
 
                     <div class="project-card">
-                        <h4>gradient-accumulator</h4>
+                        <h4><a href="https://github.com/andreped/GradientAccumulator" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">gradient-accumulator ↗</a></h4>
                         <p>Python package enabling gradient accumulation in TensorFlow 2 — fills a key gap for training large models on limited GPU memory. Available on PyPI.</p>
                         <div class="project-tech">
                             <span class="tech-tag">Python</span>
@@ -1859,7 +1880,7 @@ class DesktopPortfolio {
                     </div>
 
                     <div class="project-card">
-                        <h4>torchstain</h4>
+                        <h4><a href="https://github.com/EIDOSLAB/torchstain" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">torchstain ↗</a></h4>
                         <p>Python package for rapid stain normalisation of histopathological images, supporting PyTorch, TensorFlow, and NumPy backends. Co-developed with EIDOS Lab.</p>
                         <div class="project-tech">
                             <span class="tech-tag">Python</span>
@@ -1870,7 +1891,7 @@ class DesktopPortfolio {
                     </div>
 
                     <div class="project-card">
-                        <h4>livermask</h4>
+                        <h4><a href="https://github.com/andreped/livermask" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">livermask ↗</a></h4>
                         <p>Open-source command-line tool for automatic liver segmentation from CT volumes using a pre-trained deep learning model.</p>
                         <div class="project-tech">
                             <span class="tech-tag">Python</span>
@@ -1881,7 +1902,7 @@ class DesktopPortfolio {
                     </div>
 
                     <div class="project-card">
-                        <h4>Open-Source Contributions</h4>
+                        <h4><a href="https://github.com/andreped" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">Open-Source Contributions ↗</a></h4>
                         <p>Contributed to large community GenAI projects: Vanna (20k+ GitHub stars) — AI-powered SQL generation; semantic-router (3k+ stars) — semantic routing for LLM pipelines.</p>
                         <div class="project-tech">
                             <span class="tech-tag">GenAI</span>
