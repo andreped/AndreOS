@@ -1,48 +1,65 @@
-# AndreOS — Personal WebOS Portfolio
+# AndreOS
 
-An interactive desktop OS experience serving as my personal portfolio.  
-Based on the open-source template by **[Justinianus2001 (Hoang Le Ngoc)](https://github.com/Justinianus2001/my-portfolio)** — all credit for the original architecture, visual design, and audio system goes to him.
+An interactive desktop OS experience serving as my personal portfolio — built entirely with vanilla HTML, CSS, and JavaScript.
+
+## Stack
+
+- **Frontend:** Vanilla HTML · CSS · JavaScript
+- **Build tool:** [Vite](https://vitejs.dev/)
+- **AI (in-browser):** [@mlc-ai/web-llm](https://github.com/mlc-ai/web-llm) — SmolLM2-135M running on WebGPU
+- **Browser requirement:** Chrome / Edge 113+ for the AI chat feature (WebGPU)
 
 ---
 
 ## Getting started
 
-1. Clone this repo
-2. Open `index.html` in any modern browser (Chrome recommended)
-3. Click the power button to boot up
-4. Click anywhere to enable audio
+<details open>
+<summary><strong>Development</strong></summary>
 
-## Keyboard shortcuts
+```bash
+git clone https://github.com/andreped/AndreOS.git
+cd AndreOS/
+npm install
+npm start          # or: npm run dev
+```
 
-| Shortcut | Action |
-|---|---|
-| `Ctrl + Tab` | Switch windows |
-| `Ctrl + W` | Close active window |
-| `Ctrl + Space` | Toggle start menu |
-| `Ctrl + D` | Show desktop |
-| `Esc` | Close overlays |
+Open [http://localhost:3000](http://localhost:3000).
 
-## Customising content
+> Opening `index.html` directly as a file will not work for the AI chat feature — the Vite dev server is required to set the correct security headers for WebGPU.
 
-Edit the following functions in `script.js` to make it yours:
+</details>
 
-- `getAboutContent()` — bio & intro
-- `getResumeContent()` — work experience & education
-- `getProjectsContent()` — project showcase
-- `getSkillsContent()` — tech skills
-- `getContactContent()` — contact details
-- `getSocialContent()` — social links
+<details>
+<summary><strong>Production build</strong></summary>
 
-Swap SVG files in `icons/` to change the desktop icons, and tweak CSS custom properties in `styles.css` for colours and themes.
+```bash
+npm run build
+```
 
-## Stack
+Output goes to `dist/`. The result is a fully static folder with no server-side dependencies.
 
-Pure HTML · CSS · Vanilla JavaScript · Web Audio API
+</details>
 
-## License
+<details>
+<summary><strong>Deployment</strong></summary>
 
-MIT — see [LICENSE](LICENSE).
+Below is an example of how to deploy to GitHub Pages.
+
+```bash
+npm run build
+npx gh-pages -d dist
+```
+
+Or configure a GitHub Actions workflow to build and deploy automatically on push to `main`.
+
+> **Note:** GitHub Pages does not set the COOP/COEP headers required for WebGPU by default, so the **Ask André** AI feature will not work there without additional configuration. Consider [Cloudflare Pages](https://pages.cloudflare.com/) or [Netlify](https://netlify.com/) which support custom response headers.
+
+</details>
 
 ---
 
-> Based on [Justinianus2001/my-portfolio](https://github.com/Justinianus2001/my-portfolio) · MIT License
+## Acknowledgements
+
+- **[Justinianus2001 (Hoang Le Ngoc)](https://github.com/Justinianus2001/my-portfolio)** — the original desktop portfolio template this project is based on. The core window management, taskbar, audio system, and visual design all originate from his work.
+
+- **[MLC AI / web-llm](https://github.com/mlc-ai/web-llm)** — the WebGPU-powered in-browser LLM runtime that powers the **Ask André** chat feature.
