@@ -2055,6 +2055,127 @@ body {
     color: rgba(255, 255, 255, 0.6);
 }
 
+/* ── Search results dropdown ─────────────────────────────────────────────── */
+
+.search-results-dropdown {
+    display: none;
+    position: fixed;
+    min-width: 320px;
+    background: rgba(18, 18, 28, 0.97);
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.04);
+    z-index: 9000;
+    max-height: 380px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 6px 0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+
+.search-results-dropdown.open {
+    display: block;
+    animation: searchDropIn 0.15s cubic-bezier(0.2, 0, 0.2, 1);
+}
+
+@keyframes searchDropIn {
+    from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+.search-group-label {
+    padding: 8px 14px 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.35);
+    user-select: none;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: background 0.1s ease;
+    border-radius: 0;
+}
+
+.search-result-item:hover,
+.search-result-item.active {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.search-result-item.active {
+    background: rgba(0, 120, 215, 0.25);
+}
+
+.search-result-icon {
+    font-size: 18px;
+    width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.search-result-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 2px;
+}
+
+.search-result-label-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.search-result-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.92);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.search-result-app-tag {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.45);
+    white-space: nowrap;
+    flex-shrink: 0;
+    text-transform: capitalize;
+}
+
+.search-result-subtitle {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.45);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.search-no-results {
+    padding: 20px 14px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+    text-align: center;
+}
+
+.search-no-results em {
+    color: rgba(255, 255, 255, 0.6);
+    font-style: normal;
+}
+
 .task-view-button {
     display: flex;
     align-items: center;
