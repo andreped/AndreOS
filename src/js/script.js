@@ -201,10 +201,18 @@ class DesktopPortfolio {
         this.dom.startButton?.addEventListener('click', () => this.toggleStartMenu());
 
         this.dom.startMenu?.addEventListener('click', (e) => {
-            const item = e.target.closest('.start-menu-item');
-            if (item) {
+            // Tree category toggle
+            const categoryHeader = e.target.closest('.tree-category-header');
+            if (categoryHeader) {
+                categoryHeader.closest('.tree-category')?.classList.toggle('open');
+                return;
+            }
+
+            // App item (pinned grid or tree item)
+            const item = e.target.closest('.start-menu-item, .pinned-app');
+            if (item?.dataset.action) {
                 this.windowManager.openFile(item.dataset.action);
-                this.toggleStartMenu();
+                this.closeStartMenu();
             }
         });
 
