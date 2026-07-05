@@ -4683,3 +4683,95 @@ body {
     color: #ccc;
     font-size: 13px;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Voice Dictation — Mic Button
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.voice-mic-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 24px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: color 0.2s ease, background 0.2s ease;
+    position: relative;
+    color: rgba(255, 255, 255, 0.5);   /* dim by default (idle) */
+    margin-left: 4px;
+    flex-shrink: 0;
+}
+
+.voice-mic-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.voice-mic-icon {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    display: block;
+}
+
+/* ── State: loading ─────────────────────────────────────────────────────── */
+.voice-mic-btn[data-voice-state="loading"] {
+    cursor: default;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.voice-mic-btn[data-voice-state="loading"] .voice-mic-icon {
+    animation: voiceMicPulse 1.4s ease-in-out infinite;
+}
+
+/* ── State: ready ───────────────────────────────────────────────────────── */
+.voice-mic-btn[data-voice-state="ready"] {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* ── State: recording ───────────────────────────────────────────────────── */
+.voice-mic-btn[data-voice-state="recording"] {
+    color: #ff4d4d;
+}
+
+.voice-mic-ripple {
+    position: absolute;
+    inset: 0;
+    border-radius: 3px;
+    border: 1.5px solid rgba(255, 77, 77, 0.85);
+    pointer-events: none;
+    animation: voiceMicRipple 1.1s ease-out infinite;
+}
+
+/* ── State: processing ──────────────────────────────────────────────────── */
+.voice-mic-btn[data-voice-state="processing"] {
+    color: rgba(100, 190, 255, 0.9);
+    cursor: default;
+}
+
+.voice-mic-btn[data-voice-state="processing"] .voice-mic-icon {
+    animation: voiceMicSpin 1s linear infinite;
+}
+
+/* ── State: error ───────────────────────────────────────────────────────── */
+.voice-mic-btn[data-voice-state="error"] {
+    color: rgba(255, 100, 100, 0.35);
+    cursor: not-allowed;
+}
+
+/* ── Keyframes ──────────────────────────────────────────────────────────── */
+@keyframes voiceMicPulse {
+    0%, 100% { opacity: 0.3; transform: scale(0.9);  }
+    50%       { opacity: 0.9; transform: scale(1.05); }
+}
+
+@keyframes voiceMicRipple {
+    0%   { transform: scale(0.65); opacity: 1;   }
+    100% { transform: scale(1.8);  opacity: 0;   }
+}
+
+@keyframes voiceMicSpin {
+    from { transform: rotate(0deg);   }
+    to   { transform: rotate(360deg); }
+}
