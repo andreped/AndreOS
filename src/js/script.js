@@ -187,7 +187,8 @@ class DesktopPortfolio {
             { name: 'Contact', action: () => this.openFile('contact') },
             { name: 'Social', action: () => this.openFile('social') },
             { name: 'Browser', action: () => this.openFile('browser') },
-            { name: 'Ask André', action: () => this.openFile('chat') }
+            { name: 'Ask André', action: () => this.openFile('chat') },
+            { name: 'Cast Arena', action: () => this.openFile('game') }
         ];
         
         const results = searchableItems.filter(item => 
@@ -1621,9 +1622,37 @@ class DesktopPortfolio {
             height: 600
         };
 
+        windowData['game'] = {
+            title: 'Cast Arena',
+            isGame: true,
+            content: this.getGameContent(),
+            width: 960,
+            height: 680
+        };
+
         return windowData[fileType] || null;
     }
-    
+
+    getGameContent() {
+        return `
+            <div class="game-viewport">
+                <iframe class="game-iframe"
+                    src="https://cast-arena-io.onrender.com/"
+                    credentialless
+                    allow="accelerometer; autoplay; clipboard-write; fullscreen; gamepad; pointer-lock"
+                    referrerpolicy="no-referrer"></iframe>
+                <div class="browser-blocked game-blocked">
+                    <div class="blocked-icon">&#128683;</div>
+                    <p>Game couldn't load — the server may not allow embedding.</p>
+                    <a class="blocked-newtab" href="https://cast-arena-io.onrender.com/" target="_blank" rel="noopener noreferrer">Open in new tab &#8599;</a>
+                </div>
+                <div class="browser-loading">
+                    <div class="browser-spinner"></div>
+                </div>
+            </div>
+        `;
+    }
+
     getBrowserContent() {
         return `
             <div class="browser-chrome">
@@ -2148,6 +2177,35 @@ class DesktopPortfolio {
         }
     }
 
+    setupGameWindow(winEl) {
+        const iframe  = winEl.querySelector('.game-iframe');
+        const blocked = winEl.querySelector('.game-blocked');
+        const loading = winEl.querySelector('.browser-loading');
+
+        if (!iframe) return;
+
+        iframe.addEventListener('load', () => {
+            if (loading) loading.style.display = 'none';
+            try {
+                const doc = iframe.contentDocument || iframe.contentWindow.document;
+                const isBlocked = !doc || !doc.body || doc.body.innerHTML.trim() === '';
+                if (blocked) blocked.style.display = isBlocked ? 'flex' : 'none';
+            } catch (e) {
+                if (blocked) blocked.style.display = 'none';
+            }
+        });
+
+        // Blur iframe on header click so Escape still works
+        const header = winEl.querySelector('.window-header');
+        if (header) {
+            header.addEventListener('mousedown', () => {
+                iframe.blur();
+                winEl.focus({ preventScroll: true });
+            });
+        }
+        winEl.setAttribute('tabindex', '-1');
+    }
+
     setupBrowserWindow(winEl, startUrl) {
         const iframe    = winEl.querySelector('.browser-iframe');
         const urlBar    = winEl.querySelector('.url-bar');
@@ -2283,6 +2341,7 @@ class DesktopPortfolio {
         if (!windowsContainer) return;
         if (windowData.isBrowser) window.classList.add('browser-window');
         if (windowData.isChat)    window.classList.add('chat-window-wrap');
+        if (windowData.isGame)    window.classList.add('game-window-wrap');
         windowsContainer.appendChild(window);
         
         this.scheduleUpdate(() => {
@@ -2314,6 +2373,9 @@ class DesktopPortfolio {
         }
         if (windowData.isChat) {
             this.setupChatWindow(window);
+        }
+        if (windowData.isGame) {
+            this.setupGameWindow(window);
         }
         this.addSoundEffect('open');
     }
@@ -3005,8 +3067,7 @@ class DesktopPortfolio {
         if (title.includes('Projects')) return '📁';
         if (title.includes('Skills')) return '⚙️';
         if (title.includes('Contact')) return '📧';
-        if (title.includes('Social')) return '🌐';
-        return '📋'; 
+        if (title.includes('Cast')) return '🎮'; 
     }
     
     animateWindowRestore(windowElement) {
