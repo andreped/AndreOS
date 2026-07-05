@@ -1632,6 +1632,7 @@ class DesktopPortfolio {
                 </div>
                 <div class="browser-viewport">
                     <iframe class="browser-iframe"
+                        credentialless
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                         referrerpolicy="no-referrer"></iframe>
                     <div class="browser-blocked">
