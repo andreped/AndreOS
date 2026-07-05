@@ -685,6 +685,11 @@ class DesktopPortfolio {
             contextMenus.forEach(menu => menu.remove());
             return;
         }
+
+        // Close the currently active window
+        if (this.activeWindow) {
+            this.closeWindow(this.activeWindow);
+        }
     }
     
     showDesktop() {
