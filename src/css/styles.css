@@ -3884,3 +3884,9 @@ body {
 .si-brand svg {
     display: block;
 }
+
+/* White-background brand icons get a subtle border */
+.si-brand[style*="background:#fff"],
+.si-brand[style*="background: #fff"] {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
