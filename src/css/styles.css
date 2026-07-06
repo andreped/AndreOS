@@ -4115,7 +4115,8 @@ body {
     border-radius: 20px;
     color: rgba(255, 255, 255, 0.9);
     font-size: 13px;
-    padding: 8px 16px;
+    padding: 0 16px;
+    height: 38px;
     outline: none;
     font-family: inherit;
     transition: border-color 0.2s ease;
@@ -4134,8 +4135,8 @@ body {
     border: none;
     color: #fff;
     border-radius: 50%;
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -4153,9 +4154,8 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.18);
     color: rgba(255, 255, 255, 0.65);
     border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    font-size: 14px;
+    width: 38px;
+    height: 38px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -5148,6 +5148,61 @@ body {
 /* ═══════════════════════════════════════════════════════════════════════════
    Voice Dictation — Mic Button
    ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Language tray button ─────────────────────────────────────────────────── */
+.lang-tray-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.15s;
+    flex-shrink: 0;
+    user-select: none;
+}
+.lang-tray-btn:hover { background: rgba(255,255,255,0.1); }
+.lang-tray-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.75);
+    letter-spacing: 0.05em;
+}
+.lang-popup {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    background: rgba(20, 20, 30, 0.97);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 4px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    min-width: 120px;
+    z-index: 6000;
+    display: none;
+}
+.lang-tray-btn.open .lang-popup { display: block; }
+.lang-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.8);
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    border-radius: 7px;
+    transition: background 0.12s;
+}
+.lang-option:hover  { background: rgba(255,255,255,0.08); color: #fff; }
+.lang-option.active { color: #fff; }
+.lang-check { color: #ff6b6b; font-size: 12px; }
+@media (max-width: 768px) { .lang-tray-btn { display: none; } }
 
 .voice-mic-btn {
     display: flex;
