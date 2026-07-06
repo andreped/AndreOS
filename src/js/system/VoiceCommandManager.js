@@ -14,7 +14,7 @@
  *   const vcm = new VoiceCommandManager({ windowManager, notifications, onStateChange });
  *   await vcm.toggleRecording();   // first call loads the model; subsequent calls toggle mic
  */
-import { VoiceEngine } from '../system/VoiceEngine.js';
+import { VoiceEngine }       from '../system/VoiceEngine.js';
 
 /**
  * Command registry — English and Norwegian keywords per intent.
@@ -219,17 +219,41 @@ export class VoiceCommandManager {
         this._notifications.updateLive(this._liveCardId, pct, `Loading ${filename} — ${pct}%`);
     }
 
-    _onTranscript(text) {
+    async _onTranscript(text) {
         if (!text) {
             this._setState('ready');
             return;
         }
+        const heard = text.length > 45 ? text.slice(0, 43) + '…' : text;
+
+        // 1. Fast keyword registry
         const match = this._parse(text);
         if (match) {
-            this._notifications.show(`🎤 "${text}" → ${match.label}`, 'success');
+            this._notifications.show(`🎤 Heard: "${heard}"\n↳ ${match.label}`, 'success');
             this._dispatch(match);
+            this._setState('ready');
+            return;
+        }
+
+        // 2. Rule-based compound parser (reliable for common multi-step patterns)
+        const compound = this._parseCompound(text);
+        if (compound) {
+            const intent = this._describeActions(compound);
+            this._notifications.show(`🎤 Heard: "${heard}"\n↳ ${intent}`, 'success');
+            await this._executeSequence(compound);
+            this._setState('ready');
+            return;
+        }
+
+        // 3. LLM fallback for anything else
+        this._notifications.show('🤖 Parsing command with AI…', 'info');
+        const actions = await this._parseLLM(text);
+        if (actions?.length) {
+            const intent = this._describeActions(actions);
+            this._notifications.show(`🤖 Heard: "${heard}"\n↳ ${intent}`, 'success');
+            await this._executeSequence(actions);
         } else {
-            this._notifications.show(`🎤 "${text}" — no command matched (try "help")`, 'warning');
+            this._notifications.show(`🎤 Heard: "${heard}"\n↳ No command matched — try “help”`, 'warning');
         }
         this._setState('ready');
     }
@@ -237,6 +261,171 @@ export class VoiceCommandManager {
     _onEngineError(message) {
         this._notifications.show(`Voice error: ${message}`, 'error');
         this._setState(this._engine.isReady ? 'ready' : 'error');
+    }
+
+    // ── Private: rule-based compound parser ──────────────────────────────────────────
+
+    _parseCompound(rawText) {
+        const t = rawText.toLowerCase().replace(/[.,!?]/g, ' ').trim();
+
+        // "open browser and search (for) X" — must come before generic "search for" check
+        const openBrowserSearch = t.match(
+            /(?:open|show|launch)\s+browser[\w\s]*?\s+and\s+search\s+(?:for\s+)?(.+)/i
+        );
+        if (openBrowserSearch && openBrowserSearch[1].trim().length > 1) {
+            return [{ a: 'browse', t: openBrowserSearch[1].trim() }];
+        }
+
+        // Web / browser search or navigation
+        const webSearch = t.match(
+            /(?:search\s+(?:the\s+)?web\s+(?:for)?|search\s+online(?:\s+for)?|browse\s+to|go\s+to|navigate\s+to)\s+(.+)/i
+        );
+        if (webSearch && webSearch[1].trim().length > 1) {
+            return [{ a: 'browse', t: webSearch[1].trim() }];
+        }
+
+        // Desktop search: "search for X" (uses the taskbar search bar, not the browser)
+        const desktopSearch = t.match(/\bsearch\s+for\s+(.+)/i);
+        if (desktopSearch && desktopSearch[1].trim().length > 1) {
+            return [{ a: 'search', t: desktopSearch[1].trim() }];
+        }
+
+        // "open [app] and ask/say/tell [message]"
+        const openAsk = t.match(
+            /(?:open|show|launch)\s+([\w\s]+?)\s+and\s+(?:ask|say|tell|send|message)\s+(.+)/i
+        );
+        if (openAsk) {
+            const app = this._resolveApp(openAsk[1].trim());
+            const msg = openAsk[2].trim();
+            if (app && msg.length > 2) {
+                return [{ a: 'open', t: app }, { a: 'chat', t: msg }];
+            }
+        }
+
+        // "open [app] and (then) open [app2]"
+        const openOpen = t.match(
+            /(?:open|show|launch)\s+([\w\s]+?)\s+(?:and\s+(?:then\s+)?|then\s+)(?:open|show|launch)\s+([\w\s]+)/i
+        );
+        if (openOpen) {
+            const app1 = this._resolveApp(openOpen[1].trim());
+            const app2 = this._resolveApp(openOpen[2].trim());
+            if (app1 && app2) return [{ a: 'open', t: app1 }, { a: 'open', t: app2 }];
+        }
+
+        return null;
+    }
+
+    _resolveApp(name) {
+        const n = name.toLowerCase().trim();
+        if (/^chats?$|ask\s+andr|snakk\s+med/.test(n))              return 'chat';
+        if (/research|paper|publication|science|forskning/.test(n))   return 'research';
+        if (/resume|^cv$|curriculum|jobberfaring/.test(n))            return 'resume';
+        if (/about|bio|om\s+meg/.test(n))                            return 'about';
+        if (/project|portfolio|prosjekt/.test(n))                     return 'projects';
+        if (/skill|tech|stack|ferdigh/.test(n))                       return 'skills';
+        if (/contact|email|kontakt/.test(n))                          return 'contact';
+        if (/social|linkedin/.test(n))                                return 'social';
+        if (/browser|internet|nettleser/.test(n))                     return 'browser';
+        if (/game|cast|arena|spill/.test(n))                          return 'game';
+        return null;
+    }
+
+    // ── Private: LLM command parsing ───────────────────────────────────────────
+
+    async _parseLLM(text) {
+        try {
+            return await window.AndreChat?.parseCommand(text) ?? null;
+        } catch {
+            return null;
+        }
+    }
+
+    /**
+     * Convert a parsed action sequence into a human-readable description.
+     * @param {Array<{a:string,t?:string}>} actions
+     * @returns {string}
+     */
+    _describeActions(actions) {
+        const APP_LABELS = {
+            about: 'About Me', resume: 'Resume', projects: 'Projects',
+            skills: 'Skills', contact: 'Contact', social: 'Social Links',
+            browser: 'Browser', chat: 'Ask André', game: 'Cast Arena', research: 'Research',
+        };
+        return actions.map(a => {
+            switch (a.a) {
+                case 'open':     return `Open ${APP_LABELS[a.t] ?? a.t}`;
+                case 'close':    return 'Close window';
+                case 'minimize': return 'Minimize window';
+                case 'desktop':  return 'Show desktop';
+                case 'chat': {
+                    const msg = a.t ?? '';
+                    return `Ask André: “${msg.length > 40 ? msg.slice(0, 38) + '…' : msg}”`;
+                }
+                case 'search': return `Search desktop: "${(a.t ?? '').slice(0, 40)}"`;
+                case 'browse': {
+                    const q = a.t ?? '';
+                    return /^https?:\/\//i.test(q)
+                        ? `Browse to ${q.slice(0, 40)}`
+                        : `Search web: "${q.slice(0, 40)}"`;
+                }
+                default: return a.a;
+            }
+        }).join(' → ');
+    }
+
+    /**
+     * Execute a sequence of AI-parsed actions with a short delay between steps.
+     * @param {Array<{a:string,t?:string}>} actions
+     */
+    async _executeSequence(actions) {
+        for (const act of actions) {
+            switch (act.a) {
+                case 'open':
+                    this._windowManager.openFile(act.t);
+                    break;
+                case 'close': {
+                    const id = this._windowManager.activeWindowId;
+                    if (id) this._windowManager.closeWindow(id);
+                    break;
+                }
+                case 'minimize': {
+                    const id = this._windowManager.activeWindowId;
+                    if (id) this._windowManager.minimizeWindow(id);
+                    break;
+                }
+                case 'desktop':
+                    this._windowManager.showDesktop();
+                    break;
+                case 'chat':
+                    window.AndreChat?.injectMessage(act.t ?? '');
+                    break;
+                case 'search': {
+                    // Focus the desktop search bar and type the query
+                    const searchInput = document.querySelector('.search-input');
+                    if (searchInput) {
+                        const box = searchInput.closest('.search-box');
+                        if (box) box.classList.add('focused');
+                        searchInput.focus();
+                        searchInput.value = act.t ?? '';
+                        searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                    break;
+                }
+                case 'browse': {
+                    // Open browser window then navigate to URL or yep.com search
+                    this._windowManager.openFile('browser');
+                    await new Promise(r => setTimeout(r, 500));
+                    const raw = act.t ?? '';
+                    const url = /^https?:\/\//i.test(raw)
+                        ? raw
+                        : `https://yep.com/web?q=${encodeURIComponent(raw)}`;
+                    document.dispatchEvent(new CustomEvent('andreos:browser-navigate', { detail: { url } }));
+                    break;
+                }
+            }
+            // Pause between steps so each window has time to open/focus
+            if (actions.length > 1) await new Promise(r => setTimeout(r, 450));
+        }
     }
 
     // ── Private: command parsing ───────────────────────────────────────────────
@@ -251,24 +440,43 @@ export class VoiceCommandManager {
         // Checked before the keyword registry so the full question is preserved.
         // No ^ anchor — Whisper sometimes prepends whitespace.
         // [\s,]+ after the name — Whisper often inserts a comma: "Ask André, ..."
+        // andr[^\s,]+ matches any Whisper rendering: André, Andrea, Andrei, Andrew, Andrés…
+        // including accented characters that \w misses.
         const chatMatch = rawText.match(
-            /(?:ask\s+andr[eé]|tell\s+andr[eé]|message\s+andr[eé])[\s,]+(.+)/i
+            /(?:ask\s+andr[^\s,]+|tell\s+andr[^\s,]+|message\s+andr[^\s,]+|spør\s+andr[^\s,]+)[\s,]+(.+)/i
         );
         if (chatMatch) {
             const message = chatMatch[1].trim();
             if (message.length > 2) {
                 const preview = message.length > 40 ? message.slice(0, 40) + '…' : message;
-                return { intent: 'chat_message', args: { text: message }, label: `chat: "${preview}"` };
+                return { intent: 'chat_message', args: { text: message }, label: `Ask André: "${preview}"` };
             }
         }
 
         // Normalise: lowercase, collapse punctuation to spaces
         const text = ` ${rawText.toLowerCase().replace(/[.,!?]/g, ' ')} `;
 
+        // Compound-command signals — skip keyword matching and let the LLM
+        // parse multi-step intent ("open chat and ask X", "open research then show Y")
+        const COMPOUND_SIGNALS = [
+            'and ask', 'and say', 'and tell', 'and send', 'and search',
+            'and then', 'then open', 'then ask', 'then show', 'then close',
+            'after that', 'followed by',
+            'og spør', 'og si', 'og åpne', // Norwegian
+            'go to', 'navigate to', 'browse to', 'search for', 'search the web', 'search online',
+        ];
+        if (COMPOUND_SIGNALS.some(s => text.includes(s))) return null;
+
+        const APP_LABELS = {
+            about: 'About Me', resume: 'Resume', projects: 'Projects',
+            skills: 'Skills', contact: 'Contact', social: 'Social Links',
+            browser: 'Browser', chat: 'Ask André', game: 'Cast Arena', research: 'Research',
+        };
+
         for (const cmd of COMMAND_REGISTRY) {
             if (cmd.keywords.some(kw => text.includes(kw))) {
                 const label = cmd.args?.fileType
-                    ? `opening ${cmd.args.fileType}`
+                    ? `Open ${APP_LABELS[cmd.args.fileType] ?? cmd.args.fileType}`
                     : cmd.intent;
                 return { intent: cmd.intent, args: cmd.args ?? {}, label };
             }

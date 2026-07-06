@@ -363,6 +363,43 @@ window.AndreChat = {
      */
     searchPapers(query) { return ragEngine.searchPapers(query); },
 
+    /**
+     * Parse a natural-language OS command into a sequence of actions using
+     * the local LLM. Returns null if the engine isn't ready.
+     * Used by VoiceCommandManager for the AI window manager feature.
+     * @param {string} text
+     * @returns {Promise<Array<{a:string,t?:string}>|null>}
+     */
+    async parseCommand(text) {
+        if (engineState !== 'ready') return null;
+        const prompt =
+`You are an OS command parser. Convert the voice command into a JSON array of actions.
+Apps: about, resume, projects, skills, contact, social, browser, chat, game, research
+Actions: {"a":"open","t":"<app>"} | {"a":"close"} | {"a":"minimize"} | {"a":"desktop"} | {"a":"chat","t":"<message>"}
+Reply with ONLY the JSON array, nothing else.
+Examples:
+"open research and then chat" → [{"a":"open","t":"research"},{"a":"open","t":"chat"}]
+"show desktop" → [{"a":"desktop"}]
+"ask André about his PhD" → [{"a":"open","t":"chat"},{"a":"chat","t":"Tell me about your PhD"}]
+Command: "${text.replace(/"/g, "'")}"`;
+
+        try {
+            const response = await engine.chat.completions.create({
+                messages: [{ role: 'user', content: prompt }],
+                max_tokens: 120,
+                temperature: 0.1,
+            });
+            const raw     = response.choices[0]?.message?.content?.trim() ?? '';
+            const jsonMatch = raw.match(/\[[\s\S]*?\]/);
+            if (!jsonMatch) return null;
+            const actions = JSON.parse(jsonMatch[0]);
+            return Array.isArray(actions) && actions.length > 0 ? actions : null;
+        } catch (err) {
+            console.warn('[AndreChat] parseCommand failed:', err);
+            return null;
+        }
+    },
+
     retry() {
         engineState = 'idle';
         engine = null;
