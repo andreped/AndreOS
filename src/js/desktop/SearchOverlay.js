@@ -11,12 +11,12 @@ const SEARCH_INDEX = [
     { type: 'app', fileType: 'about',    icon: '👤', label: 'About Me.txt',  subtitle: 'Who André Pedersen is',                                     keywords: 'about andre pedersen background bio profile' },
     { type: 'app', fileType: 'resume',   icon: '📄', label: 'Resume.pdf',    subtitle: 'Work experience, education, certifications',                 keywords: 'resume cv work job experience degree dips sintef ntnu' },
     { type: 'app', fileType: 'projects', icon: '📁', label: 'Projects',      subtitle: 'Open-source and research projects',                          keywords: 'projects github open source software' },
-    { type: 'app', fileType: 'skills',   icon: '💻', label: 'Skills.exe',    subtitle: 'Technical skills and technologies',                          keywords: 'skills python typescript react azure docker kubernetes programming' },
     { type: 'app', fileType: 'contact',  icon: '✉️', label: 'Contact.txt',   subtitle: 'Get in touch with André',                                    keywords: 'contact email reach out message' },
     { type: 'app', fileType: 'social',   icon: '🔗', label: 'Social Links',  subtitle: 'GitHub, LinkedIn, Google Scholar and more',                  keywords: 'social github linkedin twitter scholar publications links' },
     { type: 'app', fileType: 'browser',  icon: '🌐', label: 'Browser',       subtitle: 'Browse the web',                                             keywords: 'browser internet web navigate' },
     { type: 'app', fileType: 'chat',     icon: '💬', label: 'Ask André',     subtitle: 'Chat with an AI version of André',                           keywords: 'chat ai ask question andre' },
     { type: 'app', fileType: 'game',     icon: '🎮', label: 'Cast Arena',    subtitle: 'Play Cast Arena',                                            keywords: 'game cast arena play' },
+    { type: 'app', fileType: 'settings', icon: '⚙️', label: 'Settings',      subtitle: 'AI model, voice commands, preferences',                      keywords: 'settings model ai voice preferences configure' },
 
     // ── Content — About ───────────────────────────────────────────────────
     { type: 'content', fileType: 'about', icon: '🏥', label: 'Healthcare AI',       subtitle: 'AI-augmented software for Norwegian hospitals at DIPS AS',        keywords: 'healthcare hospital ai norway dips oslo clinical' },
@@ -38,13 +38,6 @@ const SEARCH_INDEX = [
     { type: 'content', fileType: 'projects', icon: '🧠', label: 'Raidionics',            subtitle: 'Clinical software for automatic brain tumour segmentation',       keywords: 'raidionics brain tumour segmentation clinical devops' },
     { type: 'content', fileType: 'projects', icon: '📦', label: 'gradient-accumulator', subtitle: 'Python/TensorFlow library for gradient accumulation',             keywords: 'gradient accumulator python tensorflow library pypi' },
     { type: 'content', fileType: 'projects', icon: '🎨', label: 'torchstain',            subtitle: 'Stain normalisation library for PyTorch/TF/NumPy',               keywords: 'torchstain stain normalisation pytorch tensorflow numpy' },
-
-    // ── Content — Skills ──────────────────────────────────────────────────
-    { type: 'content', fileType: 'skills', icon: '🐍', label: 'Python & ML',       subtitle: 'TensorFlow, PyTorch, scikit-learn, HuggingFace Transformers',    keywords: 'python tensorflow pytorch scikit huggingface transformers ml' },
-    { type: 'content', fileType: 'skills', icon: '🖥️', label: 'Fullstack Dev',     subtitle: 'React, TypeScript, .NET, PostgreSQL',                            keywords: 'react typescript dotnet net postgresql frontend backend fullstack web' },
-    { type: 'content', fileType: 'skills', icon: '☁️', label: 'Cloud & DevOps',    subtitle: 'Azure, Docker, Kubernetes, Argo CD, GitHub Actions',             keywords: 'azure docker kubernetes argo devops github actions cloud ci cd' },
-    { type: 'content', fileType: 'skills', icon: '🔬', label: 'Medical Imaging',   subtitle: 'Segmentation, classification, registration — CT, MRI, pathology', keywords: 'medical imaging segmentation classification mri ct pathology' },
-    { type: 'content', fileType: 'skills', icon: '💬', label: 'NLP & GenAI',       subtitle: 'LLMs, Azure OpenAI, RAG, speech-to-text, semantic search',       keywords: 'nlp genai llm openai rag speech text language model' },
 ];
 
 export class SearchOverlay {
