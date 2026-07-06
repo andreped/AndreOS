@@ -63,6 +63,7 @@ class DesktopPortfolio {
     createLiveNotification(...a)   { return this.notifications.createLive(...a); }
     updateLiveNotification(...a)   { return this.notifications.updateLive(...a); }
     completeLiveNotification(...a) { return this.notifications.completeLive(...a); }
+    pushNotification(...a)         { return this.notifications.push(...a); }
 
     init() {
         this.updateClock();

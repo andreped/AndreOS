@@ -3957,7 +3957,6 @@ body {
     border-radius: 50%;
     width: 36px;
     height: 36px;
-    font-size: 18px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -3969,6 +3968,59 @@ body {
 .chat-send:hover  { opacity: 0.85; }
 .chat-send:active { transform: scale(0.93); }
 .chat-send:disabled { opacity: 0.3; cursor: default; }
+
+.chat-clear {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.65);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+.chat-clear:hover  { color: rgba(255,255,255,0.75); border-color: rgba(255,255,255,0.3); }
+.chat-clear:active { transform: scale(0.93); }
+
+/* Custom tooltips for chat buttons */
+.chat-clear[data-tooltip],
+.chat-send[data-tooltip] {
+    position: relative;
+}
+.chat-clear[data-tooltip]::after,
+.chat-send[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 7px);
+    background: rgba(20, 20, 30, 0.92);
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 11px;
+    white-space: nowrap;
+    padding: 4px 9px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    z-index: 9999;
+}
+/* Clear button: anchor tooltip to left edge */
+.chat-clear[data-tooltip]::after {
+    left: 0;
+}
+/* Send button: anchor tooltip to right edge */
+.chat-send[data-tooltip]::after {
+    right: 0;
+}
+.chat-clear:hover[data-tooltip]::after,
+.chat-send:hover[data-tooltip]::after {
+    opacity: 1;
+}
 
 .chat-retry-btn {
     margin-top: 8px;
