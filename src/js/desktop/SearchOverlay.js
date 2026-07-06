@@ -62,12 +62,31 @@ export class SearchOverlay {
 
         this._input = this._searchBox.querySelector('.search-input');
 
-        // Attach to body so desktop overflow:hidden can't clip it
+        // Desktop dropdown — anchored above the taskbar search box
         const dd = document.createElement('div');
         dd.className = 'search-results-dropdown';
         dd.setAttribute('role', 'listbox');
         document.body.appendChild(dd);
         this._dropdown = dd;
+
+        // Mobile spotlight overlay — a free-floating card centred on screen
+        const spotlight = document.createElement('div');
+        spotlight.className = 'mobile-spotlight';
+        spotlight.innerHTML = `
+            <div class="mobile-spotlight-card">
+                <div class="mobile-spotlight-bar">
+                    <span class="mobile-spotlight-icon">🔍</span>
+                    <input class="mobile-spotlight-input" type="search"
+                           placeholder="Search…" autocomplete="off" spellcheck="false">
+                    <button class="mobile-spotlight-close">✕</button>
+                </div>
+                <div class="mobile-spotlight-results"></div>
+            </div>
+        `;
+        document.body.appendChild(spotlight);
+        this._spotlight        = spotlight;
+        this._spotlightInput   = spotlight.querySelector('.mobile-spotlight-input');
+        this._spotlightResults = spotlight.querySelector('.mobile-spotlight-results');
 
         this._wireEvents();
     }
@@ -76,6 +95,7 @@ export class SearchOverlay {
         const { _input: input, _searchBox: box } = this;
         if (!input) return;
 
+        // ── Desktop events (focus-driven) ──────────────────────────────────
         input.addEventListener('focus', () => box.classList.add('focused'));
         input.addEventListener('blur',  () => {
             box.classList.remove('focused');
@@ -96,6 +116,35 @@ export class SearchOverlay {
             if (e.key === 'Enter')      { e.preventDefault(); this._selectActive(); return; }
             if (e.key === 'Escape')     { this._hide(); input.value = ''; input.blur(); }
         });
+
+        // ── Mobile spotlight events ────────────────────────────────────────
+        // Tapping the search icon opens the spotlight overlay (not the taskbar input)
+        box.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                this._openSpotlight();
+            } else if (document.activeElement !== input) {
+                input.focus();
+            }
+        });
+
+        const si = this._spotlightInput;
+        si.addEventListener('input', (e) => {
+            const q = e.target.value.trim();
+            this._results   = q ? this._search(q.toLowerCase()) : [];
+            this._activeIdx = -1;
+            this._renderSpotlight();
+        });
+        si.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') { this._closeSpotlight(); }
+            if (e.key === 'Enter')  { this._selectActive(); }
+        });
+
+        this._spotlight.addEventListener('mousedown', (e) => {
+            // Close when tapping the backdrop (outside the card)
+            if (e.target === this._spotlight) this._closeSpotlight();
+        });
+        this._spotlight.querySelector('.mobile-spotlight-close')
+            .addEventListener('click', () => this._closeSpotlight());
 
         document.addEventListener('click', (e) => {
             if (!this._searchBox.contains(e.target) && !this._dropdown.contains(e.target)) {
@@ -119,12 +168,23 @@ export class SearchOverlay {
     _render() {
         if (!this._dropdown) return;
 
-        // Position the dropdown above the search box
-        const rect = this._searchBox.getBoundingClientRect();
-        this._dropdown.style.left   = rect.left + 'px';
-        this._dropdown.style.width  = Math.max(rect.width, 320) + 'px';
-        this._dropdown.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
-        this._dropdown.style.top    = 'auto';
+        const rect    = this._searchBox.getBoundingClientRect();
+        const isMobile = window.innerWidth <= 768 && this._searchBox.classList.contains('focused');
+
+        if (isMobile) {
+            // Spotlight mode: dropdown floats below the centred card
+            const cardWidth = Math.min(window.innerWidth * 0.92, 400);
+            this._dropdown.style.top    = (rect.bottom + 8) + 'px';
+            this._dropdown.style.left   = '50%';
+            this._dropdown.style.width  = cardWidth + 'px';
+            this._dropdown.style.bottom = 'auto';
+        } else {
+            // Desktop: dropdown anchored above the taskbar search box
+            this._dropdown.style.left   = rect.left + 'px';
+            this._dropdown.style.width  = Math.max(rect.width, 320) + 'px';
+            this._dropdown.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
+            this._dropdown.style.top    = 'auto';
+        }
 
         if (this._results.length === 0) {
             this._dropdown.innerHTML =
@@ -208,7 +268,46 @@ export class SearchOverlay {
         if (!item) return;
         this._openFileCb(item.fileType);
         this._hide();
+        this._closeSpotlight();
         if (this._input) { this._input.value = ''; this._input.blur(); }
+    }
+
+    // ── Mobile spotlight ──────────────────────────────────────────────────
+
+    _openSpotlight() {
+        this._spotlight.classList.add('open');
+        this._results = [];
+        this._spotlightResults.innerHTML = '';
+        setTimeout(() => this._spotlightInput.focus(), 50);
+    }
+
+    _closeSpotlight() {
+        this._spotlight.classList.remove('open');
+        this._spotlightInput.value = '';
+        this._spotlightResults.innerHTML = '';
+        this._results = [];
+    }
+
+    _renderSpotlight() {
+        const el = this._spotlightResults;
+        if (!this._results.length) {
+            el.innerHTML = `<div class="search-no-results">No results for "<em>${this._escHtml(this._spotlightInput.value)}</em>"</div>`;
+            return;
+        }
+        const apps    = this._results.filter(r => r.type === 'app');
+        const content = this._results.filter(r => r.type === 'content');
+        const papers  = this._results.filter(r => r.type === 'paper');
+        let flat = 0, html = '';
+        if (apps.length)    { html += `<div class="search-group-label">Apps</div>`;         apps.forEach(r => { html += this._itemHtml(r, flat++); }); }
+        if (content.length) { html += `<div class="search-group-label">Content</div>`;      content.forEach(r => { html += this._itemHtml(r, flat++); }); }
+        if (papers.length)  { html += `<div class="search-group-label">Publications</div>`; papers.forEach(r => { html += this._itemHtml(r, flat++); }); }
+        el.innerHTML = html;
+        el.querySelectorAll('.search-result-item').forEach(item => {
+            item.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                this._openResult(this._results[Number(item.dataset.idx)]);
+            });
+        });
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────

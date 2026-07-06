@@ -8,6 +8,7 @@ body {
     font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', Helvetica, Arial, sans-serif;
     overflow: hidden;
     height: 100vh;
+    height: 100dvh; /* dynamic viewport height — accounts for mobile browser chrome */
     background: linear-gradient(135deg, 
         #667eea 0%, 
         #764ba2 25%, 
@@ -21,9 +22,6 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    perspective: 1000px;
 }
 
 @keyframes gradientShift {
@@ -1359,6 +1357,7 @@ body {
     position: relative;
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
 }
 
@@ -1551,10 +1550,11 @@ body {
     top: 20px;
     left: 20px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, 120px);
+    grid-template-columns: repeat(6, 120px);
     gap: 30px;
     width: calc(100% - 40px);
     height: calc(100% - 80px);
+    align-content: start;
     z-index: 201;
 }
 
@@ -2056,6 +2056,95 @@ body {
 }
 
 /* ── Search results dropdown ─────────────────────────────────────────────── */
+
+/* Mobile spotlight overlay — always hidden, only shown on ≤768px + .open */
+.mobile-spotlight {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(8px);
+    z-index: 9500;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 18%;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+@media (max-width: 768px) {
+    .mobile-spotlight        { display: flex; }
+    .mobile-spotlight.open   { visibility: visible; opacity: 1; pointer-events: auto; }
+}
+.mobile-spotlight-card {
+    width: min(92vw, 400px);
+    background: rgba(22, 22, 32, 0.97);
+    backdrop-filter: blur(40px) saturate(180%);
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+}
+.mobile-spotlight-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+.mobile-spotlight-icon  { font-size: 20px; opacity: 0.45; flex-shrink: 0; }
+.mobile-spotlight-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 18px;
+    font-family: inherit;
+    outline: none;
+    caret-color: #ff6b6b;
+}
+.mobile-spotlight-input::placeholder { color: rgba(255, 255, 255, 0.28); }
+.mobile-spotlight-close {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    font-size: 13px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: inherit;
+}
+.mobile-spotlight-results {
+    max-height: 55dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.mobile-spotlight-results .search-group-label {
+    padding: 8px 18px 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.35);
+}
+.mobile-spotlight-results .search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 18px;
+    cursor: pointer;
+    border-radius: 0;
+    transition: background 0.12s;
+}
+.mobile-spotlight-results .search-result-item:active { background: rgba(255,255,255,0.08); }
+.mobile-spotlight-results .search-no-results {
+    padding: 20px 18px;
+    color: rgba(255,255,255,0.4);
+    font-size: 14px;
+}
 
 .search-results-dropdown {
     display: none;
@@ -3229,32 +3318,122 @@ body {
 }
 
 @media (max-width: 768px) {
+    /* ── Icon grid ─────────────────────────────────────────────────────── */
     .desktop-icons {
-        grid-template-columns: repeat(auto-fill, 100px);
-        gap: 20px;
+        grid-template-columns: repeat(3, 100px);
+        gap: 18px; top: 15px; left: 50%;
+        transform: translateX(-50%); width: auto; align-content: start;
     }
-    
     .desktop-icon {
         width: 100px;
-        height: 80px;
+        height: 96px;
+        padding: 8px;
+        contain: none; /* allow label to render — base 'contain:paint' clips it */
+        overflow: visible;
     }
-    
+
+    /* Smaller icon image to make room for label */
+    .icon-image {
+        width: 38px;
+        height: 38px;
+        margin-bottom: 5px;
+        padding: 5px;
+    }
+
+    /* Smaller labels so text doesn't clip */
+    .icon-label {
+        font-size: 9px;
+        max-width: 90px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.2;
+    }
+
+    /* ── Windows: full-screen ───────────────────────────────────────────── */
     .window {
-        min-width: 90vw;
-        min-height: 70vh;
+        position: fixed !important; top: 0 !important; left: 0 !important;
+        width: 100vw !important; height: calc(100dvh - 50px) !important;
+        border-radius: 0 !important; transform: none !important;
+        min-width: unset !important; min-height: unset !important;
     }
-    
-    .start-menu {
-        width: 100vw;
-        left: 0;
+    .window-content { height: calc(100% - 44px) !important; -webkit-overflow-scrolling: touch; }
+    .window-resize-handle { display: none !important; }
+    .window-controls { gap: 10px; }
+    .window-control { width: 26px !important; height: 26px !important; font-size: 16px !important; }
+    .window-control.minimize { display: none !important; } /* no minimize on mobile */
+    .window-control.maximize { display: none !important; } /* no fullscreen on mobile */
+    .window-header { height: 44px; padding: 0 14px; }
+    .window-title  { font-size: 14px; }
+
+    /* ── Taskbar ────────────────────────────────────────────────────────── */
+    .taskbar { height: 56px; padding: 0 20px; gap: 0; justify-content: space-between; align-items: center; }
+
+    /* All icons: uniform 40px touch target, no borders */
+    .start-button,
+    .search-box,
+    .notification-button {
+        width: 40px; height: 40px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 10px; padding: 0;
+        min-width: unset; flex: 0 0 40px;
+        background: none; border: none; cursor: pointer;
     }
-    
-    .skills-grid,
-    .projects-grid,
-    .contact-info,
-    .social-links {
-        grid-template-columns: 1fr;
+    .start-icon svg { width: 20px; height: 20px; }
+    .search-icon { font-size: 18px; }
+    .notification-icon { font-size: 20px; }
+
+    /* Search: keep input focusable but invisible until spotlight opens */
+    .search-input {
+        position: absolute;
+        width: 1px; height: 1px;
+        opacity: 0; pointer-events: none;
     }
+    /* No spotlight expansion in taskbar on mobile */
+    .search-box.focused { all: revert; }
+
+    /* Mic button */
+    .voice-mic-btn { width: 40px !important; height: 40px !important; border-radius: 10px !important; margin: 0 !important; }
+    .voice-mic-icon { width: 20px !important; height: 20px !important; }
+
+    .taskbar-items { display: none; }
+    .hidden-icons-chevron { display: none; }
+    .tray-volume-area { display: none; }
+    #batteryTrayIcon { display: none; }
+    .system-tray { gap: 4px; }
+    .clock { gap: 1px; }
+    .clock .time { font-size: 14px; }
+    .clock .date { font-size: 10px; }
+
+    /* ── Notifications: hidden by default, full-screen overlay when open ── */
+    #notificationCenter {
+        top: 0; bottom: 50px; left: 0; right: 0; width: 100%;
+        border-left: none; border-radius: 0; transform: none;
+        visibility: hidden; opacity: 0; pointer-events: none;
+        transition: opacity 0.25s ease, visibility 0.25s ease;
+    }
+    #notificationCenter.nc-open { visibility: visible; opacity: 1; pointer-events: auto; }
+    #notificationCenter::before { display: none; }
+
+    /* ── Chat ───────────────────────────────────────────────────────────── */
+    .chat-input-row { padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+    /* Ensure chat input is fully tappable and keyboard appears on mobile */
+    .chat-input {
+        touch-action: auto !important;
+        user-select: text !important;
+        -webkit-user-select: text !important;
+        pointer-events: auto !important;
+        font-size: 16px !important; /* prevents iOS auto-zoom on focus */
+    }
+
+    /* ── Start menu ─────────────────────────────────────────────────────── */
+    .start-menu { width: 100vw; left: 0; border-radius: 16px 16px 0 0; }
+
+    /* ── Content grids ───────────────────────────────────────────────────  */
+    .projects-grid, .contact-info, .social-links { grid-template-columns: 1fr; }
+    .research-filters { flex-wrap: wrap; }
+    .settings-sidebar { width: 120px; }
+    .browser-bookmarks { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
 }
 
 .window {
@@ -4276,6 +4455,25 @@ body {
     padding: 20px 16px 12px;
     border-bottom: 1px solid rgba(255,255,255,0.08);
     flex-shrink: 0;
+}
+
+/* Close button only visible on mobile */
+.nc-close-mobile {
+    display: none;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: rgba(255,255,255,0.7);
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    font-size: 14px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-family: inherit;
+}
+@media (max-width: 768px) {
+    .nc-close-mobile { display: flex; }
 }
 
 .nc-title {
