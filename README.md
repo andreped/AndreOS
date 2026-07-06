@@ -6,9 +6,68 @@ An interactive desktop OS experience serving as my personal portfolio — built 
 
 - **Frontend:** Vanilla HTML · CSS · JavaScript
 - **Build tool:** [Vite](https://vitejs.dev/)
-- **AI chat (in-browser):** [@mlc-ai/web-llm](https://github.com/mlc-ai/web-llm) — SmolLM2-135M running on WebGPU
-- **Voice dictation (in-browser):** [@xenova/transformers](https://github.com/xenova/transformers.js) + [ONNX Runtime Web](https://onnxruntime.ai/docs/get-started/with-javascript/web.html) — Whisper base (multilingual) running in a Web Worker; model cached via browser Cache API after first load (~74 MB)
-- **Browser requirement:** Chrome / Edge 113+ for the AI chat feature (WebGPU); Voice dictation works in any browser with `MediaRecorder` and WASM support (Chrome, Edge, Firefox, Safari 16+)
+- **AI chat:** [@mlc-ai/web-llm](https://github.com/mlc-ai/web-llm) — user-selectable LLM running on WebGPU (default: Qwen2.5-1.5B)
+- **Voice commands:** [@xenova/transformers](https://github.com/xenova/transformers.js) + ONNX Runtime Web — Whisper in a Web Worker; model and language configurable
+- **Browser requirement:** Chrome / Edge 113+ for AI chat (WebGPU); voice works in any browser with `MediaRecorder` + WASM support
+
+---
+
+## Features
+
+<details open>
+<summary><strong>Ask André</strong> — in-browser LLM chat, no API key needed</summary>
+
+Runs entirely on WebGPU. Configurable model (Settings → AI Engine):
+
+| Model | Size | Notes |
+|---|---|---|
+| SmolLM2 135M | ~265 MB | Fastest, English only |
+| **Qwen2.5 1.5B** *(default)* | ~1 GB | Multilingual · Norwegian ✓ |
+| Llama 3.2 1B | ~800 MB | Multilingual · Compact |
+| Llama 3.2 3B | ~2 GB | Best quality |
+
+</details>
+
+<details open>
+<summary><strong>Voice commands</strong> — click 🎤 to control the OS by speech</summary>
+
+| Intent | English | Norwegian |
+|---|---|---|
+| Open app | `"open resume"`, `"ask André"` | `"åpne CV"`, `"snakk med André"` |
+| Close window | `"close window"` | `"lukk vinduet"` |
+| Show desktop | `"show desktop"` | `"vis skrivebordet"` |
+| Web search | `"search the web for X"`, `"go to github.com"` | — |
+| Desktop search | `"search for pathology"` | — |
+| Multi-step | `"open chat and ask which day is it"` | — |
+| Help | `"help"` | `"hjelp"` |
+
+Compound commands are parsed by the LLM when loaded. Whisper model and language are configurable in Settings → Speech.
+
+</details>
+
+<details>
+<summary><strong>RAG over research papers</strong> — chat answers draw from André's actual publications</summary>
+
+A BM25 index is built over ~50 publications (titles + abstracts) fetched from [OpenAlex](https://openalex.org/) on page load. Top matching papers are automatically injected into the chat context — no extra model needed, zero RAM overhead.
+
+</details>
+
+<details>
+<summary><strong>BM25 search</strong> — taskbar search includes apps, content, and publications</summary>
+
+The 🔍 search uses a pure-JS BM25 engine with prefix matching. It searches app entries, content sections, and André's publication abstracts. On mobile, tapping 🔍 opens a macOS Spotlight-style overlay centred on screen.
+
+</details>
+
+<details>
+<summary><strong>Settings</strong> — AI model, speech model, and language preferences</summary>
+
+All preferences persist in `localStorage`. Configure via the ⚙️ Settings app or the **EN / NO** taskbar button (updates both transcription and LLM language at once).
+
+- **AI Engine:** LLM model selector · response language (Auto / EN / NO)
+- **Speech:** Whisper Tiny / Base / Small · transcription language · AI command parsing toggle
+
+</details>
 
 ---
 
@@ -44,53 +103,29 @@ Output goes to `dist/`. The result is a fully static folder with no server-side 
 <details>
 <summary><strong>Deployment</strong></summary>
 
-[Cloudflare Pages](https://pages.cloudflare.com/) is the recommended host — free tier, global CDN, and supports the custom response headers required for the AI chat feature (WebGPU).
+[Cloudflare Pages](https://pages.cloudflare.com/) is the recommended host — free tier, global CDN, and supports the custom response headers required for WebGPU.
 
 1. Push your code to GitHub
-2. Go to [dash.cloudflare.com](https://dash.cloudflare.com) → **Workers & Pages** → **Create** → **Pages** tab → **Connect to Git**
-3. Select the `AndreOS` repo and configure:
+2. Go to [dash.cloudflare.com](https://dash.cloudflare.com) → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**
+3. Configure:
 
    | Field | Value |
    |---|---|
    | Build command | `npm run build` |
    | Build output directory | `dist` |
-   | Deploy command | *(leave empty)* |
 
 4. Click **Deploy**
 
-The `public/_headers` file in this repo automatically sets the required COOP/COEP headers on every deploy — no extra configuration needed.
+The `public/_headers` file sets the required COOP/COEP headers automatically.
 
-> **GitHub Pages** does not support custom response headers, so the **Ask André** AI feature will not work there without a workaround.
+> **GitHub Pages** does not support custom response headers — the Ask André AI feature will not work there without a workaround.
 
 </details>
-
----
-
-## Voice Dictation
-
-Click the mic icon (🎤) in the taskbar system tray to activate voice control. On first use, the Whisper base model (~74 MB) is downloaded and cached — subsequent loads are instant.
-
-**Supported commands (English and Norwegian):**
-
-| Intent | English examples | Norwegian examples |
-|---|---|---|
-| Open app | `"open resume"`, `"show projects"`, `"ask André"` | `"åpne CV"`, `"prosjekter"`, `"snakk med André"` |
-| Close window | `"close window"`, `"shut down"` | `"lukk vinduet"`, `"avslutt"` |
-| Minimize | `"minimize window"` | `"minimer vinduet"` |
-| Show desktop | `"show desktop"` | `"vis skrivebordet"` |
-| Help | `"help"`, `"list commands"` | `"hjelp"`, `"kommandoer"` |
-
-**Technical details:**
-- Runs entirely in the browser via a Web Worker — no server, no API key
-- Model: `Xenova/whisper-base` (multilingual, supports English + Norwegian + 97 others)
-- ONNX Runtime Web in single-threaded mode — no `SharedArrayBuffer`/COEP requirement
-- Audio decoded and resampled to 16 kHz mono `Float32Array` before inference
-- Model cached in browser Cache API
 
 ---
 
 ## Acknowledgements
 
 - **[Justinianus2001 (Hoang Le Ngoc)](https://github.com/Justinianus2001/my-portfolio)** — the original desktop portfolio template this project is based on. The core window management, taskbar, audio system, and visual design all originate from his work.
-
-- **[MLC AI / web-llm](https://github.com/mlc-ai/web-llm)** — the WebGPU-powered in-browser LLM runtime that powers the **Ask André** chat feature.
+- **[MLC AI / web-llm](https://github.com/mlc-ai/web-llm)** — WebGPU-powered in-browser LLM runtime powering Ask André.
+- **[OpenAlex](https://openalex.org/)** — open scholarly API used for the Research window and RAG index.
