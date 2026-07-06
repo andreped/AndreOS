@@ -44,6 +44,6 @@ export function saveSettings(partial) {
 
 export function getModelId()        { return getSettings().chatModel      || DEFAULT_MODEL_ID; }
 export function getWhisperModel()   { return getSettings().whisperModel   || 'Xenova/whisper-base'; }
-export function getTranscribeLang() { return getSettings().transcribeLang || 'auto'; }
-export function getLLMLanguage()    { return getSettings().llmLang        || 'auto'; }
+export function getTranscribeLang() { return getSettings().transcribeLang || 'english'; }  // default English — more reliable than auto
+export function getLLMLanguage()    { return getSettings().llmLang        || 'en'; }        // default English
 export function isVoiceAIEnabled()  { return getSettings().voiceAI !== false; }

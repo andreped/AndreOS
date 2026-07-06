@@ -13,6 +13,7 @@ import { setupResearchWindow }  from './windows/ResearchWindow.js';
 import { setupSettingsWindow }  from './windows/SettingsWindow.js';
 import { VoiceCommandManager }  from './system/VoiceCommandManager.js';
 import { VoiceMicButton }       from './desktop/VoiceMicButton.js';
+import { LangButton }           from './desktop/LangButton.js';
 
 class DesktopPortfolio {
     constructor() {
@@ -48,6 +49,8 @@ class DesktopPortfolio {
         this.voiceMicBtn = new VoiceMicButton({
             onToggle: () => this.voice.toggleRecording(),
         });
+
+        this.langBtn = new LangButton();
 
         this.voice = new VoiceCommandManager({
             windowManager: this.windowManager,
@@ -94,6 +97,9 @@ class DesktopPortfolio {
 
         // Mount mic button immediately before the notification bell
         this.voiceMicBtn.mount(document.querySelector('.notification-button'));
+
+        // Mount language button immediately before the mic button (desktop only)
+        this.langBtn.mount(this.voiceMicBtn._el);
 
         document.querySelector('.task-view-button')?.addEventListener('click', () => {
             const opened = this.windowManager.showTaskView();
