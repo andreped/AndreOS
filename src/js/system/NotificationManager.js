@@ -132,14 +132,26 @@ export class NotificationManager {
         const isOpen = panel.classList.contains('nc-open');
         if (isOpen) {
             panel.classList.remove('nc-open');
+            document.getElementById('nc-backdrop')?.remove();
         } else {
             panel.classList.add('nc-open');
             this._ncUnread = 0;
             this._updateBadge();
+
+            // Mobile: add a tappable backdrop behind the panel
+            if (window.innerWidth <= 768) {
+                const bd = document.createElement('div');
+                bd.id = 'nc-backdrop';
+                bd.style.cssText = 'position:fixed;inset:0;z-index:4999;background:rgba(0,0,0,0.4)';
+                bd.addEventListener('click', () => this.toggleCenter());
+                document.body.appendChild(bd);
+            }
+
             setTimeout(() => {
                 const closeOutside = (e) => {
                     if (!panel.contains(e.target) && !e.target.closest('.notification-button')) {
                         panel.classList.remove('nc-open');
+                        document.getElementById('nc-backdrop')?.remove();
                         document.removeEventListener('click', closeOutside);
                     }
                 };

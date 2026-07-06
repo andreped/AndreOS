@@ -361,6 +361,12 @@ export class AudioManager {
                 if (list) list.innerHTML = '<div class="nc-empty">No new notifications</div>';
             });
         }
+
+        // Mobile close button — delegates to the notification bell toggle
+        document.querySelector('.nc-close-mobile')?.addEventListener('click', () => {
+            document.getElementById('notificationCenter')?.classList.remove('nc-open');
+            document.getElementById('nc-backdrop')?.remove();
+        });
     }
 
     _updateSliderTrack(slider) {
