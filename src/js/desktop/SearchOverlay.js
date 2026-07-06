@@ -114,9 +114,11 @@ export class SearchOverlay {
     // ── Search ────────────────────────────────────────────────────────────
 
     _search(query) {
-        return SEARCH_INDEX.filter(({ label, subtitle, keywords }) =>
+        const static_ = SEARCH_INDEX.filter(({ label, subtitle, keywords }) =>
             `${label} ${subtitle} ${keywords}`.toLowerCase().includes(query)
         );
+        const papers = window.AndreChat?.searchPapers(query) ?? [];
+        return [...static_, ...papers];
     }
 
     // ── Render ────────────────────────────────────────────────────────────
@@ -140,6 +142,7 @@ export class SearchOverlay {
 
         const apps    = this._results.filter(r => r.type === 'app');
         const content = this._results.filter(r => r.type === 'content');
+        const papers  = this._results.filter(r => r.type === 'paper');
         let flatIdx = 0;
         let html = '';
 
@@ -150,6 +153,10 @@ export class SearchOverlay {
         if (content.length) {
             html += `<div class="search-group-label">Content</div>`;
             content.forEach(r => { html += this._itemHtml(r, flatIdx++); });
+        }
+        if (papers.length) {
+            html += `<div class="search-group-label">Publications</div>`;
+            papers.forEach(r => { html += this._itemHtml(r, flatIdx++); });
         }
 
         this._dropdown.innerHTML = html;

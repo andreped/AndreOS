@@ -3,8 +3,21 @@
 
 import * as webllm from "@mlc-ai/web-llm";
 import { SYSTEM_PROMPT } from "./andre-profile.js";
+import { RAGEngine }   from "./system/RAGEngine.js";
 
 const MODEL_ID = "SmolLM2-135M-Instruct-q0f16-MLC";
+
+// ── RAG ───────────────────────────────────────────────────────────────────────
+const ragEngine = new RAGEngine();
+ragEngine.init({
+    onReady: (count) => whenReady(() =>
+        window.__AndreOSApp?.pushNotification(
+            'Research Index Ready',
+            `Ask André can now answer questions about André's ${count} publications.`,
+            '📚', 'success'
+        )
+    ),
+});
 
 // ── Module-level state ────────────────────────────────────────────────────────
 let engine        = null;
@@ -131,8 +144,13 @@ async function sendMessage(winEl, userText) {
         typingBubbles.set(w, b);
     });
 
+    const ragContext   = ragEngine.query(userText);
+    const systemContent = ragContext
+        ? `${SYSTEM_PROMPT}\n\n## Relevant Research Papers\nThese papers from André's publications are relevant to this question:\n\n${ragContext}\n\nCite paper titles when they are relevant to your answer.`
+        : SYSTEM_PROMPT;
+
     const messages = [
-        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'system', content: systemContent },
         ...messageHistory.slice(0, -1).filter(m => m.role !== 'system')
     ];
 
@@ -264,8 +282,9 @@ window.AndreChat = {
         registeredWindows.add(winEl);
         applyProgress(winEl, lastProgress.text, lastProgress.pct);
 
-        const input   = winEl.querySelector('.chat-input');
-        const sendBtn = winEl.querySelector('.chat-send');
+        const input    = winEl.querySelector('.chat-input');
+        const sendBtn  = winEl.querySelector('.chat-send');
+        const clearBtn = winEl.querySelector('.chat-clear');
         const submit  = () => {
             const text = input?.value?.trim();
             if (!text) return;
@@ -280,6 +299,20 @@ window.AndreChat = {
             input.addEventListener('mousedown', e => e.stopPropagation());
         }
         if (sendBtn) sendBtn.addEventListener('click', e => { e.stopPropagation(); submit(); });
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', e => {
+                e.stopPropagation();
+                messageHistory.length = 0;
+                registeredWindows.forEach(w => {
+                    const area = w.querySelector('.chat-messages-area');
+                    if (area) area.innerHTML = '';
+                });
+                appendBubble(winEl, 'assistant',
+                    "Hi! I'm André's AI assistant running locally in your browser 🤖\nAsk me anything about his background, projects, or skills.");
+                if (input) input.focus();
+            });
+        }
 
         if (engineState === 'ready') {
             transitionToChat(winEl);
@@ -321,6 +354,14 @@ window.AndreChat = {
             }
         }, 100);
     },
+
+    /**
+     * BM25 paper search — used by SearchOverlay to include publications in
+     * the desktop search results.
+     * @param {string} query
+     * @returns {object[]}
+     */
+    searchPapers(query) { return ragEngine.searchPapers(query); },
 
     retry() {
         engineState = 'idle';
