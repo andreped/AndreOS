@@ -121,6 +121,7 @@ export class WindowManager {
         if (windowData.isChat)     this._setupHandlers.chat(el);
         if (windowData.isGame)     this._setupHandlers.game(el);
         if (windowData.isResearch) this._setupHandlers.research(el);
+        if (windowData.isSettings) this._setupHandlers.settings(el);
 
         this._audio.addSoundEffect('open');
         this._eventBus.emit('window:created', { id, title: windowData.title });

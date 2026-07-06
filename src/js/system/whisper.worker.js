@@ -31,12 +31,12 @@ let _pipeline = null;
 
 self.addEventListener('message', async ({ data }) => {
     switch (data.type) {
-        case 'load':       await _loadModel();            break;
-        case 'transcribe': await _transcribe(data.audio); break;
+        case 'load':       await _loadModel(data.model);                    break;
+        case 'transcribe': await _transcribe(data.audio, data.language);    break;
     }
 });
 
-async function _loadModel() {
+async function _loadModel(modelId = 'Xenova/whisper-base') {
     try {
         // Dynamic import with @vite-ignore so the CDN URL is resolved at
         // runtime — Vite will not try to bundle or rewrite this path.
@@ -53,7 +53,7 @@ async function _loadModel() {
 
         _pipeline = await pipeline(
             'automatic-speech-recognition',
-            'Xenova/whisper-base',
+            modelId,
             {
                 progress_callback: (p) => self.postMessage({ type: 'progress', ...p }),
             }
@@ -64,16 +64,15 @@ async function _loadModel() {
     }
 }
 
-async function _transcribe(audio) {
+async function _transcribe(audio, language) {
     if (!_pipeline) {
         self.postMessage({ type: 'error', message: 'Model not loaded' });
         return;
     }
     try {
-        const result = await _pipeline(audio, {
-            language: 'english',
-            task: 'transcribe',
-        });
+        const opts = { task: 'transcribe' };
+        if (language && language !== 'auto') opts.language = language;
+        const result = await _pipeline(audio, opts);
         self.postMessage({ type: 'result', text: (result.text ?? '').trim() });
     } catch (err) {
         self.postMessage({ type: 'error', message: err.message });

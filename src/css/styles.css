@@ -4036,6 +4036,217 @@ body {
 }
 .chat-retry-btn:hover { background: rgba(255, 107, 107, 0.35); }
 
+/* ── Settings Window ─────────────────────────────────────────────────────── */
+/* Override the default light window-content background for the settings window */
+.window-content:has(.settings-container) {
+    background: rgba(15, 15, 25, 0.97) !important;
+    padding: 0 !important;
+    color: rgba(255, 255, 255, 0.88);
+}
+.settings-container {
+    display: flex;
+    height: 100%;
+    min-height: 0;
+    font-family: inherit;
+    color: rgba(255,255,255,0.88);
+}
+
+.settings-sidebar {
+    width: 180px;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.05);
+    border-right: 1px solid rgba(255,255,255,0.07);
+    padding: 8px 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-sidebar-header {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.35);
+    padding: 10px 16px 8px;
+}
+
+.settings-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    color: rgba(255,255,255,0.65);
+    border-radius: 0;
+    transition: background 0.15s, color 0.15s;
+}
+.settings-nav-item:hover  { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9); }
+.settings-nav-item.active { background: rgba(255,107,107,0.15); color: rgba(255,255,255,0.95); }
+.settings-nav-icon { font-size: 15px; }
+
+.settings-content-panel {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+}
+
+.settings-section { display: none; }
+.settings-section.active { display: block; }
+
+.settings-section-title {
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0 0 6px;
+    color: rgba(255,255,255,0.95);
+}
+
+.settings-section-desc {
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+    margin: 0 0 20px;
+    line-height: 1.5;
+}
+
+/* Model cards */
+.model-cards { display: flex; flex-direction: column; gap: 8px; }
+
+.model-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+.model-card:hover    { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.2); }
+.model-card.selected { border-color: rgba(255,107,107,0.7); background: rgba(255,107,107,0.08); }
+
+.model-card-radio {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: border-color 0.15s;
+}
+.model-card.selected .model-card-radio { border-color: #ff6b6b; }
+
+.model-radio-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #ff6b6b;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+.model-card.selected .model-radio-dot { opacity: 1; }
+
+.model-card-info    { flex: 1; min-width: 0; }
+.model-card-header  { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 3px; }
+.model-name         { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9); }
+.model-size         { font-size: 11px; color: rgba(255,255,255,0.35); margin-left: auto; }
+.model-desc         { font-size: 11px; color: rgba(255,255,255,0.45); }
+
+.model-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 20px;
+    background: rgba(255,107,107,0.2);
+    color: rgba(255,130,130,0.9);
+    border: 1px solid rgba(255,107,107,0.3);
+}
+
+/* Apply row */
+.settings-apply-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 18px;
+    gap: 12px;
+}
+
+/* Subsection title */
+.settings-subsection-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: rgba(255,255,255,0.35);
+    margin: 20px 0 10px;
+}
+
+/* Language pills */
+.lang-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.lang-pill {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.6);
+    font-size: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+    font-family: inherit;
+}
+.lang-pill:hover  { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.9); }
+.lang-pill.active { border-color: rgba(255,107,107,0.7); background: rgba(255,107,107,0.12); color: rgba(255,255,255,0.95); }
+.settings-apply-status {
+    font-size: 12px;
+    color: rgba(100,255,150,0.8);
+    flex: 1;
+}
+.settings-apply-btn {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    border: none;
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.settings-apply-btn:hover:not(:disabled) { opacity: 0.88; }
+.settings-apply-btn:disabled { opacity: 0.4; cursor: default; }
+
+/* Voice toggle option */
+.settings-option {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.settings-option-label { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.settings-option-desc  { font-size: 11px; color: rgba(255,255,255,0.4); line-height: 1.5; max-width: 360px; }
+
+.settings-switch { flex-shrink: 0; cursor: pointer; }
+.settings-switch input { display: none; }
+.settings-switch-track {
+    display: block;
+    width: 40px; height: 22px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 11px;
+    position: relative;
+    transition: background 0.2s;
+}
+.settings-switch-track::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.2s;
+}
+.settings-switch input:checked + .settings-switch-track { background: #ff6b6b; }
+.settings-switch input:checked + .settings-switch-track::after { transform: translateX(18px); }
+
 /* ── Notification Centre ──────────────────────────────────────────────────── */
 .notification-center {
     position: fixed;

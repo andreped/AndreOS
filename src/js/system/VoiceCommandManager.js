@@ -15,6 +15,7 @@
  *   await vcm.toggleRecording();   // first call loads the model; subsequent calls toggle mic
  */
 import { VoiceEngine }       from '../system/VoiceEngine.js';
+import { isVoiceAIEnabled, getWhisperModel, getTranscribeLang } from '../system/Settings.js';
 
 /**
  * Command registry — English and Norwegian keywords per intent.
@@ -144,11 +145,16 @@ export class VoiceCommandManager {
         this._loadStarted = false;
         this._liveCardId  = 'voice-model-load';
 
-        this._engine = new VoiceEngine({
+        this._engine = this._buildEngine();
+    }
+
+    _buildEngine() {
+        return new VoiceEngine({
             onReady:      ()    => this._onModelReady(),
             onProgress:   (p)   => this._onModelProgress(p),
             onTranscript: (t)   => this._onTranscript(t),
             onError:      (msg) => this._onEngineError(msg),
+            model:        getWhisperModel(),
         });
     }
 
@@ -192,12 +198,20 @@ export class VoiceCommandManager {
             this._engine.stopRecording();
         } else if (this._state === 'ready') {
             this._setState('recording');
-            await this._engine.startRecording();
+            await this._engine.startRecording({ language: getTranscribeLang() });
         }
     }
 
     destroy() {
         this._engine.destroy();
+    }
+
+    /** Reload the voice engine with new settings (called when settings change). */
+    reloadVoiceEngine() {
+        this._engine.destroy();
+        this._engine      = this._buildEngine();
+        this._loadStarted = false;
+        if (this._state !== 'idle') this._setState('idle');
     }
 
     // ── Private: engine callbacks ──────────────────────────────────────────────
@@ -333,6 +347,7 @@ export class VoiceCommandManager {
     // ── Private: LLM command parsing ───────────────────────────────────────────
 
     async _parseLLM(text) {
+        if (!isVoiceAIEnabled()) return null;
         try {
             return await window.AndreChat?.parseCommand(text) ?? null;
         } catch {

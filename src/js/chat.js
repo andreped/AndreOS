@@ -4,19 +4,22 @@
 import * as webllm from "@mlc-ai/web-llm";
 import { SYSTEM_PROMPT } from "./andre-profile.js";
 import { RAGEngine }   from "./system/RAGEngine.js";
+import { getModelId, MODELS, getLLMLanguage } from "./system/Settings.js";
 
-const MODEL_ID = "SmolLM2-135M-Instruct-q0f16-MLC";
+const MODEL_ID = getModelId(); // resolved from Settings at load time — re-read on retry()
 
 // ── RAG ───────────────────────────────────────────────────────────────────────
 const ragEngine = new RAGEngine();
 ragEngine.init({
-    onReady: (count) => whenReady(() =>
+    onReady: (count) => whenReady(() => {
+        if (localStorage.getItem('andreos:rag-notified')) return;
+        localStorage.setItem('andreos:rag-notified', '1');
         window.__AndreOSApp?.pushNotification(
             'Research Index Ready',
             `Ask André can now answer questions about André's ${count} publications.`,
             '📚', 'success'
-        )
-    ),
+        );
+    }),
 });
 
 // ── Module-level state ────────────────────────────────────────────────────────
@@ -144,10 +147,15 @@ async function sendMessage(winEl, userText) {
         typingBubbles.set(w, b);
     });
 
+    const langSetting = getLLMLanguage();
+    const langInstruction = langSetting === 'no' ? '\n\nAlways respond in Norwegian (Bokmål).'
+        : langSetting === 'en' ? '\n\nAlways respond in English.'
+        : '';
+
     const ragContext   = ragEngine.query(userText);
-    const systemContent = ragContext
+    const systemContent = (ragContext
         ? `${SYSTEM_PROMPT}\n\n## Relevant Research Papers\nThese papers from André's publications are relevant to this question:\n\n${ragContext}\n\nCite paper titles when they are relevant to your answer.`
-        : SYSTEM_PROMPT;
+        : SYSTEM_PROMPT) + langInstruction;
 
     const messages = [
         { role: 'system', content: systemContent },
@@ -189,7 +197,15 @@ async function sendMessage(winEl, userText) {
 async function loadEngine() {
     if (engineState === 'loading' || engineState === 'ready') return;
     engineState = 'loading';
-    console.log('[AndreChat] Starting model load:', MODEL_ID);
+    console.log('[AndreChat] Starting model load:', getModelId());
+
+    // Update the loading title to show the actual selected model name
+    const modelInfo = MODELS.find(m => m.id === getModelId());
+    const modelLabel = modelInfo?.name ?? getModelId();
+    registeredWindows.forEach(w => {
+        const titleEl = w.querySelector('.chat-model-name');
+        if (titleEl) titleEl.textContent = modelLabel;
+    });
 
     // Show NC card — but only on the first load (not on refreshes within the same session)
     const silentLoad = !!sessionStorage.getItem('andreos:model-loaded');
@@ -203,7 +219,7 @@ async function loadEngine() {
     updateAll('Compiling WebGPU shaders…', 0);
 
     try {
-        engine = await webllm.CreateMLCEngine(MODEL_ID, {
+        engine = await webllm.CreateMLCEngine(getModelId(), {
             initProgressCallback: (report) => {
                 const pct  = Math.round((report.progress || 0) * 100);
                 const text = report.text || 'Loading…';
@@ -355,6 +371,9 @@ window.AndreChat = {
         }, 100);
     },
 
+    /** Currently loaded model ID (null if not yet loaded). */
+    get currentModelId() { return engineState === 'ready' ? getModelId() : null; },
+
     /**
      * BM25 paper search — used by SearchOverlay to include publications in
      * the desktop search results.
@@ -423,3 +442,10 @@ if (navigator.gpu) {
 } else {
     console.warn('[AndreChat] WebGPU not available — model will not load.');
 }
+
+// ── React to settings changes ─────────────────────────────────────────────────
+document.addEventListener('andreos:settings-apply', () => {
+    if (!navigator.gpu) return;
+    sessionStorage.removeItem('andreos:model-loaded'); // show NC card for new model
+    window.AndreChat.retry();
+});

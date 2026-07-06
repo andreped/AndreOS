@@ -20,11 +20,13 @@ export class VoiceEngine {
      *   onError?:      (message: string) => void,
      * }} opts
      */
-    constructor({ onReady, onProgress, onTranscript, onError } = {}) {
+    constructor({ onReady, onProgress, onTranscript, onError, model } = {}) {
         this._onReady      = onReady      ?? (() => {});
         this._onProgress   = onProgress   ?? (() => {});
         this._onTranscript = onTranscript ?? (() => {});
         this._onError      = onError      ?? (() => {});
+        this._model         = model ?? 'Xenova/whisper-base';
+        this._currentLang   = null;
 
         this._worker        = null;
         this._ready         = false;
@@ -55,12 +57,10 @@ export class VoiceEngine {
         );
 
         this._worker.addEventListener('message', ({ data }) => this._onWorkerMessage(data));
-        // Catch worker-level errors (e.g. failed module load) that never
-        // reach the message handler.
         this._worker.addEventListener('error', (e) =>
             this._onError(`Worker failed to load: ${e.message ?? e.type}`)
         );
-        this._worker.postMessage({ type: 'load' });
+        this._worker.postMessage({ type: 'load', model: this._model });
     }
 
     /** Release all resources (worker + any open mic stream). */
@@ -75,9 +75,10 @@ export class VoiceEngine {
 
     /**
      * Request mic access and begin recording.
-     * Resolves once recording starts (or rejects on permission denial).
+     * @param {{ language?: string }} opts
      */
-    async startRecording() {
+    async startRecording({ language } = {}) {
+        this._currentLang = language ?? null;
         if (this._recording || !this._ready) return;
 
         try {
@@ -162,7 +163,7 @@ export class VoiceEngine {
             const samples = decoded.getChannelData(0).slice();
 
             this._worker.postMessage(
-                { type: 'transcribe', audio: samples },
+                { type: 'transcribe', audio: samples, language: this._currentLang },
                 [samples.buffer]            // zero-copy transfer to worker
             );
         } catch (err) {
