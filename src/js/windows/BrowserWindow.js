@@ -88,5 +88,15 @@ export function setupBrowserWindow(winEl, startUrl) {
         });
     });
 
+    // Voice-command navigation: VoiceCommandManager dispatches this event
+    const onVoiceNavigate = (e) => {
+        if (!document.contains(winEl)) {
+            document.removeEventListener('andreos:browser-navigate', onVoiceNavigate);
+            return;
+        }
+        navigate(e.detail?.url ?? '');
+    };
+    document.addEventListener('andreos:browser-navigate', onVoiceNavigate);
+
     navigate(startUrl);
 }
