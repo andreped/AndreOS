@@ -304,9 +304,10 @@ export class VoiceCommandManager {
             return [{ a: 'search', t: desktopSearch[1].trim() }];
         }
 
-        // "open [app] and ask/say/tell [message]"
+        // "open [app] and/,  ask/say/tell [message]" — English + Norwegian verbs
+        // Accepts both "and ask" and comma-separated "open X, ask Y"
         const openAsk = t.match(
-            /(?:open|show|launch)\s+([\w\s]+?)\s+and\s+(?:ask|say|tell|send|message)\s+(.+)/i
+            /(?:open|show|launch|åpne|vis) +([ \w]+?) *(?:, *(?:and +)?|and +|og +)(?:ask|say|tell|send|message|spør|si|fortell|send) +(.+)/i
         );
         if (openAsk) {
             const app = this._resolveApp(openAsk[1].trim());
@@ -477,8 +478,11 @@ export class VoiceCommandManager {
             'and ask', 'and say', 'and tell', 'and send', 'and search',
             'and then', 'then open', 'then ask', 'then show', 'then close',
             'after that', 'followed by',
-            'og spør', 'og si', 'og åpne', // Norwegian
+            'og spør', 'og si', 'og åpne', 'og fortell', // Norwegian
             'go to', 'navigate to', 'browse to', 'search for', 'search the web', 'search online',
+            // Comma-separated compound: "open X, ask Y" (comma → space after normalise)
+            ' ask ', ' say ', ' tell ',
+            ' spør ', ' si ', ' fortell ', // Norwegian comma-separated
         ];
         if (COMPOUND_SIGNALS.some(s => text.includes(s))) return null;
 

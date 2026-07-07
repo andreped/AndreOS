@@ -25,6 +25,7 @@ ragEngine.init({
 // ── Module-level state ────────────────────────────────────────────────────────
 let engine        = null;
 let engineState   = 'idle'; // idle | loading | ready | error
+let engineError   = '';     // human-readable error stored when state === 'error'
 let lastProgress  = { text: 'Starting model download…', pct: 0 };
 const registeredWindows = new Set();
 const messageHistory    = [];
@@ -193,6 +194,21 @@ async function sendMessage(winEl, userText) {
     if (sendBtn) sendBtn.disabled = false;
 }
 
+// ── GPU capability pre-flight ────────────────────────────────────────────────
+async function assertGPULimits() {
+    const adapter = await navigator.gpu.requestAdapter();
+    if (!adapter) throw new Error('No WebGPU adapter was found on this device.');
+    const available = adapter.limits.maxStorageBuffersPerShaderStage;
+    const required  = 10;
+    if (available < required) {
+        throw new Error(
+            `Your browser's WebGPU implementation does not meet the minimum ` +
+            `requirements for the AI model (maxStorageBuffersPerShaderStage: ` +
+            `${available}, need ≥ ${required}). Please use Chrome 113+, Edge 113+, or Safari 18+.`
+        );
+    }
+}
+
 // ── Engine loader ─────────────────────────────────────────────────────────────
 async function loadEngine() {
     if (engineState === 'loading' || engineState === 'ready') return;
@@ -219,6 +235,7 @@ async function loadEngine() {
     updateAll('Compiling WebGPU shaders…', 0);
 
     try {
+        await assertGPULimits();
         engine = await webllm.CreateMLCEngine(getModelId(), {
             initProgressCallback: (report) => {
                 const pct  = Math.round((report.progress || 0) * 100);
@@ -258,6 +275,7 @@ async function loadEngine() {
     } catch (err) {
         engineState = 'error';
         const msg = err?.message || String(err);
+        engineError = msg;
         console.error('[AndreChat] Load error:', err);
         whenReady(() => {
             window.__AndreOSApp?.completeLiveNotification(
@@ -290,7 +308,18 @@ window.AndreChat = {
             if (overlay) overlay.innerHTML = `
                 <div class="chat-load-icon">⚠️</div>
                 <div class="chat-load-title">WebGPU not available</div>
-                <div class="chat-load-subtitle">Please use Chrome or Edge 113+<br>to run the local AI model.</div>
+                <div class="chat-load-subtitle">Please use Chrome 113+, Edge 113+, or Safari 18+<br>to run the local AI model.</div>
+            `;
+            return;
+        }
+
+        if (engineState === 'error') {
+            const overlay = winEl.querySelector('.chat-load-overlay');
+            if (overlay) overlay.innerHTML = `
+                <div class="chat-load-icon">⚠️</div>
+                <div class="chat-load-title">Failed to load model</div>
+                <div class="chat-load-subtitle" style="color:rgba(255,100,100,0.8);font-size:12px;word-break:break-word">${engineError}</div>
+                <button class="chat-retry-btn" onclick="window.AndreChat&&window.AndreChat.retry()">Retry</button>
             `;
             return;
         }

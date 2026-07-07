@@ -8,7 +8,7 @@ An interactive desktop OS experience serving as my personal portfolio — built 
 - **Build tool:** [Vite](https://vitejs.dev/)
 - **AI chat:** [@mlc-ai/web-llm](https://github.com/mlc-ai/web-llm) — user-selectable LLM running on WebGPU (default: Qwen2.5-1.5B)
 - **Voice commands:** [@xenova/transformers](https://github.com/xenova/transformers.js) + ONNX Runtime Web — Whisper in a Web Worker; model and language configurable
-- **Browser requirement:** Chrome / Edge 113+ for AI chat (WebGPU); voice works in any browser with `MediaRecorder` + WASM support
+- **Browser requirement:** Chrome 113+, Edge 113+, or Safari 18+ (macOS Sequoia / iOS 18) for AI chat (WebGPU); voice works in any browser with `MediaRecorder` + WASM support
 
 ---
 
