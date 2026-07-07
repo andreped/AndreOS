@@ -14,6 +14,7 @@ import { setupSettingsWindow }  from './windows/SettingsWindow.js';
 import { VoiceCommandManager }  from './system/VoiceCommandManager.js';
 import { VoiceMicButton }       from './desktop/VoiceMicButton.js';
 import { LangButton }           from './desktop/LangButton.js';
+import { AssistantSidebar }     from './desktop/AssistantSidebar.js';
 
 class DesktopPortfolio {
     constructor() {
@@ -52,10 +53,21 @@ class DesktopPortfolio {
 
         this.langBtn = new LangButton();
 
+        this.sidebar = new AssistantSidebar({
+            onSubmit:    (text) => this.voice.submitText(text),
+            onMicToggle: () => this.voice.toggleRecording(),
+        });
+
         this.voice = new VoiceCommandManager({
-            windowManager: this.windowManager,
-            notifications: this.notifications,
-            onStateChange: (state) => this.voiceMicBtn.setState(state),
+            windowManager:   this.windowManager,
+            notifications:   this.notifications,
+            onStateChange:   (state) => {
+                this.voiceMicBtn.setState(state);
+                this.sidebar.setMicState(state);
+            },
+            onMessage:       (role, text) => this.sidebar.appendMessage(role, text),
+            onStreamMessage: (role)       => this.sidebar.startStreamMessage(role),
+            isSidebarOpen:   ()           => this.sidebar.isOpen,
         });
 
         this.startMenuOpen = false;
@@ -98,8 +110,16 @@ class DesktopPortfolio {
         // Mount mic button immediately before the notification bell
         this.voiceMicBtn.mount(document.querySelector('.notification-button'));
 
-        // Mount language button immediately before the mic button (desktop only)
-        this.langBtn.mount(this.voiceMicBtn._el);
+        // Mount language button before the notification bell (after voiceMicBtn)
+        this.langBtn.mount(document.querySelector('.notification-button'));
+
+        this._syncRightPanelInset();
+
+        document.getElementById('asstTrayBtn')?.addEventListener('click', () => {
+            document.getElementById('notificationCenter')?.classList.remove('nc-open');
+            this.sidebar.toggle();
+            document.getElementById('asstTrayBtn')?.classList.toggle('asst-tray-active', this.sidebar.isOpen);
+        });
 
         document.querySelector('.task-view-button')?.addEventListener('click', () => {
             const opened = this.windowManager.showTaskView();
@@ -107,6 +127,8 @@ class DesktopPortfolio {
         });
 
         document.querySelector('.notification-button')?.addEventListener('click', () => {
+            this.sidebar.close();
+            document.getElementById('asstTrayBtn')?.classList.remove('asst-tray-active');
             this.notifications.toggleCenter();
         });
 
@@ -124,6 +146,29 @@ class DesktopPortfolio {
                 this._showDesktopContextMenu(e);
             }
         });
+    }
+
+    /**
+     * Keep `body.right-panel-open` in sync with the assistant sidebar and
+     * notification centre open state. Maximized windows use this class to
+     * shrink so they never sit behind an open right-side panel. A single
+     * MutationObserver covers every open/close path (tray button, bell,
+     * click-outside, mobile backdrop, settings).
+     */
+    _syncRightPanelInset() {
+        const sidebar = document.getElementById('assistantSidebar');
+        const nc      = document.getElementById('notificationCenter');
+
+        const update = () => {
+            const open = !!sidebar?.classList.contains('asst-open')
+                      || !!nc?.classList.contains('nc-open');
+            document.body.classList.toggle('right-panel-open', open);
+        };
+
+        const observer = new MutationObserver(update);
+        if (sidebar) observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+        if (nc)      observer.observe(nc,      { attributes: true, attributeFilter: ['class'] });
+        update();
     }
 
     _showDesktopContextMenu(event) {
@@ -215,6 +260,17 @@ class DesktopPortfolio {
         }
         const taskViewOverlay = document.querySelector('.task-view-overlay');
         if (taskViewOverlay) { taskViewOverlay.remove(); return; }
+
+        // Close open right-side panels before touching windows
+        if (this.sidebar?.isOpen) {
+            this.sidebar.close();
+            document.getElementById('asstTrayBtn')?.classList.remove('asst-tray-active');
+            return;
+        }
+        if (document.getElementById('notificationCenter')?.classList.contains('nc-open')) {
+            this.notifications.toggleCenter();
+            return;
+        }
 
         document.querySelectorAll('.taskbar-context-menu, .context-menu').forEach(m => m.remove());
 

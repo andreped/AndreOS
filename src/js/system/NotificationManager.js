@@ -135,6 +135,9 @@ export class NotificationManager {
             document.getElementById('nc-backdrop')?.remove();
         } else {
             panel.classList.add('nc-open');
+            // Only one panel open at a time — close the assistant sidebar
+            document.getElementById('assistantSidebar')?.classList.remove('asst-open');
+            document.getElementById('asstTrayBtn')?.classList.remove('asst-tray-active');
             this._ncUnread = 0;
             this._updateBadge();
 
@@ -174,6 +177,11 @@ export class NotificationManager {
     }
 
     _showToast(icon, title, message, type = 'info', onClick = null) {
+        // Suppress toast overlays while a right-side panel (assistant sidebar /
+        // notification centre) is open — they'd cover it. The notification is
+        // still recorded in the centre, so nothing is lost.
+        if (document.body.classList.contains('right-panel-open')) return;
+
         const toast = document.createElement('div');
         toast.className = `nc-toast nc-toast-${type}`;
         if (onClick) toast.style.cursor = 'pointer';

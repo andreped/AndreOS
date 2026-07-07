@@ -412,23 +412,59 @@ window.AndreChat = {
     searchPapers(query) { return ragEngine.searchPapers(query); },
 
     /**
-     * Parse a natural-language OS command into a sequence of actions using
-     * the local LLM. Returns null if the engine isn't ready.
-     * Used by VoiceCommandManager for the AI window manager feature.
-     * @param {string} text
-     * @returns {Promise<Array<{a:string,t?:string}>|null>}
+     * Stream a conversational LLM response without touching the chat window.
+     * Used by the OS Assistant sidebar for non-command queries.
+     * @param {string}                     text
+     * @param {(partial: string) => void}  onChunk  — called with accumulated text + cursor on each token
+     * @param {(full: string) => void}     onDone   — called with final text when stream ends
      */
+    async querySidebar(text, onChunk, onDone) {
+        if (engineState !== 'ready') {
+            onDone?.('The AI model isn\'t loaded yet — open Ask André to load it first.');
+            return;
+        }
+        const langSetting = getLLMLanguage();
+        const langInstruction = langSetting === 'no' ? '\n\nAlways respond in Norwegian (Bokmål).'
+            : langSetting === 'en' ? '\n\nAlways respond in English.'
+            : '';
+        const ragContext = ragEngine.query(text);
+        const systemContent = (ragContext
+            ? `${SYSTEM_PROMPT}\n\n## Relevant Research Papers\nThese papers from André's publications are relevant to this question:\n\n${ragContext}\n\nCite paper titles when relevant.`
+            : SYSTEM_PROMPT) + langInstruction;
+        try {
+            const stream = await engine.chat.completions.create({
+                messages: [
+                    { role: 'system', content: systemContent },
+                    { role: 'user',   content: text },
+                ],
+                stream: true,
+                max_tokens: 300,
+                temperature: 0.7,
+            });
+            let fullText = '';
+            for await (const chunk of stream) {
+                fullText += chunk.choices[0]?.delta?.content || '';
+                onChunk?.(fullText + '▋');
+            }
+            onDone?.(fullText);
+        } catch (err) {
+            console.error('[AndreChat] querySidebar error:', err);
+            onDone?.('Sorry, something went wrong.');
+        }
+    },
+
     async parseCommand(text) {
         if (engineState !== 'ready') return null;
         const prompt =
 `You are an OS command parser. Convert the voice command into a JSON array of actions.
-Apps: about, resume, projects, skills, contact, social, browser, chat, game, research
+Apps: about, resume, projects, skills, contact, social, browser, chat, game, research, settings
 Actions: {"a":"open","t":"<app>"} | {"a":"close"} | {"a":"minimize"} | {"a":"desktop"} | {"a":"chat","t":"<message>"}
+Use {"a":"chat","t":"..."} to answer a question — do NOT add {"a":"open","t":"chat"} before it.
 Reply with ONLY the JSON array, nothing else.
 Examples:
-"open research and then chat" → [{"a":"open","t":"research"},{"a":"open","t":"chat"}]
+"open research and then chat" → [{"a":"open","t":"research"}]
 "show desktop" → [{"a":"desktop"}]
-"ask André about his PhD" → [{"a":"open","t":"chat"},{"a":"chat","t":"Tell me about your PhD"}]
+"ask André about his PhD" → [{"a":"chat","t":"Tell me about your PhD"}]
 Command: "${text.replace(/"/g, "'")}"`;
 
         try {
