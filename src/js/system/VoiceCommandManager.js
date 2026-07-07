@@ -96,6 +96,13 @@ const COMMAND_REGISTRY = [
             'forskning', 'publikasjoner', 'artikler', 'vitenskapelig',
         ],
     },
+    {
+        intent: 'open', args: { fileType: 'settings' },
+        keywords: [
+            'settings', 'preferences', 'configuration', 'options', 'configure',
+            'innstillinger', 'instillinger', 'preferanser', 'valg',
+        ],
+    },
 
     // ── Window management ──────────────────────────────────────────────────────
     {
@@ -131,21 +138,38 @@ const COMMAND_REGISTRY = [
 export class VoiceCommandManager {
     /**
      * @param {{
-     *   windowManager:  import('../desktop/WindowManager.js').WindowManager,
-     *   notifications:  import('./NotificationManager.js').NotificationManager,
-     *   onStateChange?: (state: 'idle'|'loading'|'ready'|'recording'|'processing'|'error') => void,
+     *   windowManager:    import('../desktop/WindowManager.js').WindowManager,
+     *   notifications:    import('./NotificationManager.js').NotificationManager,
+     *   onStateChange?:   (state: 'idle'|'loading'|'ready'|'recording'|'processing'|'error') => void,
+     *   onMessage?:       (role: 'user'|'assistant'|'system', text: string) => void,
+     *   onStreamMessage?: (role: 'assistant') => (text: string) => void,
+     *   isSidebarOpen?:   () => boolean,
      * }} opts
      */
-    constructor({ windowManager, notifications, onStateChange }) {
-        this._windowManager = windowManager;
-        this._notifications = notifications;
-        this._onStateChange = onStateChange ?? (() => {});
+    constructor({ windowManager, notifications, onStateChange, onMessage, onStreamMessage, isSidebarOpen }) {
+        this._windowManager   = windowManager;
+        this._notifications   = notifications;
+        this._onStateChange   = onStateChange   ?? (() => {});
+        this._onMessage       = onMessage       ?? (() => {});
+        this._onStreamMessage = onStreamMessage ?? null;
+        this._isSidebarOpen   = isSidebarOpen   ?? (() => false);
 
         this._state       = 'idle';
         this._loadStarted = false;
         this._liveCardId  = 'voice-model-load';
 
         this._engine = this._buildEngine();
+    }
+
+    /**
+     * Show a transient status toast — but skip it when the assistant sidebar
+     * is open, since the same feedback is already shown inline there.
+     * @param {string} message
+     * @param {'info'|'success'|'warning'|'error'} type
+     */
+    _feedback(message, type = 'info') {
+        if (this._isSidebarOpen()) return;
+        this._notifications.show(message, type);
     }
 
     _buildEngine() {
@@ -206,6 +230,18 @@ export class VoiceCommandManager {
         this._engine.destroy();
     }
 
+    /**
+     * Submit text directly through the same pipeline as a voice transcript.
+     * Used by the OS Assistant sidebar text input.
+     * Safe to call regardless of voice-model load state.
+     * @param {string} text
+     */
+    async submitText(text) {
+        if (!text?.trim()) return;
+        if (this._state === 'recording' || this._state === 'processing') return;
+        await this._onTranscript(text, { fromVoice: false });
+    }
+
     /** Reload the voice engine with new settings (called when settings change). */
     reloadVoiceEngine() {
         this._engine.destroy();
@@ -233,48 +269,96 @@ export class VoiceCommandManager {
         this._notifications.updateLive(this._liveCardId, pct, `Loading ${filename} — ${pct}%`);
     }
 
-    async _onTranscript(text) {
+    async _onTranscript(text, { fromVoice = true } = {}) {
         if (!text) {
-            this._setState('ready');
+            if (fromVoice) this._setState('ready');
             return;
         }
+
+        // Show the user's words in the sidebar immediately
+        this._onMessage('user', text);
+
         const heard = text.length > 45 ? text.slice(0, 43) + '…' : text;
 
-        // 1. Fast keyword registry
+        // 1. Fast keyword registry (includes chat-message shortcut)
         const match = this._parse(text);
         if (match) {
-            this._notifications.show(`🎤 Heard: "${heard}"\n↳ ${match.label}`, 'success');
-            this._dispatch(match);
-            this._setState('ready');
+            if (match.intent === 'chat_message') {
+                // Conversational shortcut (“ask André X”) → answer inline in sidebar
+                this._feedback(`🎤 Heard: "${heard}"`, 'info');
+                await this._streamToSidebar(match.args.text);
+            } else {
+                this._feedback(`🎤 Heard: "${heard}"\n↳ ${match.label}`, 'success');
+                this._dispatch(match);
+                this._onMessage('assistant', `✓ ${match.label}`);
+            }
+            if (fromVoice) this._setState('ready');
             return;
         }
 
-        // 2. Rule-based compound parser (reliable for common multi-step patterns)
+        // 2. Rule-based compound parser
         const compound = this._parseCompound(text);
         if (compound) {
             const intent = this._describeActions(compound);
-            this._notifications.show(`🎤 Heard: "${heard}"\n↳ ${intent}`, 'success');
+            this._feedback(`🎤 Heard: "${heard}"\n↳ ${intent}`, 'success');
             await this._executeSequence(compound);
-            this._setState('ready');
+            // A chat reply is its own output — don't add a redundant “✓ …” confirmation
+            if (!compound.some(a => a.a === 'chat')) this._onMessage('assistant', `✓ ${intent}`);
+            if (fromVoice) this._setState('ready');
             return;
         }
 
-        // 3. LLM fallback for anything else
-        this._notifications.show('🤖 Parsing command with AI…', 'info');
+        // 3. LLM intent parse — execute only when it yields a real OS action
+        //    (open/close/desktop/…). Pure-chat or empty results fall through to
+        //    a normal conversation so we always answer the user's *original*
+        //    message rather than a rewritten command interpretation of it.
         const actions = await this._parseLLM(text);
-        if (actions?.length) {
+        if (actions?.some(a => a.a !== 'chat')) {
             const intent = this._describeActions(actions);
-            this._notifications.show(`🤖 Heard: "${heard}"\n↳ ${intent}`, 'success');
+            this._feedback(`🤖 Heard: "${heard}"\n↳ ${intent}`, 'success');
             await this._executeSequence(actions);
-        } else {
-            this._notifications.show(`🎤 Heard: "${heard}"\n↳ No command matched — try “help”`, 'warning');
+            if (!actions.some(a => a.a === 'chat')) this._onMessage('assistant', `✓ ${intent}`);
+            if (fromVoice) this._setState('ready');
+            return;
         }
-        this._setState('ready');
-    }
 
+        // 4. Conversational fallback — stream LLM reply into sidebar
+        await this._streamToSidebar(text);
+        if (fromVoice) this._setState('ready');
+    }
     _onEngineError(message) {
         this._notifications.show(`Voice error: ${message}`, 'error');
         this._setState(this._engine.isReady ? 'ready' : 'error');
+    }
+
+    /**
+     * Answer a conversational query. When the assistant sidebar is open the
+     * reply streams inline there; otherwise (e.g. voice command with the
+     * sidebar closed) it opens the “Ask André” window instead.
+     * @param {string} text
+     */
+    async _streamToSidebar(text) {
+        // Sidebar not visible → use the Ask André window so the reply is seen
+        if (!this._isSidebarOpen()) {
+            if (window.AndreChat) window.AndreChat.injectMessage(text);
+            else this._windowManager.openFile('chat');
+            return;
+        }
+
+        if (window.AndreChat?.querySidebar) {
+            if (this._onStreamMessage) {
+                const update = this._onStreamMessage('assistant');
+                await window.AndreChat.querySidebar(text, update, update);
+            } else {
+                await window.AndreChat.querySidebar(
+                    text,
+                    null,
+                    (full) => this._onMessage('assistant', full || 'No response.')
+                );
+            }
+        } else {
+            this._onMessage('assistant', 'The AI model isn\'t loaded yet — open Ask André to load it first.');
+        }
     }
 
     // ── Private: rule-based compound parser ──────────────────────────────────────────
@@ -342,6 +426,7 @@ export class VoiceCommandManager {
         if (/social|linkedin/.test(n))                                return 'social';
         if (/browser|internet|nettleser/.test(n))                     return 'browser';
         if (/game|cast|arena|spill/.test(n))                          return 'game';
+        if (/setting|preference|option|configur|innstilling|instilling|preferanse/.test(n)) return 'settings';
         return null;
     }
 
@@ -366,6 +451,7 @@ export class VoiceCommandManager {
             about: 'About Me', resume: 'Resume', projects: 'Projects',
             skills: 'Skills', contact: 'Contact', social: 'Social Links',
             browser: 'Browser', chat: 'Ask André', game: 'Cast Arena', research: 'Research',
+            settings: 'Settings',
         };
         return actions.map(a => {
             switch (a.a) {
@@ -394,7 +480,14 @@ export class VoiceCommandManager {
      * @param {Array<{a:string,t?:string}>} actions
      */
     async _executeSequence(actions) {
-        for (const act of actions) {
+        // When the sidebar is open and the sequence includes a chat reply,
+        // drop any redundant “open chat” step — the answer streams inline.
+        const hasChat = actions.some(a => a.a === 'chat');
+        const steps = (hasChat && this._isSidebarOpen())
+            ? actions.filter(a => !(a.a === 'open' && a.t === 'chat'))
+            : actions;
+
+        for (const act of steps) {
             switch (act.a) {
                 case 'open':
                     this._windowManager.openFile(act.t);
@@ -413,7 +506,7 @@ export class VoiceCommandManager {
                     this._windowManager.showDesktop();
                     break;
                 case 'chat':
-                    window.AndreChat?.injectMessage(act.t ?? '');
+                    await this._streamToSidebar(act.t ?? '');
                     break;
                 case 'search': {
                     // Focus the desktop search bar and type the query
@@ -440,7 +533,7 @@ export class VoiceCommandManager {
                 }
             }
             // Pause between steps so each window has time to open/focus
-            if (actions.length > 1) await new Promise(r => setTimeout(r, 450));
+            if (steps.length > 1) await new Promise(r => setTimeout(r, 450));
         }
     }
 
@@ -490,6 +583,7 @@ export class VoiceCommandManager {
             about: 'About Me', resume: 'Resume', projects: 'Projects',
             skills: 'Skills', contact: 'Contact', social: 'Social Links',
             browser: 'Browser', chat: 'Ask André', game: 'Cast Arena', research: 'Research',
+            settings: 'Settings',
         };
 
         for (const cmd of COMMAND_REGISTRY) {

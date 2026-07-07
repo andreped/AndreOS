@@ -201,6 +201,7 @@
                     </div>
                     <span id="batteryTrayIcon" class="tray-icon" title="Battery">🔋</span>
                 </div>
+                <div class="asst-tray-btn" id="asstTrayBtn" title="OS Assistant">🤖</div>
                 <div class="notification-button" title="Notifications">
                     <div class="notification-icon">🔔</div>
                     <span class="nc-badge" id="ncBadge" style="display:none">0</span>
@@ -329,6 +330,34 @@
         </div>
         <div class="nc-list" id="ncList">
             <div class="nc-empty">No new notifications</div>
+        </div>
+    </div>
+
+    <!-- OS Assistant sidebar -->
+    <div id="assistantSidebar" class="assistant-sidebar">
+        <div class="asst-header">
+            <div class="asst-header-left">
+                <span class="asst-title-icon">🤖</span>
+                <span class="asst-title">OS Assistant</span>
+            </div>
+            <div class="asst-header-actions">
+                <button class="asst-clear" title="Clear conversation">Clear</button>
+                <button class="asst-close" title="Close">✕</button>
+            </div>
+        </div>
+        <div class="asst-messages" id="asstMessages">
+            <div class="asst-welcome">
+                <div class="asst-welcome-icon">🤖</div>
+                <div class="asst-welcome-text">Ask me anything about André, or give a command — open an app, search the web, and more.</div>
+                <div class="asst-welcome-hint">Try: &quot;open resume&quot; · &quot;tell me about André's research&quot;</div>
+            </div>
+        </div>
+        <div class="asst-input-row">
+            <button class="asst-mic-btn" data-mic-state="idle" title="Click to load voice model">
+                <span class="asst-mic-icon">🎤</span>
+            </button>
+            <input type="text" class="asst-input" placeholder="Ask or command…" autocomplete="off" />
+            <button class="asst-send-btn" title="Send">↑</button>
         </div>
     </div>
 
