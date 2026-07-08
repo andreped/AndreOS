@@ -4,6 +4,7 @@
 import * as webllm from "@mlc-ai/web-llm";
 import { SYSTEM_PROMPT } from "./andre-profile.js";
 import { RAGEngine }   from "./system/RAGEngine.js";
+import { ActiveContext } from "./system/ActiveContext.js";
 import { getModelId, MODELS, getLLMLanguage } from "./system/Settings.js";
 
 const MODEL_ID = getModelId(); // resolved from Settings at load time — re-read on retry()
@@ -153,10 +154,17 @@ async function sendMessage(winEl, userText) {
         : langSetting === 'en' ? '\n\nAlways respond in English.'
         : '';
 
-    const ragContext   = ragEngine.query(userText);
-    const systemContent = (ragContext
-        ? `${SYSTEM_PROMPT}\n\n## Relevant Research Papers\nThese papers from André's publications are relevant to this question:\n\n${ragContext}\n\nCite paper titles when they are relevant to your answer.`
-        : SYSTEM_PROMPT) + langInstruction;
+    const activeCtx    = ActiveContext.getContextBlock(userText);
+    // When the user is viewing a specific paper, that paper is the context —
+    // don't also inject other RAG papers or the small model conflates them.
+    const ragContext   = activeCtx ? '' : ragEngine.query(userText);
+    const systemContent = [
+        SYSTEM_PROMPT,
+        activeCtx || null,
+        ragContext
+            ? `## Relevant Research Papers\nThese papers from André's publications are relevant to this question:\n\n${ragContext}\n\nCite paper titles when they are relevant to your answer.`
+            : null,
+    ].filter(Boolean).join('\n\n') + langInstruction;
 
     const messages = [
         { role: 'system', content: systemContent },
@@ -427,10 +435,16 @@ window.AndreChat = {
         const langInstruction = langSetting === 'no' ? '\n\nAlways respond in Norwegian (Bokmål).'
             : langSetting === 'en' ? '\n\nAlways respond in English.'
             : '';
-        const ragContext = ragEngine.query(text);
-        const systemContent = (ragContext
-            ? `${SYSTEM_PROMPT}\n\n## Relevant Research Papers\nThese papers from André's publications are relevant to this question:\n\n${ragContext}\n\nCite paper titles when relevant.`
-            : SYSTEM_PROMPT) + langInstruction;
+        const activeCtx  = ActiveContext.getContextBlock(text);
+        // A viewed paper takes priority over general RAG retrieval.
+        const ragContext = activeCtx ? '' : ragEngine.query(text);
+        const systemContent = [
+            SYSTEM_PROMPT,
+            activeCtx || null,
+            ragContext
+                ? `## Relevant Research Papers\nThese papers from André's publications are relevant to this question:\n\n${ragContext}\n\nCite paper titles when relevant.`
+                : null,
+        ].filter(Boolean).join('\n\n') + langInstruction;
         try {
             const stream = await engine.chat.completions.create({
                 messages: [
