@@ -18,6 +18,7 @@ import { BM25 } from './BM25.js';
 let _paper  = null; // { title, abstract, fullText, year, url }
 let _bm25   = null;
 let _chunks = [];
+let _appContext = null; // { name, text, chunks, bm25 }
 
 /** Split text into overlapping ~140-word chunks for retrieval. */
 function chunkText(text, size = 140, overlap = 30) {
@@ -58,6 +59,28 @@ export const ActiveContext = {
 
     get() { return _paper; },
 
+    // ── App-window context (About, Resume, Projects, Contact, Social) ─────────
+
+    /** Set the currently focused static app window as context. */
+    setAppContent(name, htmlOrText) {
+        if (!name || !htmlOrText) { _appContext = null; return; }
+        // Strip HTML tags to plain text
+        const div  = document.createElement('div');
+        div.innerHTML = htmlOrText;
+        const text = (div.textContent || div.innerText || '').replace(/\s+/g, ' ').trim();
+        if (!text) { _appContext = null; return; }
+        const chunks = chunkText(text);
+        let bm25 = null;
+        if (chunks.length > 1) {
+            bm25 = new BM25();
+            chunks.forEach((c, i) => bm25.addDocument(String(i), c));
+            bm25.build();
+        }
+        _appContext = { name, text, chunks, bm25 };
+    },
+
+    clearAppContent() { _appContext = null; },
+
     /**
      * LLM-ready context block describing the paper on screen, or '' when none.
      * Always includes the paper head (title / authors / abstract intro) so
@@ -67,44 +90,51 @@ export const ActiveContext = {
      * @returns {string}
      */
     getContextBlock(query = '') {
-        if (!_paper) return '';
+        // ── Research paper ────────────────────────────────────────────────────
+        if (_paper) {
+            let body  = '';
+            let label = '';
 
-        let body  = '';
-        let label = '';
-
-        if (_chunks.length) {
-            const picked = [];
-            const seen   = new Set();
-            const add = (i) => {
-                if (i >= 0 && i < _chunks.length && !seen.has(i)) { seen.add(i); picked.push(i); }
-            };
-
-            // Always include the first chunk — the title page holds the title,
-            // author list and abstract intro, which no keyword query would match.
-            add(0);
-
-            // Then the passages most relevant to the question.
-            if (_bm25 && query) {
-                _bm25.search(query, 3).filter(h => h.score > 0).forEach(h => add(Number(h.id)));
+            if (_chunks.length) {
+                const picked = [];
+                const seen   = new Set();
+                const add = (i) => {
+                    if (i >= 0 && i < _chunks.length && !seen.has(i)) { seen.add(i); picked.push(i); }
+                };
+                add(0);
+                if (_bm25 && query) {
+                    _bm25.search(query, 3).filter(h => h.score > 0).forEach(h => add(Number(h.id)));
+                }
+                body  = picked.sort((a, b) => a - b).map(i => _chunks[i]).join('\n…\n');
+                label = 'excerpts from the full text (the first excerpt is the title page)';
             }
-
-            body  = picked.sort((a, b) => a - b).map(i => _chunks[i]).join('\n…\n');
-            label = 'excerpts from the full text (the first excerpt is the title page)';
+            if (!body) { body = (_paper.abstract || '').trim(); label = 'abstract'; }
+            if (!body) return '';
+            const yr = _paper.year ? ` (${_paper.year})` : '';
+            return `## Paper the user is currently viewing\n` +
+                `Title: "${_paper.title}"${yr}\n` +
+                `${label}:\n${body}\n\n` +
+                `When the user says "this paper", "the article", "it", etc., they mean the paper above. ` +
+                `Answer strictly from the excerpts above. If a detail is not present in them, say you don't have it rather than guessing.`;
         }
 
-        if (!body) {
-            body  = (_paper.abstract || '').trim();
-            label = 'abstract';
+        // ── Static app window ─────────────────────────────────────────────────
+        if (_appContext) {
+            let excerpt = '';
+            if (_appContext.bm25 && query) {
+                const hits = _appContext.bm25.search(query, 4).filter(h => h.score > 0);
+                excerpt = (hits.length
+                    ? hits.map(h => _appContext.chunks[parseInt(h.id)]).join('\n…\n')
+                    : _appContext.text.slice(0, 900));
+            } else {
+                excerpt = _appContext.text.slice(0, 900);
+            }
+            return `## App currently open: ${_appContext.name}\n` +
+                `The user is viewing the following content:\n${excerpt}\n\n` +
+                `"This page", "here", "this section", etc. refer to the ${_appContext.name} content above.`;
         }
-        if (!body) return '';
 
-        const yr = _paper.year ? ` (${_paper.year})` : '';
-        return `## Paper the user is currently viewing\n` +
-            `Title: "${_paper.title}"${yr}\n` +
-            `${label}:\n${body}\n\n` +
-            `When the user says "this paper", "the article", "it", etc., they mean the paper above. ` +
-            `Answer strictly from the excerpts above. If a detail (e.g. an author name or number) ` +
-            `is not present in them, say you don't have that detail rather than guessing.`;
+        return '';
     },
 };
 

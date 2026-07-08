@@ -14,6 +14,21 @@
  */
 import { getWindowIcon }  from './windowUtils.js';
 import { getWindowData }  from '../content/AppContent.js';
+import { ActiveContext }  from '../system/ActiveContext.js';
+
+/** Strip HTML tags to plain text for ActiveContext. */
+function _htmlToText(html) {
+    if (!html) return '';
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return (div.textContent || div.innerText || '').replace(/\s+/g, ' ').trim();
+}
+
+/** True for content windows whose text should be loaded into ActiveContext. */
+function _isContentWindow(data) {
+    return !data.isBrowser && !data.isChat && !data.isGame &&
+           !data.isResearch && !data.isSettings;
+}
 
 export class WindowManager {
     /**
@@ -110,7 +125,8 @@ export class WindowManager {
             }, 600);
         });
 
-        this._windows.push({ id, element: el, title: windowData.title, isMaximized: false });
+        this._windows.push({ id, element: el, title: windowData.title, isMaximized: false,
+            _plainText: _isContentWindow(windowData) ? _htmlToText(windowData.content) : '' });
         this.setActiveWindow(id);
 
         this._setupWindowControls(el, id);
@@ -133,6 +149,9 @@ export class WindowManager {
 
         const win = this._windows[idx];
         this._eventBus.emit('window:closed', { id, title: win.title });
+
+        // Clear app context if this was the context window
+        if (win._plainText) ActiveContext.clearAppContent();
 
         win.element.style.transition = 'all 0.3s cubic-bezier(0.4,0,0.2,1)';
         win.element.style.transform  = 'scale(0)';
@@ -223,6 +242,11 @@ export class WindowManager {
             win.element.style.zIndex = this._windowZIndex;
             win.element.classList.add('active-window');
             this._activeWindowId = id;
+
+            // Update active context for the assistant
+            if (win._plainText) {
+                ActiveContext.setAppContent(win.title, win._plainText);
+            }
 
             // Bubble active window to top of array (for "last window" logic)
             const idx = this._windows.indexOf(win);

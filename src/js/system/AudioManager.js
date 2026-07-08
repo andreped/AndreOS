@@ -447,6 +447,20 @@ export class AudioManager {
             musicToggle?.classList.add('muted');
             const tray = document.getElementById('volumeTrayIcon');
             if (tray) tray.textContent = '🔇';
+        } else {
+            // Music was playing before the refresh — restore the flag so the
+            // gesture-unlock handler will start it on the next user interaction.
+            this.musicPlaying = true;
+            musicToggle?.classList.add('playing');
+            musicToggle?.classList.remove('muted');
+            const tray = document.getElementById('volumeTrayIcon');
+            if (tray) tray.textContent = '🎵';
+            this._dom.desktop?.classList.add('music-playing');
+            // If the AudioContext is already running (some browsers don't suspend
+            // on a soft refresh), start music immediately without waiting.
+            if (this.audioContext?.state === 'running') {
+                this.createAmbientMusic();
+            }
         }
     }
 

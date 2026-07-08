@@ -443,6 +443,51 @@ export function setupResearchWindow(winEl) {
             searchEl.addEventListener('input',  () => applyFilters(listEl, data.papers, searchEl.value, sortEl.value, activeType, selectedId));
             sortEl.addEventListener('change',   () => applyFilters(listEl, data.papers, searchEl.value, sortEl.value, activeType, selectedId));
 
+            // ── Voice command API ──────────────────────────────────────────
+            window.__ResearchApp = {
+                /** Select and open the Nth visible paper (1-based). */
+                openPaper(n) {
+                    const rows = listEl.querySelectorAll('.research-paper');
+                    const row  = rows[n - 1];
+                    if (!row) return false;
+                    const paper = papersById.get(row.dataset.id);
+                    if (!paper) return false;
+                    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    selectedId = paper.id;
+                    selectPaper(winEl, paper);
+                    return true;
+                },
+                /** Change sort order. Values: 'cited' | 'date' | 'asc' */
+                setSort(value) {
+                    if (!sortEl) return;
+                    sortEl.value = value;
+                    sortEl.dispatchEvent(new Event('change'));
+                },
+                /** Click a type-filter pill. Value: 'all' | 'journal-article' | etc. */
+                setFilter(type) {
+                    const pill = filtersEl?.querySelector(`.type-pill[data-type="${type}"]`);
+                    if (pill) pill.click();
+                },
+                /** Set the search input and trigger filtering. */
+                search(query) {
+                    if (!searchEl) return;
+                    searchEl.value = query;
+                    searchEl.dispatchEvent(new Event('input'));
+                    searchEl.focus();
+                },
+                /** Return available filter types as a human-readable string. */
+                getCategories() {
+                    if (!filtersEl) return 'All';
+                    return [...filtersEl.querySelectorAll('.type-pill[data-type]')]
+                        .map(p => p.dataset.type === 'all' ? 'All' : p.childNodes[0]?.textContent?.trim() ?? p.dataset.type)
+                        .join(', ');
+                },
+                /** Current visible paper count. */
+                getPaperCount() {
+                    return listEl.querySelectorAll('.research-paper').length;
+                },
+            };
+
             // Row selection → load paper into the detail panel
             listEl.addEventListener('click', (e) => {
                 const row = e.target.closest('.research-paper');
