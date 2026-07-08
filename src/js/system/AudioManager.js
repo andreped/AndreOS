@@ -33,6 +33,36 @@ export class AudioManager {
 
         this._setupControls();
         this._setupGestureUnlock();
+
+        // Override browser form-restoration (which resets <input type="range">
+        // to HTML defaults) by re-applying localStorage values on pageshow —
+        // the event that fires after all browser value-restoration is complete.
+        window.addEventListener('pageshow', () => {
+            const s = this._loadSettings();
+            if (!s) return;
+            const { masterVolumeSlider, musicVolumeSlider, sfxVolumeSlider } = this._dom;
+            if (masterVolumeSlider && s.masterVolume != null) {
+                masterVolumeSlider.value = s.masterVolume;
+                this._updateSliderTrack(masterVolumeSlider);
+                this._updatePct('masterPct', s.masterVolume);
+                if (this.masterGainNode && !this.masterMuted)
+                    this.masterGainNode.gain.value = s.masterVolume / 100;
+            }
+            if (musicVolumeSlider && s.musicVolume != null) {
+                musicVolumeSlider.value = s.musicVolume;
+                this._updateSliderTrack(musicVolumeSlider);
+                this._updatePct('musicPct', s.musicVolume);
+                if (this.musicGainNode && this.musicPlaying)
+                    this.musicGainNode.gain.value = s.musicVolume / 100;
+            }
+            if (sfxVolumeSlider && s.sfxVolume != null) {
+                sfxVolumeSlider.value = s.sfxVolume;
+                this._updateSliderTrack(sfxVolumeSlider);
+                this._updatePct('sfxPct', s.sfxVolume);
+                if (this.sfxGainNode && !this.sfxMuted)
+                    this.sfxGainNode.gain.value = s.sfxVolume / 100;
+            }
+        }, { once: true });
     }
 
     /** Resume AudioContext after the first user gesture, then start music if flagged. */
@@ -176,6 +206,16 @@ export class AudioManager {
 
     createAmbientMusic() {
         if (!this.audioContext) return;
+        // Mark desktop as music-playing now that audio is actually starting
+        this._dom.desktop?.classList.add('music-playing');
+        // Fade the music gain in over ~4 s so it "tunes in" rather than blasting
+        const targetGain = Math.max(0.001, this.musicGainNode.gain.value);
+        this.musicGainNode.gain.cancelScheduledValues(this.audioContext.currentTime);
+        this.musicGainNode.gain.setValueAtTime(0.001, this.audioContext.currentTime);
+        this.musicGainNode.gain.exponentialRampToValueAtTime(
+            targetGain,
+            this.audioContext.currentTime + 1
+        );
 
         const happyScale      = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25];
         const cheerfulChords  = [
@@ -455,9 +495,9 @@ export class AudioManager {
             musicToggle?.classList.remove('muted');
             const tray = document.getElementById('volumeTrayIcon');
             if (tray) tray.textContent = '🎵';
-            this._dom.desktop?.classList.add('music-playing');
-            // If the AudioContext is already running (some browsers don't suspend
-            // on a soft refresh), start music immediately without waiting.
+            // Don't add 'music-playing' class here — it shows a UI indicator
+            // that would flash during the loading screen. It gets added in
+            // createAmbientMusic() once audio actually starts.
             if (this.audioContext?.state === 'running') {
                 this.createAmbientMusic();
             }
