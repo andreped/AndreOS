@@ -822,8 +822,8 @@ export function getWindowData(fileType) {
             title:    'IronFlow',
             isIronFlow: true,
             content:  getIronFlowContent(),
-            width:    1100,
-            height:   700,
+            width:    420,
+            height:   780,
         },
         game: {
             title:  'Cast Arena',
