@@ -4753,7 +4753,8 @@ body {
     height: 100%;
 }
 
-.game-iframe {
+.game-iframe,
+.ironflow-iframe {
     width: 100%;
     height: 100%;
     border: none;

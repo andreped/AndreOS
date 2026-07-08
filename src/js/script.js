@@ -9,6 +9,7 @@ import { SearchOverlay }        from './desktop/SearchOverlay.js';
 import { setupBrowserWindow }   from './windows/BrowserWindow.js';
 import { setupChatWindow }      from './windows/ChatWindow.js';
 import { setupGameWindow }      from './windows/GameWindow.js';
+import { setupIronFlowWindow }  from './windows/IronFlowWindow.js';
 import { setupResearchWindow }  from './windows/ResearchWindow.js';
 import { setupSettingsWindow }  from './windows/SettingsWindow.js';
 import { VoiceCommandManager }  from './system/VoiceCommandManager.js';
@@ -31,6 +32,7 @@ class DesktopPortfolio {
                 browser:   setupBrowserWindow,
                 chat:      setupChatWindow,
                 game:      setupGameWindow,
+                ironflow:  setupIronFlowWindow,
                 research:  setupResearchWindow,
                 settings:  setupSettingsWindow,
             },

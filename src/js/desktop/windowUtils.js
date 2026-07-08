@@ -3,13 +3,14 @@
  */
 
 export function getWindowIcon(title) {
-    if (title.includes('About'))    return '👤';
-    if (title.includes('Resume'))   return '📄';
-    if (title.includes('Projects')) return '📁';
-    if (title.includes('Skills'))   return '⚙️';
-    if (title.includes('Contact'))  return '📧';
-    if (title.includes('Cast'))     return '🎮';
-    if (title.includes('Research')) return '🔬';
+    if (title.includes('About'))     return '👤';
+    if (title.includes('Resume'))    return '📄';
+    if (title.includes('Projects'))  return '📁';
+    if (title.includes('Skills'))    return '⚙️';
+    if (title.includes('Contact'))   return '📧';
+    if (title.includes('Cast'))      return '🎮';
+    if (title.includes('Research'))  return '🔬';
+    if (title.includes('IronFlow'))  return '🏋️';
     return '🗂️';
 }
 
@@ -24,5 +25,6 @@ export function getAppType(title) {
     if (title.includes('André') || title.includes('Andre') || title.includes('Ask')) return 'chat';
     if (title.includes('Cast'))     return 'game';
     if (title.includes('Research')) return 'research';
+    if (title.includes('IronFlow')) return 'ironflow';
     return 'unknown';
 }

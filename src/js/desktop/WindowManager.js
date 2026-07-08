@@ -110,9 +110,10 @@ export class WindowManager {
             <div class="window-resize-handle"></div>
         `;
 
-        if (windowData.isBrowser) el.classList.add('browser-window');
-        if (windowData.isChat)    el.classList.add('chat-window-wrap');
-        if (windowData.isGame)    el.classList.add('game-window-wrap');
+        if (windowData.isBrowser)  el.classList.add('browser-window');
+        if (windowData.isChat)     el.classList.add('chat-window-wrap');
+        if (windowData.isGame)     el.classList.add('game-window-wrap');
+        if (windowData.isIronFlow) el.classList.add('game-window-wrap');
 
         this._dom.windowsContainer?.appendChild(el);
 
@@ -133,11 +134,12 @@ export class WindowManager {
         this._makeWindowDraggable(el);
         this._makeWindowResizable(el);
 
-        if (windowData.isBrowser)  this._setupHandlers.browser(el, windowData.startUrl ?? 'https://andreped.dev');
-        if (windowData.isChat)     this._setupHandlers.chat(el);
-        if (windowData.isGame)     this._setupHandlers.game(el);
-        if (windowData.isResearch) this._setupHandlers.research(el);
-        if (windowData.isSettings) this._setupHandlers.settings(el);
+        if (windowData.isBrowser)   this._setupHandlers.browser(el, windowData.startUrl ?? 'https://andreped.dev');
+        if (windowData.isChat)      this._setupHandlers.chat(el);
+        if (windowData.isGame)      this._setupHandlers.game(el);
+        if (windowData.isResearch)  this._setupHandlers.research(el);
+        if (windowData.isSettings)  this._setupHandlers.settings(el);
+        if (windowData.isIronFlow)  this._setupHandlers.ironflow(el);
 
         this._audio.addSoundEffect('open');
         this._eventBus.emit('window:created', { id, title: windowData.title });
