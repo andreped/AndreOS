@@ -135,6 +135,21 @@ const COMMAND_REGISTRY = [
     },
 ];
 
+/**
+ * Returns true if the utterance starts with a recognised OS action verb
+ * (after stripping common filler phrases). Used to gate _parseLLM so
+ * conversational questions never reach the OS-command LLM pipeline.
+ *
+ * Examples that pass:  "open resume", "close window", "search for X"
+ * Examples that fail:  "can you summarize", "what is", "tell me about"
+ */
+function _looksLikeOSCommand(rawText) {
+    const OS_VERBS = /^(?:open|close|show|hide|minimize|maximise|maximize|navigate|go\s+to|search|sort|filter|browse|launch|select|find|start|stop|turn|display|åpne|lukk|vis|søk|minimer|naviger|gå\s+til)\b/i;
+    const FILLER   = /^(?:can\s+you|could\s+you|please|hey|just|would\s+you|will\s+you)\s+/i;
+    const stripped = rawText.trim().replace(FILLER, '').trim();
+    return OS_VERBS.test(stripped);
+}
+
 export class VoiceCommandManager {
     /**
      * @param {{
@@ -296,6 +311,23 @@ export class VoiceCommandManager {
             return;
         }
 
+        // 1.5. Context-aware commands (active window)
+        const contextual = this._parseContextual(text);
+        if (contextual) {
+            const heard = text.length > 45 ? text.slice(0, 43) + '…' : text;
+            if (contextual.intent === 'research_question') {
+                // Conversational research query — stream via sidebar, same as chat
+                this._feedback(`🎤 Heard: "${heard}"`, 'info');
+                await this._streamToSidebar(contextual.args.query);
+            } else {
+                this._feedback(`🎤 Heard: "${heard}"\n↳ ${contextual.label}`, 'success');
+                this._dispatch(contextual);
+                this._onMessage('assistant', `✓ ${contextual.label}`);
+            }
+            if (fromVoice) this._setState('ready');
+            return;
+        }
+
         // 2. Rule-based compound parser
         const compound = this._parseCompound(text);
         if (compound) {
@@ -308,18 +340,21 @@ export class VoiceCommandManager {
             return;
         }
 
-        // 3. LLM intent parse — execute only when it yields a real OS action
-        //    (open/close/desktop/…). Pure-chat or empty results fall through to
-        //    a normal conversation so we always answer the user's *original*
-        //    message rather than a rewritten command interpretation of it.
-        const actions = await this._parseLLM(text);
-        if (actions?.some(a => a.a !== 'chat')) {
-            const intent = this._describeActions(actions);
-            this._feedback(`🤖 Heard: "${heard}"\n↳ ${intent}`, 'success');
-            await this._executeSequence(actions);
-            if (!actions.some(a => a.a === 'chat')) this._onMessage('assistant', `✓ ${intent}`);
-            if (fromVoice) this._setState('ready');
-            return;
+        // 3. LLM intent parse — ONLY for utterances that look like OS commands.
+        //    Gate with an action-verb check first: conversational questions,
+        //    questions starting with "can you / what / how / why / summarize…"
+        //    skip straight to the conversational fallback. This prevents the
+        //    small LLM from hallucinating OS actions for natural language input.
+        if (_looksLikeOSCommand(text)) {
+            const actions = await this._parseLLM(text);
+            if (actions?.some(a => a.a !== 'chat')) {
+                const intent = this._describeActions(actions);
+                this._feedback(`🤖 Heard: "${heard}"\n↳ ${intent}`, 'success');
+                await this._executeSequence(actions);
+                if (!actions.some(a => a.a === 'chat')) this._onMessage('assistant', `✓ ${intent}`);
+                if (fromVoice) this._setState('ready');
+                return;
+            }
         }
 
         // 4. Conversational fallback — stream LLM reply into sidebar
@@ -359,6 +394,74 @@ export class VoiceCommandManager {
         } else {
             this._onMessage('assistant', 'The AI model isn\'t loaded yet — open Ask André to load it first.');
         }
+    }
+
+    // ── Private: context-aware commands (active window) ──────────────────────
+
+    _parseContextual(rawText) {
+        const activeWin   = this._windowManager.windows.find(w => w.id === this._windowManager.activeWindowId);
+        const activeTitle = activeWin?.title ?? '';
+        const t = rawText.toLowerCase().replace(/[.,!?]/g, ' ');
+
+        if (activeTitle === 'Research') {
+            // ── Open the Nth paper ──────────────────────────────────────────
+            const ORDINALS = { first:1,second:2,third:3,fourth:4,fifth:5,
+                               sixth:6,seventh:7,eighth:8,ninth:9,tenth:10 };
+            const nthMatch = t.match(/(?:open|show|select|expand|read)\s+(?:the\s+)?(\w+)\s+(?:paper|article|publication|item|result|one)/i);
+            if (nthMatch) {
+                const raw = nthMatch[1].toLowerCase();
+                const n   = ORDINALS[raw] ?? (parseInt(raw) || null);
+                if (n) return { intent: 'research_open_nth', args: { n }, label: `Open paper #${n}` };
+            }
+            // "open number 5" / "select 3"
+            const numMatch = t.match(/(?:open|show|select|expand)\s+(?:number|item|paper|article|publication)?\s*(\d+)/i);
+            if (numMatch) {
+                const n = parseInt(numMatch[1]);
+                if (n > 0) return { intent: 'research_open_nth', args: { n }, label: `Open paper #${n}` };
+            }
+
+            // ── Sort ────────────────────────────────────────────────────────
+            if (/sort\s+by\s+cit|most\s+cited|by\s+citation/.test(t))
+                return { intent: 'research_sort', args: { sort: 'cited' }, label: 'Sort by citations' };
+            if (/sort\s+by\s+(?:date|newest|latest|recent)|newest|latest|most\s+recent/.test(t))
+                return { intent: 'research_sort', args: { sort: 'date' }, label: 'Sort by newest' };
+            if (/sort\s+by\s+(?:oldest|earliest|year)|oldest|earliest/.test(t))
+                return { intent: 'research_sort', args: { sort: 'asc' }, label: 'Sort by oldest' };
+
+            // ── Filter by type ──────────────────────────────────────────────
+            if (/show\s+all|reset\s+filter|clear\s+filter|all\s+types/.test(t))
+                return { intent: 'research_filter', args: { type: 'all' }, label: 'Show all types' };
+            if (/journal/.test(t) && /show|filter|only/.test(t))
+                return { intent: 'research_filter', args: { type: 'journal-article' }, label: 'Filter: journals' };
+            if (/conference|proceedings/.test(t) && /show|filter|only/.test(t))
+                return { intent: 'research_filter', args: { type: 'proceedings-article' }, label: 'Filter: conferences' };
+            if (/preprint/.test(t) && /show|filter|only/.test(t))
+                return { intent: 'research_filter', args: { type: 'preprint' }, label: 'Filter: preprints' };
+            if (/book\s+chapter/.test(t) && /show|filter|only/.test(t))
+                return { intent: 'research_filter', args: { type: 'book-chapter' }, label: 'Filter: book chapters' };
+
+            // ── List categories ─────────────────────────────────────────────
+            if (/(?:what|list|show|which)\s+(?:categor|filter|type|option)/.test(t))
+                return { intent: 'research_categories', args: {}, label: 'List categories' };
+
+            // ── Search within research ──────────────────────────────────────
+            const searchMatch = rawText.match(/(?:search|find|look)\s+(?:for\s+)?(.+)/i);
+            if (searchMatch) {
+                const query = searchMatch[1].trim();
+                if (query.length > 2)
+                    return { intent: 'research_search', args: { query }, label: `Search: "${query.slice(0,30)}"` };
+            }
+
+            // ── Research question (conversational) — route to sidebar ────────
+            // Catch BEFORE the LLM action parser so it can't hallucinate OS
+            // commands from natural language research questions.
+            if (/summarize|explain|describe|analys[ei]|tell\s+me\s+about|what\s+is|what\s+does|how\s+does|why\s+is|compare|discuss|abstract|conclusion/.test(t) ||
+                /(?:next|previous|prev|last|this|the\s+selected)\s+paper/.test(t)) {
+                return { intent: 'research_question', args: { query: rawText }, label: 'Ask about paper' };
+            }
+        }
+
+        return null;
     }
 
     // ── Private: rule-based compound parser ──────────────────────────────────────────
@@ -630,6 +733,26 @@ export class VoiceCommandManager {
             case 'desktop':
                 this._windowManager.showDesktop();
                 break;
+
+            case 'research_open_nth': {
+                const ok = window.__ResearchApp?.openPaper(args.n);
+                if (!ok) this._notifications.show(`No paper #${args.n} in current list`, 'warning');
+                break;
+            }
+            case 'research_sort':
+                window.__ResearchApp?.setSort(args.sort);
+                break;
+            case 'research_filter':
+                window.__ResearchApp?.setFilter(args.type);
+                break;
+            case 'research_search':
+                window.__ResearchApp?.search(args.query);
+                break;
+            case 'research_categories': {
+                const cats = window.__ResearchApp?.getCategories() ?? 'Research not open';
+                this._notifications.show(`📋 Available categories: ${cats}`, 'info');
+                break;
+            }
 
             case 'help':
                 this._showHelp();

@@ -85,8 +85,10 @@ class DesktopPortfolio {
 
     init() {
         this.updateClock();
+        this.audio.init();        // must run before showLoadingScreen so that
+                                  // musicPlaying is restored from localStorage
+                                  // before revealDesktop() calls startMusic()
         this.showLoadingScreen();
-        this.audio.init();
 
         const clockUpdate = () => {
             this.updateClock();
@@ -394,7 +396,10 @@ class DesktopPortfolio {
                 window.__desktopReady = true;
                 document.dispatchEvent(new CustomEvent('andreos:desktop-ready'));
             }, 300);
-            this.audio.startMusic();
+            // Only start music if it wasn't already restored by _applySettings
+            // (which sets musicPlaying = true on refresh). Calling startMusic()
+            // again would show the sound-effect bubble unnecessarily.
+            if (!this.audio.musicPlaying) this.audio.startMusic();
         };
 
         if (skipBoot) {
