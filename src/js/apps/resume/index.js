@@ -1,4 +1,5 @@
 import { render } from './content.js';
+import { makeContentContext } from '../../assistant/retrieval/contentContext.js';
 
 /** @type {import('../registry/AppRegistry.js').AppManifest} */
 export const catalog = {
@@ -11,6 +12,7 @@ export const catalog = {
 /** @type {import('../../assistant/registry/AssistantRegistry.js').AssistantProfile} */
 export const profile = {
     appId: 'resume',
+    context: makeContentContext({ name: catalog.title, render }),
     match: /resume|^cv$|curriculum|jobberfaring/,
     voiceKeywords: [
         'resume', 'curriculum vitae', 'work experience', 'career', 'experience',

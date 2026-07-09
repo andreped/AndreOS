@@ -1,4 +1,5 @@
 import { render } from './content.js';
+import { makeContentContext } from '../../assistant/retrieval/contentContext.js';
 
 /** @type {import('../registry/AppRegistry.js').AppManifest} */
 export const catalog = {
@@ -11,6 +12,7 @@ export const catalog = {
 /** @type {import('../../assistant/registry/AssistantRegistry.js').AssistantProfile} */
 export const profile = {
     appId: 'about',
+    context: makeContentContext({ name: catalog.title, render }),
     match: /about|bio|om\s+meg/,
     voiceKeywords: [
         'open about', 'about me', 'about andre', 'who are you', 'who is andre', 'tell me about',

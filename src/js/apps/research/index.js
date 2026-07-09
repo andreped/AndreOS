@@ -1,4 +1,5 @@
 import { render } from './content.js';
+import { researchContext } from './context.js';
 import { setupResearchWindow } from './window.js';
 
 /**
@@ -20,6 +21,7 @@ const api = () => /** @type {any} */ (window).__ResearchApp ?? null;
 /** @type {import('../../assistant/registry/AssistantRegistry.js').AssistantProfile} */
 export const profile = {
     appId: 'research',
+    context: researchContext,
     match: /research|paper|publication|science|forskning/,
     voiceKeywords: [
         'research', 'publications', 'papers', 'science', 'scientific work',
