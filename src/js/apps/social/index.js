@@ -1,9 +1,9 @@
-import { getSocialContent } from '../../content/AppContent.js';
+import { render } from './content.js';
 
 /** @type {import('../registry/AppRegistry.js').AppManifest} */
 export const catalog = {
     id: 'social', name: 'Social Links', title: 'Social Links', icon: '🔗', kind: 'content',
-    window: { width: 600, height: 500, render: getSocialContent },
+    window: { width: 600, height: 500, render },
     searchable: true,
     search: { icon: '🔗', subtitle: 'GitHub, LinkedIn, Google Scholar and more', keywords: 'social github linkedin twitter scholar publications links' },
 };

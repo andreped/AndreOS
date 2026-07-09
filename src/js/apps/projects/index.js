@@ -1,9 +1,9 @@
-import { getProjectsContent } from '../../content/AppContent.js';
+import { render } from './content.js';
 
 /** @type {import('../registry/AppRegistry.js').AppManifest} */
 export const catalog = {
     id: 'projects', name: 'Projects', title: 'Projects', icon: '📁', kind: 'content',
-    window: { width: 800, height: 600, render: getProjectsContent },
+    window: { width: 800, height: 600, render },
     searchable: true,
     search: { icon: '📁', subtitle: 'Open-source and research projects', keywords: 'projects github open source software' },
 };
