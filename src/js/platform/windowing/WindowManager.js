@@ -13,7 +13,7 @@
  *   taskbar:update   {}
  */
 import { getWindowIcon }  from './windowUtils.js';
-import { getWindowData }  from '../../content/AppContent.js';
+import { appRegistry }    from '../../apps/registry/AppRegistry.js';
 import { ActiveContext }  from '../../assistant/retrieval/ActiveContext.js';
 
 /** Strip HTML tags to plain text for ActiveContext. */
@@ -33,17 +33,15 @@ function _isContentWindow(data) {
 export class WindowManager {
     /**
      * @param {{
-     *   domCache:            object,
-     *   eventBus:            import('../core/EventBus.js').EventBus,
-     *   audioManager:        import('../services/AudioManager.js').AudioManager,
-     *   windowSetupHandlers: { browser: Function, chat: Function, game: Function }
+     *   domCache:     object,
+     *   eventBus:     import('../core/EventBus.js').EventBus,
+     *   audioManager: import('../services/AudioManager.js').AudioManager,
      * }} opts
      */
-    constructor({ domCache, eventBus, audioManager, windowSetupHandlers }) {
+    constructor({ domCache, eventBus, audioManager }) {
         this._dom             = domCache;
         this._eventBus        = eventBus;
         this._audio           = audioManager;
-        this._setupHandlers   = windowSetupHandlers;
 
         this._windows         = [];   // { id, element, title, isMaximized, prevRect? }
         this._activeWindowId  = null;
@@ -78,7 +76,7 @@ export class WindowManager {
             const existing = this._windows.find(w => w.title === 'Ask André');
             if (existing) { this.setActiveWindow(existing.id); return; }
         }
-        const data = getWindowData(fileType);
+        const data = appRegistry.toWindowData(fileType);
         if (data) this.createWindow(data);
     }
 
@@ -134,12 +132,8 @@ export class WindowManager {
         this._makeWindowDraggable(el);
         this._makeWindowResizable(el);
 
-        if (windowData.isBrowser)   this._setupHandlers.browser(el, windowData.startUrl ?? 'https://andreped.dev');
-        if (windowData.isChat)      this._setupHandlers.chat(el);
-        if (windowData.isGame)      this._setupHandlers.game(el);
-        if (windowData.isResearch)  this._setupHandlers.research(el);
-        if (windowData.isSettings)  this._setupHandlers.settings(el);
-        if (windowData.isIronFlow)  this._setupHandlers.ironflow(el);
+        // Each app owns its window setup, declared in its catalog entry.
+        windowData.setup?.(el, windowData);
 
         this._audio.addSoundEffect('open');
         this._eventBus.emit('window:created', { id, title: windowData.title });

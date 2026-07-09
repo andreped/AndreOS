@@ -7,12 +7,6 @@ import { WindowManager }        from './platform/windowing/WindowManager.js';
 import { Taskbar }              from './platform/shell/Taskbar.js';
 import { Desktop }              from './platform/shell/Desktop.js';
 import { SearchOverlay }        from './platform/shell/SearchOverlay.js';
-import { setupBrowserWindow }   from './windows/BrowserWindow.js';
-import { setupChatWindow }      from './windows/ChatWindow.js';
-import { setupGameWindow }      from './windows/GameWindow.js';
-import { setupIronFlowWindow }  from './windows/IronFlowWindow.js';
-import { setupResearchWindow }  from './windows/ResearchWindow.js';
-import { setupSettingsWindow }  from './windows/SettingsWindow.js';
 import { VoiceCommandManager }  from './assistant/voice/VoiceCommandManager.js';
 import { VoiceMicButton }       from './assistant/voice/VoiceMicButton.js';
 import { LangButton }           from './platform/shell/LangButton.js';
@@ -26,17 +20,9 @@ class DesktopPortfolio {
         this.audio         = new AudioManager(this.dom);
 
         this.windowManager = new WindowManager({
-            domCache:            this.dom,
-            eventBus:            this.eventBus,
-            audioManager:        this.audio,
-            windowSetupHandlers: {
-                browser:   setupBrowserWindow,
-                chat:      setupChatWindow,
-                game:      setupGameWindow,
-                ironflow:  setupIronFlowWindow,
-                research:  setupResearchWindow,
-                settings:  setupSettingsWindow,
-            },
+            domCache:     this.dom,
+            eventBus:     this.eventBus,
+            audioManager: this.audio,
         });
 
         this.taskbar = new Taskbar({

@@ -16,9 +16,9 @@
  */
 import { VoiceEngine }       from './VoiceEngine.js';
 import { isVoiceAIEnabled, getWhisperModel, getTranscribeLang } from '../../platform/services/Settings.js';
-import { appRegistry }       from '../../apps/catalog/AppRegistry.js';
-import { assistantRegistry } from '../../apps/assistant/AssistantRegistry.js';
-import { ActionDispatcher }  from '../../apps/assistant/ActionDispatcher.js';
+import { appRegistry }       from '../../apps/registry/AppRegistry.js';
+import { assistantRegistry } from '../registry/AssistantRegistry.js';
+import { ActionDispatcher }  from '../registry/ActionDispatcher.js';
 
 /**
  * OS-level voice commands (window management + help).

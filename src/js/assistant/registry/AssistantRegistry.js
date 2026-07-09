@@ -35,7 +35,7 @@
  * @property {() => boolean}   [ready]      True once the app's runtime API is available (for sequencing).
  */
 
-import { appRegistry } from '../catalog/AppRegistry.js';
+import { appRegistry } from '../../apps/registry/AppRegistry.js';
 
 export class AssistantRegistry {
     /** @param {import('../catalog/AppRegistry.js').AppRegistry} catalog */
