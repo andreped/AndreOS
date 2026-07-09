@@ -13,8 +13,8 @@
  *   taskbar:update   {}
  */
 import { getWindowIcon }  from './windowUtils.js';
-import { getWindowData }  from '../content/AppContent.js';
-import { ActiveContext }  from '../system/ActiveContext.js';
+import { getWindowData }  from '../../content/AppContent.js';
+import { ActiveContext }  from '../../assistant/retrieval/ActiveContext.js';
 
 /** Strip HTML tags to plain text for ActiveContext. */
 function _htmlToText(html) {
@@ -35,7 +35,7 @@ export class WindowManager {
      * @param {{
      *   domCache:            object,
      *   eventBus:            import('../core/EventBus.js').EventBus,
-     *   audioManager:        import('../system/AudioManager.js').AudioManager,
+     *   audioManager:        import('../services/AudioManager.js').AudioManager,
      *   windowSetupHandlers: { browser: Function, chat: Function, game: Function }
      * }} opts
      */

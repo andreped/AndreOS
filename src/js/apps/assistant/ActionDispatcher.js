@@ -24,8 +24,8 @@ import { assistantRegistry } from './AssistantRegistry.js';
 export class ActionDispatcher {
     /**
      * @param {{
-     *   windowManager: import('../../desktop/WindowManager.js').WindowManager,
-     *   notifications: import('../../system/NotificationManager.js').NotificationManager,
+     *   windowManager: import('../../platform/windowing/WindowManager.js').WindowManager,
+     *   notifications: import('../../platform/services/NotificationManager.js').NotificationManager,
      *   registry?:     import('./AssistantRegistry.js').AssistantRegistry,
      * }} opts
      */

@@ -7,7 +7,7 @@
  *
  * Only renders on desktop (hidden via CSS on mobile — users use Settings there).
  */
-import { getTranscribeLang, saveSettings } from '../system/Settings.js';
+import { getTranscribeLang, saveSettings } from '../services/Settings.js';
 
 const LANGS = [
     { id: 'en', label: 'EN', name: 'English',   transcribe: 'english',   llm: 'en' },

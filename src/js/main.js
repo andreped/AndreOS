@@ -1,22 +1,22 @@
 import './apps/index.js'; // registers the app catalog + assistant layer (side effect)
-import { buildDomCache }        from './core/DomCache.js';
-import { EventBus }             from './core/EventBus.js';
-import { NotificationManager }  from './system/NotificationManager.js';
-import { AudioManager }         from './system/AudioManager.js';
-import { WindowManager }        from './desktop/WindowManager.js';
-import { Taskbar }              from './desktop/Taskbar.js';
-import { Desktop }              from './desktop/Desktop.js';
-import { SearchOverlay }        from './desktop/SearchOverlay.js';
+import { buildDomCache }        from './platform/core/DomCache.js';
+import { EventBus }             from './platform/core/EventBus.js';
+import { NotificationManager }  from './platform/services/NotificationManager.js';
+import { AudioManager }         from './platform/services/AudioManager.js';
+import { WindowManager }        from './platform/windowing/WindowManager.js';
+import { Taskbar }              from './platform/shell/Taskbar.js';
+import { Desktop }              from './platform/shell/Desktop.js';
+import { SearchOverlay }        from './platform/shell/SearchOverlay.js';
 import { setupBrowserWindow }   from './windows/BrowserWindow.js';
 import { setupChatWindow }      from './windows/ChatWindow.js';
 import { setupGameWindow }      from './windows/GameWindow.js';
 import { setupIronFlowWindow }  from './windows/IronFlowWindow.js';
 import { setupResearchWindow }  from './windows/ResearchWindow.js';
 import { setupSettingsWindow }  from './windows/SettingsWindow.js';
-import { VoiceCommandManager }  from './system/VoiceCommandManager.js';
-import { VoiceMicButton }       from './desktop/VoiceMicButton.js';
-import { LangButton }           from './desktop/LangButton.js';
-import { AssistantSidebar }     from './desktop/AssistantSidebar.js';
+import { VoiceCommandManager }  from './assistant/voice/VoiceCommandManager.js';
+import { VoiceMicButton }       from './assistant/voice/VoiceMicButton.js';
+import { LangButton }           from './platform/shell/LangButton.js';
+import { AssistantSidebar }     from './assistant/ui/AssistantSidebar.js';
 
 class DesktopPortfolio {
     constructor() {

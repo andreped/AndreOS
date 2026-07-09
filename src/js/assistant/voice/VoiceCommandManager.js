@@ -14,11 +14,11 @@
  *   const vcm = new VoiceCommandManager({ windowManager, notifications, onStateChange });
  *   await vcm.toggleRecording();   // first call loads the model; subsequent calls toggle mic
  */
-import { VoiceEngine }       from '../system/VoiceEngine.js';
-import { isVoiceAIEnabled, getWhisperModel, getTranscribeLang } from '../system/Settings.js';
-import { appRegistry }       from '../apps/catalog/AppRegistry.js';
-import { assistantRegistry } from '../apps/assistant/AssistantRegistry.js';
-import { ActionDispatcher }  from '../apps/assistant/ActionDispatcher.js';
+import { VoiceEngine }       from './VoiceEngine.js';
+import { isVoiceAIEnabled, getWhisperModel, getTranscribeLang } from '../../platform/services/Settings.js';
+import { appRegistry }       from '../../apps/catalog/AppRegistry.js';
+import { assistantRegistry } from '../../apps/assistant/AssistantRegistry.js';
+import { ActionDispatcher }  from '../../apps/assistant/ActionDispatcher.js';
 
 /**
  * OS-level voice commands (window management + help).
@@ -78,8 +78,8 @@ function _looksLikeOSCommand(rawText) {
 export class VoiceCommandManager {
     /**
      * @param {{
-     *   windowManager:    import('../desktop/WindowManager.js').WindowManager,
-     *   notifications:    import('./NotificationManager.js').NotificationManager,
+     *   windowManager:    import('../../platform/windowing/WindowManager.js').WindowManager,
+     *   notifications:    import('../../platform/services/NotificationManager.js').NotificationManager,
      *   onStateChange?:   (state: 'idle'|'loading'|'ready'|'recording'|'processing'|'error') => void,
      *   onMessage?:       (role: 'user'|'assistant'|'system', text: string) => void,
      *   onStreamMessage?: (role: 'assistant') => (text: string) => void,

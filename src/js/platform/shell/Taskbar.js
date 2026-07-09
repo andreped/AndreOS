@@ -5,11 +5,11 @@
  * Listens to window lifecycle events via EventBus and calls back into
  * WindowManager for user-initiated actions (click, context menu).
  */
-import { getWindowIcon, getAppType } from './windowUtils.js';
+import { getWindowIcon, getAppType } from '../windowing/windowUtils.js';
 
 export class Taskbar {
     /**
-     * @param {{ domCache: object, eventBus: import('../core/EventBus.js').EventBus, windowManager: import('./WindowManager.js').WindowManager }} opts
+     * @param {{ domCache: object, eventBus: import('../core/EventBus.js').EventBus, windowManager: import('../windowing/WindowManager.js').WindowManager }} opts
      */
     constructor({ domCache, eventBus, windowManager }) {
         this._dom           = domCache;
