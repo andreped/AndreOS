@@ -4,20 +4,24 @@
  * Renders a live search dropdown below the taskbar search box.
  * Indexes all apps and key content sections; opens the matching
  * window when a result is selected.
+ *
+ * App entries come from the App Registry (the single source of truth); the
+ * content entries below are curated sub-sections within those apps.
  */
+import { appRegistry } from '../apps/catalog/AppRegistry.js';
 
-const SEARCH_INDEX = [
-    // ── Apps ──────────────────────────────────────────────────────────────
-    { type: 'app', fileType: 'about',    icon: '👤', label: 'About Me.txt',  subtitle: 'Who André Pedersen is',                                     keywords: 'about andre pedersen background bio profile' },
-    { type: 'app', fileType: 'resume',   icon: '📄', label: 'Resume.pdf',    subtitle: 'Work experience, education, certifications',                 keywords: 'resume cv work job experience degree dips sintef ntnu' },
-    { type: 'app', fileType: 'projects', icon: '📁', label: 'Projects',      subtitle: 'Open-source and research projects',                          keywords: 'projects github open source software' },
-    { type: 'app', fileType: 'contact',  icon: '✉️', label: 'Contact.txt',   subtitle: 'Get in touch with André',                                    keywords: 'contact email reach out message' },
-    { type: 'app', fileType: 'social',   icon: '🔗', label: 'Social Links',  subtitle: 'GitHub, LinkedIn, Google Scholar and more',                  keywords: 'social github linkedin twitter scholar publications links' },
-    { type: 'app', fileType: 'browser',  icon: '🌐', label: 'Browser',       subtitle: 'Browse the web',                                             keywords: 'browser internet web navigate' },
-    { type: 'app', fileType: 'chat',     icon: '💬', label: 'Ask André',     subtitle: 'Chat with an AI version of André',                           keywords: 'chat ai ask question andre' },
-    { type: 'app', fileType: 'game',     icon: '🎮', label: 'Cast Arena',    subtitle: 'Play Cast Arena',                                            keywords: 'game cast arena play' },
-    { type: 'app', fileType: 'settings', icon: '⚙️', label: 'Settings',      subtitle: 'AI model, voice commands, preferences',                      keywords: 'settings model ai voice preferences configure' },
+/** App-level search entries, built from the registry at query time. */
+function appSearchEntries() {
+    return appRegistry.searchable().map(m => ({
+        type: 'app', fileType: m.id,
+        icon:  m.search?.icon ?? m.icon,
+        label: m.title,
+        subtitle: m.search?.subtitle ?? '',
+        keywords: m.search?.keywords ?? '',
+    }));
+}
 
+const CONTENT_INDEX = [
     // ── Content — About ───────────────────────────────────────────────────
     { type: 'content', fileType: 'about', icon: '🏥', label: 'Healthcare AI',       subtitle: 'AI-augmented software for Norwegian hospitals at DIPS AS',        keywords: 'healthcare hospital ai norway dips oslo clinical' },
     { type: 'content', fileType: 'about', icon: '🎓', label: 'PhD & Publications',  subtitle: '30+ peer-reviewed papers, 500+ citations, h-index 15',            keywords: 'phd publications research papers citations scholar ntnu' },
@@ -156,7 +160,8 @@ export class SearchOverlay {
     // ── Search ────────────────────────────────────────────────────────────
 
     _search(query) {
-        const static_ = SEARCH_INDEX.filter(({ label, subtitle, keywords }) =>
+        const index   = [...appSearchEntries(), ...CONTENT_INDEX];
+        const static_ = index.filter(({ label, subtitle, keywords }) =>
             `${label} ${subtitle} ${keywords}`.toLowerCase().includes(query)
         );
         const papers = window.AndreChat?.searchPapers(query) ?? [];

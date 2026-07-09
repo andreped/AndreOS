@@ -1,3 +1,4 @@
+import './apps/index.js'; // registers the app catalog + assistant layer (side effect)
 import { buildDomCache }        from './core/DomCache.js';
 import { EventBus }             from './core/EventBus.js';
 import { NotificationManager }  from './system/NotificationManager.js';
