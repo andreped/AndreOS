@@ -8,7 +8,7 @@
  * App entries come from the App Registry (the single source of truth); the
  * content entries below are curated sub-sections within those apps.
  */
-import { appRegistry } from '../../apps/catalog/AppRegistry.js';
+import { appRegistry } from '../../apps/registry/AppRegistry.js';
 
 /** App-level search entries, built from the registry at query time. */
 function appSearchEntries() {

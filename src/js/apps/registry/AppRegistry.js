@@ -86,6 +86,7 @@ export class AppRegistry {
             content: m.window.render(),
             width:   m.window.width,
             height:  m.window.height,
+            setup:   m.window.setup,
         };
         switch (m.kind) {
             case 'browser':  return { ...base, isBrowser: true, startUrl: m.window.startUrl };

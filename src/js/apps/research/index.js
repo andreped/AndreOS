@@ -1,17 +1,24 @@
+import { getResearchContent } from '../../content/AppContent.js';
+import { setupResearchWindow } from './window.js';
+
 /**
- * Research assistant profile — the reference example of an app that declares
- * rich, in-app capabilities the assistant can drive.
- *
- * The capability handlers call the app's runtime API (exposed by the Research
- * window as `window.__ResearchApp`). Declaring them here means the assistant
- * discovers these actions from the registry instead of hardcoding a switch.
+ * Research — the reference example of an app that declares rich, in-app
+ * capabilities the assistant can drive. Capability handlers call the app's
+ * runtime API (exposed by the window as `window.__ResearchApp`).
  */
+
+/** @type {import('../registry/AppRegistry.js').AppManifest} */
+export const catalog = {
+    id: 'research', name: 'Research', title: 'Research', icon: '🔬', kind: 'research',
+    window: { width: 1040, height: 660, render: getResearchContent, setup: (el) => setupResearchWindow(el) },
+    searchable: false, // publications are added to search dynamically via RAG
+};
 
 /** Convenience: the live Research window API, or null if not open yet. */
 const api = () => /** @type {any} */ (window).__ResearchApp ?? null;
 
-/** @type {import('../AssistantRegistry.js').AssistantProfile} */
-export const researchProfile = {
+/** @type {import('../../assistant/registry/AssistantRegistry.js').AssistantProfile} */
+export const profile = {
     appId: 'research',
     match: /research|paper|publication|science|forskning/,
     voiceKeywords: [

@@ -2,11 +2,8 @@
  * Pure HTML-string factories for every app window.
  * No DOM, no side effects — easy to test and update independently.
  *
- * Window configuration (title, size, kind) now lives in the App Registry
- * (`src/js/apps/`). `getWindowData()` is a thin adapter over it so existing
- * callers keep working.
+ * These render functions are imported by each app's `apps/<app>/index.js`.
  */
-import { appRegistry } from '../apps/catalog/AppRegistry.js';
 
 export function getAboutContent() {
     return `
@@ -764,13 +761,4 @@ export function getResearchContent() {
             </div>
         </div>
     `;
-}
-
-/**
- * Returns the window configuration object for a given file type, or null if
- * unknown. Delegates to the App Registry — the single source of truth for app
- * identity and window specs.
- */
-export function getWindowData(fileType) {
-    return appRegistry.toWindowData(fileType);
 }
