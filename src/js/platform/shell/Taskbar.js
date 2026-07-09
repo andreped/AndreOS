@@ -4,8 +4,10 @@
  * Manages taskbar item DOM, window grouping, previews, and context menus.
  * Listens to window lifecycle events via EventBus and calls back into
  * WindowManager for user-initiated actions (click, context menu).
+ *
+ * App identity (type + icon) arrives on the window lifecycle events, sourced
+ * from the App Registry — the taskbar never guesses it from the title.
  */
-import { getWindowIcon, getAppType } from '../windowing/windowUtils.js';
 
 export class Taskbar {
     /**
@@ -34,7 +36,7 @@ export class Taskbar {
 
     _subscribeToEvents() {
         const eb = this._eventBus;
-        eb.on('window:created',   ({ id, title }) => this._addItem(id, title));
+        eb.on('window:created',   ({ id, title, appType, icon }) => this._addItem(id, title, appType, icon));
         eb.on('window:closed',    ({ id })         => this._removeItem(id));
         eb.on('window:minimized', ({ id })         => this._setItemState(id, true));
         eb.on('window:restored',  ({ id })         => this._setItemState(id, false));
@@ -44,11 +46,10 @@ export class Taskbar {
 
     // ── Private: add / remove / state ────────────────────────────────────────
 
-    _addItem(windowId, title) {
+    _addItem(windowId, title, appType, icon) {
         const taskbarItems = this._dom.taskbarItems;
         if (!taskbarItems) return;
 
-        const appType       = getAppType(title);
         const existingGroup = this._groupedApps.get(appType);
 
         if (existingGroup?.windows.length > 0) {
@@ -61,7 +62,6 @@ export class Taskbar {
             item.dataset.windowId = windowId;
             item.dataset.appType  = appType;
 
-            const icon = getWindowIcon(title);
             item.innerHTML = `
                 <span class="taskbar-icon">${icon}</span>
                 <span class="taskbar-title">${title}</span>
@@ -233,7 +233,7 @@ export class Taskbar {
             thumbnail.innerHTML = `
                 <div class="mini-window">
                     <div class="mini-header">${win.title}</div>
-                    <div class="mini-content">${getWindowIcon(win.title)}</div>
+                    <div class="mini-content">${win.icon ?? '🗂️'}</div>
                 </div>
             `;
         }
@@ -256,7 +256,7 @@ export class Taskbar {
                     const win = this._windowManager.getWindow(winId);
                     return `
                         <div class="group-window-item" data-window-id="${winId}">
-                            <div class="group-window-preview">${getWindowIcon(win?.title ?? '')}</div>
+                            <div class="group-window-preview">${win?.icon ?? '🗂️'}</div>
                             <div class="group-window-title">${win?.title ?? ''}</div>
                             <div class="group-window-close" data-action="close">×</div>
                         </div>

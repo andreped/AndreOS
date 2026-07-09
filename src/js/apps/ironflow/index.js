@@ -1,4 +1,4 @@
-import { getIronFlowContent } from '../../content/AppContent.js';
+import { render } from './content.js';
 import { setupIronFlowWindow } from './window.js';
 
 /**
@@ -8,7 +8,7 @@ import { setupIronFlowWindow } from './window.js';
  */
 export const catalog = {
     id: 'ironflow', name: 'IronFlow', title: 'IronFlow', icon: '🏋️', kind: 'ironflow',
-    window: { width: 420, height: 780, render: getIronFlowContent, setup: (el) => setupIronFlowWindow(el) },
+    window: { width: 420, height: 780, render, setup: (el) => setupIronFlowWindow(el) },
     launchable: false,
     searchable: false,
 };

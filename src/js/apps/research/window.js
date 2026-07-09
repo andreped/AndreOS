@@ -13,7 +13,7 @@
  * Scholar profile:  https://scholar.google.com/citations?user=U20zUHQAAAAJ
  */
 
-import { ActiveContext } from '../../assistant/retrieval/ActiveContext.js';
+import { researchContext } from './context.js';
 
 const AUTHOR_ID = 'A5090654106';
 const CACHE_KEY = 'andreOS_research_v3'; // v3: added best_oa_location to the query
@@ -302,7 +302,7 @@ function selectPaper(winEl, paper) {
     if (absText) absText.textContent = abstract || 'No abstract is available for this publication.';
 
     // Register active context immediately (abstract-based); full text fills in later
-    ActiveContext.setPaper({ title, abstract, year: paper.publication_year, url: pdfUrl ?? doi ?? paper.id });
+    researchContext.setPaper({ title, abstract, year: paper.publication_year, url: pdfUrl ?? doi ?? paper.id });
 
     // Reset viewer; a monotonic token guards against out-of-order renders
     if (canvas) canvas.innerHTML = '';
@@ -328,7 +328,7 @@ function selectPaper(winEl, paper) {
                 applyDetailView(winEl);
                 try {
                     const txt = await extractPdfText(doc);
-                    if (txt && isCurrent()) ActiveContext.setFullText(pdfUrl, txt);
+                    if (txt && isCurrent()) researchContext.setFullText(pdfUrl, txt);
                 } catch {}
             })
             .catch(() => {
@@ -520,7 +520,7 @@ export function setupResearchWindow(winEl) {
             // Clear the active assistant context when the window is closed
             const observer = new MutationObserver(() => {
                 if (!document.contains(winEl)) {
-                    ActiveContext.clear();
+                    researchContext.clear();
                     clearTimeout(winEl._pdfBlockedTimer);
                     observer.disconnect();
                 }

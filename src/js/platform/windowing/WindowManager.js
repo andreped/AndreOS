@@ -12,23 +12,8 @@
  *   window:focused   { id }
  *   taskbar:update   {}
  */
-import { getWindowIcon }  from './windowUtils.js';
 import { appRegistry }    from '../../apps/registry/AppRegistry.js';
 import { ActiveContext }  from '../../assistant/retrieval/ActiveContext.js';
-
-/** Strip HTML tags to plain text for ActiveContext. */
-function _htmlToText(html) {
-    if (!html) return '';
-    const div = document.createElement('div');
-    div.innerHTML = html;
-    return (div.textContent || div.innerText || '').replace(/\s+/g, ' ').trim();
-}
-
-/** True for content windows whose text should be loaded into ActiveContext. */
-function _isContentWindow(data) {
-    return !data.isBrowser && !data.isChat && !data.isGame &&
-           !data.isResearch && !data.isSettings;
-}
 
 export class WindowManager {
     /**
@@ -125,7 +110,7 @@ export class WindowManager {
         });
 
         this._windows.push({ id, element: el, title: windowData.title, isMaximized: false,
-            _plainText: _isContentWindow(windowData) ? _htmlToText(windowData.content) : '' });
+            appType: windowData.appType, icon: windowData.icon });
         this.setActiveWindow(id);
 
         this._setupWindowControls(el, id);
@@ -136,7 +121,7 @@ export class WindowManager {
         windowData.setup?.(el, windowData);
 
         this._audio.addSoundEffect('open');
-        this._eventBus.emit('window:created', { id, title: windowData.title });
+        this._eventBus.emit('window:created', { id, title: windowData.title, appType: windowData.appType, icon: windowData.icon });
     }
 
     closeWindow(id) {
@@ -146,8 +131,8 @@ export class WindowManager {
         const win = this._windows[idx];
         this._eventBus.emit('window:closed', { id, title: win.title });
 
-        // Clear app context if this was the context window
-        if (win._plainText) ActiveContext.clearAppContent();
+        // Clear on-screen context if this was the focused app
+        ActiveContext.clearActiveApp(win.appType);
 
         win.element.style.transition = 'all 0.3s cubic-bezier(0.4,0,0.2,1)';
         win.element.style.transform  = 'scale(0)';
@@ -239,10 +224,8 @@ export class WindowManager {
             win.element.classList.add('active-window');
             this._activeWindowId = id;
 
-            // Update active context for the assistant
-            if (win._plainText) {
-                ActiveContext.setAppContent(win.title, win._plainText);
-            }
+            // Track the focused app for the assistant's on-screen context
+            ActiveContext.setActiveApp(win.appType);
 
             // Bubble active window to top of array (for "last window" logic)
             const idx = this._windows.indexOf(win);
@@ -286,7 +269,7 @@ export class WindowManager {
                     ${this._windows.map(win => `
                         <div class="task-view-item" data-window-id="${win.id}">
                             <div class="task-view-thumbnail">
-                                <div class="task-view-window-preview">${getWindowIcon(win.title)}</div>
+                                <div class="task-view-window-preview">${win.icon ?? '🗂️'}</div>
                             </div>
                             <div class="task-view-title">${win.title}</div>
                             <div class="task-view-close-btn">×</div>
@@ -468,7 +451,7 @@ export class WindowManager {
                     ${windows.map((win, i) => `
                         <div class="switcher-window ${i === 0 ? 'selected' : ''}" data-window-id="${win.id}">
                             <div class="switcher-preview">
-                                <div class="preview-content">${getWindowIcon(win.title)}</div>
+                                <div class="preview-content">${win.icon ?? '🗂️'}</div>
                             </div>
                             <div class="switcher-title">${win.title}</div>
                         </div>

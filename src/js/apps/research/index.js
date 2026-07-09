@@ -1,4 +1,5 @@
-import { getResearchContent } from '../../content/AppContent.js';
+import { render } from './content.js';
+import { researchContext } from './context.js';
 import { setupResearchWindow } from './window.js';
 
 /**
@@ -10,7 +11,7 @@ import { setupResearchWindow } from './window.js';
 /** @type {import('../registry/AppRegistry.js').AppManifest} */
 export const catalog = {
     id: 'research', name: 'Research', title: 'Research', icon: '🔬', kind: 'research',
-    window: { width: 1040, height: 660, render: getResearchContent, setup: (el) => setupResearchWindow(el) },
+    window: { width: 1040, height: 660, render, setup: (el) => setupResearchWindow(el) },
     searchable: false, // publications are added to search dynamically via RAG
 };
 
@@ -20,6 +21,7 @@ const api = () => /** @type {any} */ (window).__ResearchApp ?? null;
 /** @type {import('../../assistant/registry/AssistantRegistry.js').AssistantProfile} */
 export const profile = {
     appId: 'research',
+    context: researchContext,
     match: /research|paper|publication|science|forskning/,
     voiceKeywords: [
         'research', 'publications', 'papers', 'science', 'scientific work',
