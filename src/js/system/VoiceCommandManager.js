@@ -16,94 +16,19 @@
  */
 import { VoiceEngine }       from '../system/VoiceEngine.js';
 import { isVoiceAIEnabled, getWhisperModel, getTranscribeLang } from '../system/Settings.js';
+import { appRegistry }       from '../apps/catalog/AppRegistry.js';
+import { assistantRegistry } from '../apps/assistant/AssistantRegistry.js';
+import { ActionDispatcher }  from '../apps/assistant/ActionDispatcher.js';
 
 /**
- * Command registry — English and Norwegian keywords per intent.
- * Entries are tested in order; first keyword match wins.
+ * OS-level voice commands (window management + help).
+ * App-open commands are generated from the App Registry at match time
+ * (see `_parse()`), so adding a new app never touches this file.
  *
  * @type {Array<{ intent: string, args?: Record<string,string>, keywords: string[] }>}
  */
 const COMMAND_REGISTRY = [
-    // ── Open windows ───────────────────────────────────────────────────────────
-    {
-        intent: 'open', args: { fileType: 'about' },
-        keywords: [
-            'open about', 'about me', 'about andre', 'who are you', 'who is andre', 'tell me about',
-            'om meg', 'hvem er du', 'hvem er andre',
-        ],
-    },
-    {
-        intent: 'open', args: { fileType: 'resume' },
-        keywords: [
-            'resume', 'curriculum vitae', 'work experience', 'career', 'experience',
-            ' cv ',  // surrounded by spaces to avoid matching "csv" etc.
-            'åpne cv', 'vis cv', 'jobberfaring', 'erfaring',
-        ],
-    },
-    {
-        intent: 'open', args: { fileType: 'projects' },
-        keywords: [
-            'projects', 'portfolio', 'open source', 'what have you built',
-            'prosjekter', 'hva har du bygget',
-        ],
-    },
-    {
-        intent: 'open', args: { fileType: 'skills' },
-        keywords: [
-            'skills', 'technologies', 'tech stack', 'programming languages', 'tools', 'competence',
-            'ferdigheter', 'teknologier', 'kompetanse',
-        ],
-    },
-    {
-        intent: 'open', args: { fileType: 'contact' },
-        keywords: [
-            'contact', 'email', 'reach out', 'get in touch', 'hire',
-            'kontakt', 'epost', 'ta kontakt',
-        ],
-    },
-    {
-        intent: 'open', args: { fileType: 'social' },
-        keywords: [
-            'social links', 'linkedin', 'google scholar', 'social media',
-            'sosiale lenker', 'sosiale medier',
-        ],
-    },
-    {
-        intent: 'open', args: { fileType: 'browser' },
-        keywords: [
-            'browser', 'open internet', 'navigate to', 'browse',
-            'nettleser', 'internett',
-        ],
-    },
-    {
-        intent: 'open', args: { fileType: 'chat' },
-        keywords: [
-            'chat', 'ask andre', 'talk to andre', 'ai chat', 'question for andre',
-            'snakk med andre', 'still spørsmål', 'spørsmål til andre', 'chat med andre',
-        ],
-    },
-    {
-        intent: 'open', args: { fileType: 'game' },
-        keywords: [
-            'game', 'play game', 'cast arena', 'play cast',
-            'spill', 'spille spill', 'cast arena',
-        ],
-    },
-    {
-        intent: 'open', args: { fileType: 'research' },
-        keywords: [
-            'research', 'publications', 'papers', 'science', 'scientific work',
-            'forskning', 'publikasjoner', 'artikler', 'vitenskapelig',
-        ],
-    },
-    {
-        intent: 'open', args: { fileType: 'settings' },
-        keywords: [
-            'settings', 'preferences', 'configuration', 'options', 'configure',
-            'innstillinger', 'instillinger', 'preferanser', 'valg',
-        ],
-    },
-
+    // ── App-open commands come from the App Registry (see _parse) ──
     // ── Window management ──────────────────────────────────────────────────────
     {
         intent: 'close',
@@ -173,6 +98,9 @@ export class VoiceCommandManager {
         this._loadStarted = false;
         this._liveCardId  = 'voice-model-load';
         this._history     = [];   // { role: 'user'|'assistant', content: string }[]
+
+        // Executes OS actions + app capabilities uniformly (reads the registry).
+        this._actions = new ActionDispatcher({ windowManager, notifications });
 
         this._engine = this._buildEngine();
     }
@@ -411,19 +339,6 @@ export class VoiceCommandManager {
         if (fromVoice) this._setState('ready');
     }
 
-    /** Poll until window.__ResearchApp exists (papers loaded) or timeout. */
-    _waitForResearchApp(timeoutMs = 15_000) {
-        if (window.__ResearchApp) return Promise.resolve();
-        return new Promise(resolve => {
-            const deadline = Date.now() + timeoutMs;
-            const poll = () => {
-                if (window.__ResearchApp || Date.now() > deadline) return resolve();
-                setTimeout(poll, 200);
-            };
-            poll();
-        });
-    }
-
     _addHistory(role, content) {
         this._history.push({ role, content });
         if (this._history.length > 20) this._history.shift();
@@ -586,19 +501,7 @@ export class VoiceCommandManager {
     }
 
     _resolveApp(name) {
-        const n = name.toLowerCase().trim();
-        if (/^chats?$|ask\s+andr|snakk\s+med/.test(n))              return 'chat';
-        if (/research|paper|publication|science|forskning/.test(n))   return 'research';
-        if (/resume|^cv$|curriculum|jobberfaring/.test(n))            return 'resume';
-        if (/about|bio|om\s+meg/.test(n))                            return 'about';
-        if (/project|portfolio|prosjekt/.test(n))                     return 'projects';
-        if (/skill|tech|stack|ferdigh/.test(n))                       return 'skills';
-        if (/contact|email|kontakt/.test(n))                          return 'contact';
-        if (/social|linkedin/.test(n))                                return 'social';
-        if (/browser|internet|nettleser/.test(n))                     return 'browser';
-        if (/game|cast|arena|spill/.test(n))                          return 'game';
-        if (/setting|preference|option|configur|innstilling|instilling|preferanse/.test(n)) return 'settings';
-        return null;
+        return assistantRegistry.resolveId(name);
     }
 
     // ── Private: LLM command parsing ───────────────────────────────────────────
@@ -618,14 +521,8 @@ export class VoiceCommandManager {
      * @returns {string}
      */
     _describeSingleAction(a) {
-        const APP_LABELS = {
-            about: 'About Me', resume: 'Resume', projects: 'Projects',
-            skills: 'Skills', contact: 'Contact', social: 'Social Links',
-            browser: 'Browser', chat: 'Ask André', game: 'Cast Arena', research: 'Research',
-            settings: 'Settings',
-        };
         switch (a.a) {
-            case 'open':      return `Open ${APP_LABELS[a.t] ?? a.t}`;
+            case 'open':      return `Open ${appRegistry.label(a.t)}`;
             case 'open_paper': return `Open paper #${a.n}`;
             case 'close':    return 'Close window';
             case 'minimize': return 'Minimize window';
@@ -662,27 +559,21 @@ export class VoiceCommandManager {
         for (const act of steps) {
             switch (act.a) {
                 case 'open':
-                    this._windowManager.openFile(act.t);
+                    this._actions.openApp(act.t);
                     break;
-                case 'close': {
-                    const id = this._windowManager.activeWindowId;
-                    if (id) this._windowManager.closeWindow(id);
+                case 'close':
+                    this._actions.closeActive();
                     break;
-                }
-                case 'minimize': {
-                    const id = this._windowManager.activeWindowId;
-                    if (id) this._windowManager.minimizeWindow(id);
+                case 'minimize':
+                    this._actions.minimizeActive();
                     break;
-                }
                 case 'desktop':
-                    this._windowManager.showDesktop();
+                    this._actions.showDesktop();
                     break;
                 case 'open_paper': {
-                    // Open a specific numbered paper in the Research window.
-                    // Wait for the Research app to finish loading its paper list first.
-                    await this._waitForResearchApp();
-                    const ok = window.__ResearchApp?.openPaper(act.n);
-                    if (!ok) this._notifications.show(`No paper #${act.n} in current list`, 'warning');
+                    // Wait for the Research app to finish loading its paper list.
+                    await this._actions.waitForApp('research');
+                    await this._actions.runCapability('research', 'openPaper', { n: act.n });
                     break;
                 }
                 case 'chat': {
@@ -692,7 +583,7 @@ export class VoiceCommandManager {
                     // contextual action, then stream the follow-up question.
                     const ctxMatch = this._parseContextual(act.t ?? '');
                     if (ctxMatch && ctxMatch.intent !== 'research_question') {
-                        await this._waitForResearchApp();
+                        await this._actions.waitForApp('research');
                         this._dispatch(ctxMatch);
                         const ctxReply = `✓ ${ctxMatch.label}`;
                         this._onMessage('assistant', ctxReply);
@@ -702,29 +593,12 @@ export class VoiceCommandManager {
                     await this._streamToSidebar(act.t ?? '');
                     break;
                 }
-                case 'search': {
-                    // Focus the desktop search bar and type the query
-                    const searchInput = document.querySelector('.search-input');
-                    if (searchInput) {
-                        const box = searchInput.closest('.search-box');
-                        if (box) box.classList.add('focused');
-                        searchInput.focus();
-                        searchInput.value = act.t ?? '';
-                        searchInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    }
+                case 'search':
+                    this._actions.desktopSearch(act.t ?? '');
                     break;
-                }
-                case 'browse': {
-                    // Open browser window then navigate to URL or yep.com search
-                    this._windowManager.openFile('browser');
-                    await new Promise(r => setTimeout(r, 500));
-                    const raw = act.t ?? '';
-                    const url = /^https?:\/\//i.test(raw)
-                        ? raw
-                        : `https://yep.com/web?q=${encodeURIComponent(raw)}`;
-                    document.dispatchEvent(new CustomEvent('andreos:browser-navigate', { detail: { url } }));
+                case 'browse':
+                    await this._actions.browse(act.t ?? '');
                     break;
-                }
             }
             // Pause between steps so each window has time to open and become active
             if (steps.length > 1) await new Promise(r => setTimeout(r, 700));
@@ -780,10 +654,12 @@ export class VoiceCommandManager {
             settings: 'Settings',
         };
 
-        for (const cmd of COMMAND_REGISTRY) {
+        // App-open commands come from the registry; OS commands are local.
+        const registry = [...assistantRegistry.openCommands(), ...COMMAND_REGISTRY];
+        for (const cmd of registry) {
             if (cmd.keywords.some(kw => text.includes(kw))) {
                 const label = cmd.args?.fileType
-                    ? `Open ${APP_LABELS[cmd.args.fileType] ?? cmd.args.fileType}`
+                    ? `Open ${appRegistry.label(cmd.args.fileType)}`
                     : cmd.intent;
                 return { intent: cmd.intent, args: cmd.args ?? {}, label };
             }
@@ -796,54 +672,43 @@ export class VoiceCommandManager {
     _dispatch({ intent, args }) {
         switch (intent) {
             case 'open':
-                this._windowManager.openFile(args.fileType);
+                this._actions.openApp(args.fileType);
                 break;
 
-            case 'close': {
-                const id = this._windowManager.activeWindowId;
-                if (id) this._windowManager.closeWindow(id);
-                else    this._notifications.show('No active window to close', 'info');
+            case 'close':
+                if (!this._actions.closeActive())
+                    this._notifications.show('No active window to close', 'info');
                 break;
-            }
 
-            case 'minimize': {
-                const id = this._windowManager.activeWindowId;
-                if (id) this._windowManager.minimizeWindow(id);
-                else    this._notifications.show('No active window to minimize', 'info');
+            case 'minimize':
+                if (!this._actions.minimizeActive())
+                    this._notifications.show('No active window to minimize', 'info');
                 break;
-            }
 
             case 'chat_message':
-                if (window.AndreChat) {
-                    window.AndreChat.injectMessage(args.text);
-                } else {
-                    this._windowManager.openFile('chat');
-                }
+                if (window.AndreChat) window.AndreChat.injectMessage(args.text);
+                else                  this._actions.openApp('chat');
                 break;
 
             case 'desktop':
-                this._windowManager.showDesktop();
+                this._actions.showDesktop();
                 break;
 
-            case 'research_open_nth': {
-                const ok = window.__ResearchApp?.openPaper(args.n);
-                if (!ok) this._notifications.show(`No paper #${args.n} in current list`, 'warning');
+            case 'research_open_nth':
+                this._actions.runCapability('research', 'openPaper', { n: args.n });
                 break;
-            }
             case 'research_sort':
-                window.__ResearchApp?.setSort(args.sort);
+                this._actions.runCapability('research', 'sort', { by: args.sort });
                 break;
             case 'research_filter':
-                window.__ResearchApp?.setFilter(args.type);
+                this._actions.runCapability('research', 'filter', { type: args.type });
                 break;
             case 'research_search':
-                window.__ResearchApp?.search(args.query);
+                this._actions.runCapability('research', 'search', { query: args.query });
                 break;
-            case 'research_categories': {
-                const cats = window.__ResearchApp?.getCategories() ?? 'Research not open';
-                this._notifications.show(`📋 Available categories: ${cats}`, 'info');
+            case 'research_categories':
+                this._actions.runCapability('research', 'categories', {});
                 break;
-            }
 
             case 'help':
                 this._showHelp();

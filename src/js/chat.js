@@ -6,6 +6,7 @@ import { SYSTEM_PROMPT } from "./andre-profile.js";
 import { RAGEngine }   from "./system/RAGEngine.js";
 import { ActiveContext } from "./system/ActiveContext.js";
 import { getModelId, MODELS, getLLMLanguage } from "./system/Settings.js";
+import { appRegistry } from "./apps/index.js";
 
 const MODEL_ID = getModelId(); // resolved from Settings at load time — re-read on retry()
 
@@ -472,9 +473,10 @@ window.AndreChat = {
         const histCtx = history.slice(-6)
             .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
             .join('\n');
+        const appIds = appRegistry.launchable().map(m => m.id).join(', ');
         const prompt =
 `You are an OS command parser. Convert the request into a JSON array of actions.
-Apps: about, resume, projects, skills, contact, social, browser, chat, game, research, settings
+Apps: ${appIds}
 Actions: {"a":"open","t":"<app>"} | {"a":"open_paper","n":<number>} | {"a":"close"} | {"a":"minimize"} | {"a":"desktop"} | {"a":"browse","t":"<url-or-query>"} | {"a":"search","t":"<query>"} | {"a":"chat","t":"<message>"}
 Rules:
 - Use {"a":"open_paper","n":<number>} when the user wants to open a specific numbered paper in the Research app.

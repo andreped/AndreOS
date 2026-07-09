@@ -1,7 +1,12 @@
 /**
  * Pure HTML-string factories for every app window.
  * No DOM, no side effects — easy to test and update independently.
+ *
+ * Window configuration (title, size, kind) now lives in the App Registry
+ * (`src/js/apps/`). `getWindowData()` is a thin adapter over it so existing
+ * callers keep working.
  */
+import { appRegistry } from '../apps/catalog/AppRegistry.js';
 
 export function getAboutContent() {
     return `
@@ -762,91 +767,10 @@ export function getResearchContent() {
 }
 
 /**
- * Returns the window configuration object for a given file type,
- * or null if unknown.
+ * Returns the window configuration object for a given file type, or null if
+ * unknown. Delegates to the App Registry — the single source of truth for app
+ * identity and window specs.
  */
 export function getWindowData(fileType) {
-    const data = {
-        about: {
-            title:   'About Me.txt',
-            content: getAboutContent(),
-            width:   600,
-            height:  500,
-        },
-        resume: {
-            title:   'Resume.pdf',
-            content: getResumeContent(),
-            width:   700,
-            height:  600,
-        },
-        projects: {
-            title:   'Projects',
-            content: getProjectsContent(),
-            width:   800,
-            height:  600,
-        },
-        skills: {
-            title:   'Skills.exe',
-            content: getSkillsContent(),
-            width:   700,
-            height:  500,
-        },
-        contact: {
-            title:   'Contact.txt',
-            content: getContactContent(),
-            width:   500,
-            height:  400,
-        },
-        social: {
-            title:   'Social Links',
-            content: getSocialContent(),
-            width:   600,
-            height:  500,
-        },
-        browser: {
-            title:    'Browser',
-            isBrowser: true,
-            startUrl: 'https://yep.com',
-            content:  getBrowserContent(),
-            width:    960,
-            height:   680,
-        },
-        chat: {
-            title:  'Ask André',
-            isChat: true,
-            content: getChatContent(),
-            width:  500,
-            height: 600,
-        },
-        ironflow: {
-            title:    'IronFlow',
-            isIronFlow: true,
-            content:  getIronFlowContent(),
-            width:    420,
-            height:   780,
-        },
-        game: {
-            title:  'Cast Arena',
-            isGame: true,
-            content: getGameContent(),
-            width:  960,
-            height: 680,
-        },
-        research: {
-            title:      'Research',
-            isResearch: true,
-            content:    getResearchContent(),
-            width:      1040,
-            height:     660,
-        },
-        settings: {
-            title:      'Settings',
-            isSettings: true,
-            content:    getSettingsContent(),
-            width:      720,
-            height:     600,
-        },
-    };
-
-    return data[fileType] ?? null;
+    return appRegistry.toWindowData(fileType);
 }
