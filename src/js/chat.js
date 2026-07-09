@@ -467,24 +467,32 @@ window.AndreChat = {
         }
     },
 
-    async parseCommand(text) {
+    async parseCommand(text, history = []) {
         if (engineState !== 'ready') return null;
+        const histCtx = history.slice(-6)
+            .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
+            .join('\n');
         const prompt =
-`You are an OS command parser. Convert the voice command into a JSON array of actions.
+`You are an OS command parser. Convert the request into a JSON array of actions.
 Apps: about, resume, projects, skills, contact, social, browser, chat, game, research, settings
-Actions: {"a":"open","t":"<app>"} | {"a":"close"} | {"a":"minimize"} | {"a":"desktop"} | {"a":"chat","t":"<message>"}
-Use {"a":"chat","t":"..."} to answer a question — do NOT add {"a":"open","t":"chat"} before it.
-Reply with ONLY the JSON array, nothing else.
+Actions: {"a":"open","t":"<app>"} | {"a":"open_paper","n":<number>} | {"a":"close"} | {"a":"minimize"} | {"a":"desktop"} | {"a":"browse","t":"<url-or-query>"} | {"a":"search","t":"<query>"} | {"a":"chat","t":"<message>"}
+Rules:
+- Use {"a":"open_paper","n":<number>} when the user wants to open a specific numbered paper in the Research app.
+- Use {"a":"chat","t":"<message>"} for questions or follow-up tasks AFTER other actions.
+- Never add {"a":"open","t":"chat"} — the sidebar handles chat automatically.
+- Always include a trailing {"a":"chat",...} when the request ends with a question or task like "summarize", "tell me", "give me a brief summary".
 Examples:
-"open research and then chat" → [{"a":"open","t":"research"}]
+"open research" → [{"a":"open","t":"research"}]
 "show desktop" → [{"a":"desktop"}]
-"ask André about his PhD" → [{"a":"chat","t":"Tell me about your PhD"}]
-Command: "${text.replace(/"/g, "'")}"`;
+"open resume and tell me about his experience" → [{"a":"open","t":"resume"},{"a":"chat","t":"tell me about his experience"}]
+"open research, open 40th paper, and summarize important topics" → [{"a":"open","t":"research"},{"a":"open_paper","n":40},{"a":"chat","t":"summarize important topics in this paper"}]
+Reply with ONLY the JSON array.${histCtx ? `\nRecent conversation:\n${histCtx}` : ''}
+Request: "${text.replace(/"/g, "'")}"`;
 
         try {
             const response = await engine.chat.completions.create({
                 messages: [{ role: 'user', content: prompt }],
-                max_tokens: 120,
+                max_tokens: 150,
                 temperature: 0.1,
             });
             const raw     = response.choices[0]?.message?.content?.trim() ?? '';
@@ -496,6 +504,48 @@ Command: "${text.replace(/"/g, "'")}"`;
             console.warn('[AndreChat] parseCommand failed:', err);
             return null;
         }
+    },
+
+    async routeIntent(text, history = []) {
+        if (engineState !== 'ready') return null;
+        const histCtx = history.slice(-4)
+            .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
+            .join('\n');
+        const prompt =
+`You are an OS intent router. Decide if the user message is an OS command (open/close/navigate apps) or a direct question/conversation.
+${histCtx ? `Recent conversation:\n${histCtx}\n` : ''}Reply with ONLY "command" or "direct".
+Examples: "open research" → command | "who is André?" → direct | "go to github.com" → command | "tell me about his work" → direct | "close this window" → command
+Message: "${text.replace(/"/g, "'")}"`;
+        try {
+            const res = await engine.chat.completions.create({
+                messages: [{ role: 'user', content: prompt }],
+                max_tokens: 5,
+                temperature: 0,
+            });
+            const out = res.choices[0]?.message?.content?.trim().toLowerCase() ?? '';
+            return out.includes('command') ? 'command' : 'direct';
+        } catch {
+            return null;
+        }
+    },
+
+    /**
+     * Returns a Promise that resolves when the engine reaches 'ready'.
+     * Rejects after timeoutMs (default 2 min) or if the engine errors out.
+     * Safe to call at any time — resolves immediately if already ready.
+     */
+    whenReady(timeoutMs = 120_000) {
+        if (engineState === 'ready') return Promise.resolve();
+        return new Promise((resolve, reject) => {
+            const deadline = Date.now() + timeoutMs;
+            const poll = () => {
+                if (engineState === 'ready')  return resolve();
+                if (engineState === 'error')  return reject(new Error('Engine failed to load'));
+                if (Date.now() > deadline)    return reject(new Error('Engine load timed out'));
+                setTimeout(poll, 500);
+            };
+            poll();
+        });
     },
 
     retry() {

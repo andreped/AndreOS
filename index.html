@@ -75,7 +75,7 @@
         
         <div class="windows-container">
             <div class="desktop-icons">
-                <!-- Row 1: André's profile -->
+                <!-- Row 1: Portfolio -->
                 <div class="desktop-icon" data-file="about">
                     <div class="icon-image">
                         <img src="assets/icons/user.svg" alt="About Me">
@@ -97,13 +97,6 @@
                     <div class="icon-label">Projects</div>
                 </div>
 
-                <div class="desktop-icon" data-file="research">
-                    <div class="icon-image">
-                        <img src="assets/icons/research.svg" alt="Research">
-                    </div>
-                    <div class="icon-label">Research</div>
-                </div>
-
                 <div class="desktop-icon" data-file="contact">
                     <div class="icon-image">
                         <img src="assets/icons/mail.svg" alt="Contact">
@@ -119,18 +112,18 @@
                 </div>
 
                 <!-- Row 2: Apps + system -->
-                <div class="desktop-icon" data-file="browser">
+                <div class="desktop-icon desktop-icon-row-start" data-file="browser">
                     <div class="icon-image">
                         <img src="assets/icons/browser.svg" alt="Browser">
                     </div>
                     <div class="icon-label">Browser</div>
                 </div>
 
-                <div class="desktop-icon" data-file="chat">
+                <div class="desktop-icon" data-file="research">
                     <div class="icon-image">
-                        <img src="assets/icons/chat.svg" alt="Ask André">
+                        <img src="assets/icons/research.svg" alt="Research">
                     </div>
-                    <div class="icon-label">Ask André</div>
+                    <div class="icon-label">Research</div>
                 </div>
 
                 <div class="desktop-icon" data-file="ironflow">
@@ -145,6 +138,13 @@
                         <img src="assets/icons/cast-arena.svg" alt="Cast Arena">
                     </div>
                     <div class="icon-label">Cast Arena</div>
+                </div>
+
+                <div class="desktop-icon" data-file="chat">
+                    <div class="icon-image">
+                        <img src="assets/icons/chat.svg" alt="Ask André">
+                    </div>
+                    <div class="icon-label">Ask André</div>
                 </div>
 
                 <div class="desktop-icon" data-file="settings">
@@ -244,13 +244,13 @@
                             <div class="pinned-icon">👤</div>
                             <div class="pinned-label">About Me</div>
                         </div>
-                        <div class="pinned-app" data-action="projects">
-                            <div class="pinned-icon">📁</div>
-                            <div class="pinned-label">Projects</div>
-                        </div>
                         <div class="pinned-app" data-action="resume">
                             <div class="pinned-icon">📄</div>
                             <div class="pinned-label">Resume</div>
+                        </div>
+                        <div class="pinned-app" data-action="projects">
+                            <div class="pinned-icon">📁</div>
+                            <div class="pinned-label">Projects</div>
                         </div>
                         <div class="pinned-app" data-action="browser">
                             <div class="pinned-icon">🌐</div>
@@ -291,6 +291,8 @@
                             </div>
                             <div class="tree-children">
                                 <div class="start-menu-item" data-action="browser"><span class="item-icon">🌐</span> Browser</div>
+                                <div class="start-menu-item" data-action="research"><span class="item-icon">🔬</span> Research</div>
+                                <div class="start-menu-item" data-action="ironflow"><span class="item-icon">💪</span> IronFlow</div>
                                 <div class="start-menu-item" data-action="game"><span class="item-icon">🎮</span> Cast Arena</div>
                             </div>
                         </div>
@@ -303,6 +305,17 @@
                             </div>
                             <div class="tree-children">
                                 <div class="start-menu-item" data-action="chat"><span class="item-icon">🤖</span> Ask André</div>
+                            </div>
+                        </div>
+
+                        <div class="tree-category">
+                            <div class="tree-category-header">
+                                <span class="tree-arrow">▶</span>
+                                <span class="tree-cat-icon">⚙️</span>
+                                <span class="tree-cat-label">System</span>
+                            </div>
+                            <div class="tree-children">
+                                <div class="start-menu-item" data-action="settings"><span class="item-icon">⚙️</span> Settings</div>
                             </div>
                         </div>
 
