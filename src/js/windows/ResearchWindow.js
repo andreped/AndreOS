@@ -13,7 +13,7 @@
  * Scholar profile:  https://scholar.google.com/citations?user=U20zUHQAAAAJ
  */
 
-import { ActiveContext } from '../system/ActiveContext.js';
+import { ActiveContext } from '../assistant/retrieval/ActiveContext.js';
 
 const AUTHOR_ID = 'A5090654106';
 const CACHE_KEY = 'andreOS_research_v3'; // v3: added best_oa_location to the query

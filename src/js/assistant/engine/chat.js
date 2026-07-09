@@ -3,10 +3,10 @@
 
 import * as webllm from "@mlc-ai/web-llm";
 import { SYSTEM_PROMPT } from "./andre-profile.js";
-import { RAGEngine }   from "./system/RAGEngine.js";
-import { ActiveContext } from "./system/ActiveContext.js";
-import { getModelId, MODELS, getLLMLanguage } from "./system/Settings.js";
-import { appRegistry } from "./apps/index.js";
+import { RAGEngine }   from "../retrieval/RAGEngine.js";
+import { ActiveContext } from "../retrieval/ActiveContext.js";
+import { getModelId, MODELS, getLLMLanguage } from "../../platform/services/Settings.js";
+import { appRegistry } from "../../apps/index.js";
 
 const MODEL_ID = getModelId(); // resolved from Settings at load time — re-read on retry()
 

@@ -1,4 +1,4 @@
-import { getModelId, getSettings, saveSettings, getWhisperModel, getTranscribeLang, getLLMLanguage } from '../system/Settings.js';
+import { getModelId, getSettings, saveSettings, getWhisperModel, getTranscribeLang, getLLMLanguage } from '../platform/services/Settings.js';
 
 export function setupSettingsWindow(winEl) {
     winEl.querySelectorAll('.settings-nav-item').forEach(item => {
