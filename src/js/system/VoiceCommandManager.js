@@ -172,6 +172,7 @@ export class VoiceCommandManager {
         this._state       = 'idle';
         this._loadStarted = false;
         this._liveCardId  = 'voice-model-load';
+        this._history     = [];   // { role: 'user'|'assistant', content: string }[]
 
         this._engine = this._buildEngine();
     }
@@ -292,75 +293,142 @@ export class VoiceCommandManager {
 
         // Show the user's words in the sidebar immediately
         this._onMessage('user', text);
+        this._addHistory('user', text);
 
         const heard = text.length > 45 ? text.slice(0, 43) + '…' : text;
 
-        // 1. Fast keyword registry (includes chat-message shortcut)
-        const match = this._parse(text);
-        if (match) {
-            if (match.intent === 'chat_message') {
-                // Conversational shortcut (“ask André X”) → answer inline in sidebar
-                this._feedback(`🎤 Heard: "${heard}"`, 'info');
-                await this._streamToSidebar(match.args.text);
-            } else {
-                this._feedback(`🎤 Heard: "${heard}"\n↳ ${match.label}`, 'success');
-                this._dispatch(match);
-                this._onMessage('assistant', `✓ ${match.label}`);
-            }
-            if (fromVoice) this._setState('ready');
-            return;
-        }
-
-        // 1.5. Context-aware commands (active window)
+        // 0. Context-aware commands (active window) — fast, no LLM needed.
+        //    Kept as a pre-step because these reference UI state the LLM can't see.
         const contextual = this._parseContextual(text);
         if (contextual) {
-            const heard = text.length > 45 ? text.slice(0, 43) + '…' : text;
             if (contextual.intent === 'research_question') {
-                // Conversational research query — stream via sidebar, same as chat
                 this._feedback(`🎤 Heard: "${heard}"`, 'info');
                 await this._streamToSidebar(contextual.args.query);
             } else {
                 this._feedback(`🎤 Heard: "${heard}"\n↳ ${contextual.label}`, 'success');
                 this._dispatch(contextual);
-                this._onMessage('assistant', `✓ ${contextual.label}`);
+                const reply = `✓ ${contextual.label}`;
+                this._onMessage('assistant', reply);
+                this._addHistory('assistant', reply);
             }
             if (fromVoice) this._setState('ready');
             return;
         }
 
-        // 2. Rule-based compound parser
+        // 1. Two-step LLM path (when model is loaded) ─────────────────────────
+        //    Call 1: route — decide "command" vs "direct response"
+        //    Call 2: if command, parse into an action sequence using history
+        //    Gate: routeIntent returns null when engine isn’t ready —
+        //    fall through to the keyword fallback in that case.
+        if (window.AndreChat?.routeIntent) {
+            const route = await window.AndreChat.routeIntent(text, this._history);
+
+            if (route !== null) {
+                if (route === 'command') {
+                    const actions = await window.AndreChat.parseCommand(text, this._history);
+                    if (actions?.length) {
+                        // Show the planned steps as a message before executing
+                        const plan = actions
+                            .map((a, i) => `${i + 1}. ${this._describeSingleAction(a)}`)
+                            .join('\n');
+                        const planMsg = `📋 Plan:\n${plan}`;
+                        this._onMessage('assistant', planMsg);
+                        this._addHistory('assistant', planMsg);
+
+                        await this._executeSequence(actions);
+                        if (!actions.some(a => a.a === 'chat')) {
+                            const reply = `✓ Done`;
+                            this._onMessage('assistant', reply);
+                            this._addHistory('assistant', reply);
+                        }
+                        if (fromVoice) this._setState('ready');
+                        return;
+                    }
+                    // parseCommand returned null — treat as direct response
+                }
+
+                // "direct" or command parse failed → stream conversational response
+                await this._streamToSidebar(text);
+                if (fromVoice) this._setState('ready');
+                return;
+            }
+            // route === null → engine not ready, fall through to keyword fallback
+        }
+
+        // 2. Fallback: LLM not loaded — keyword/regex pipeline ─────────────────
+
+        // 2a. Fast keyword registry (includes chat-message shortcut)
+        const match = this._parse(text);
+        if (match) {
+            if (match.intent === 'chat_message') {
+                this._feedback(`🎤 Heard: "${heard}"`, 'info');
+                await this._streamToSidebar(match.args.text);
+            } else {
+                this._feedback(`🎤 Heard: "${heard}"\n↳ ${match.label}`, 'success');
+                this._dispatch(match);
+                const reply = `✓ ${match.label}`;
+                this._onMessage('assistant', reply);
+                this._addHistory('assistant', reply);
+            }
+            if (fromVoice) this._setState('ready');
+            return;
+        }
+
+        // 2b. Rule-based compound parser
         const compound = this._parseCompound(text);
         if (compound) {
             const intent = this._describeActions(compound);
             this._feedback(`🎤 Heard: "${heard}"\n↳ ${intent}`, 'success');
             await this._executeSequence(compound);
-            // A chat reply is its own output — don't add a redundant “✓ …” confirmation
-            if (!compound.some(a => a.a === 'chat')) this._onMessage('assistant', `✓ ${intent}`);
+            if (!compound.some(a => a.a === 'chat')) {
+                const reply = `✓ ${intent}`;
+                this._onMessage('assistant', reply);
+                this._addHistory('assistant', reply);
+            }
             if (fromVoice) this._setState('ready');
             return;
         }
 
-        // 3. LLM intent parse — ONLY for utterances that look like OS commands.
-        //    Gate with an action-verb check first: conversational questions,
-        //    questions starting with "can you / what / how / why / summarize…"
-        //    skip straight to the conversational fallback. This prevents the
-        //    small LLM from hallucinating OS actions for natural language input.
+        // 2c. Heuristic-gated LLM intent parse (legacy edge-case handler)
         if (_looksLikeOSCommand(text)) {
             const actions = await this._parseLLM(text);
             if (actions?.some(a => a.a !== 'chat')) {
                 const intent = this._describeActions(actions);
                 this._feedback(`🤖 Heard: "${heard}"\n↳ ${intent}`, 'success');
                 await this._executeSequence(actions);
-                if (!actions.some(a => a.a === 'chat')) this._onMessage('assistant', `✓ ${intent}`);
+                if (!actions.some(a => a.a === 'chat')) {
+                    const reply = `✓ ${intent}`;
+                    this._onMessage('assistant', reply);
+                    this._addHistory('assistant', reply);
+                }
                 if (fromVoice) this._setState('ready');
                 return;
             }
         }
 
-        // 4. Conversational fallback — stream LLM reply into sidebar
+        // 2d. Conversational fallback
         await this._streamToSidebar(text);
         if (fromVoice) this._setState('ready');
     }
+
+    /** Poll until window.__ResearchApp exists (papers loaded) or timeout. */
+    _waitForResearchApp(timeoutMs = 15_000) {
+        if (window.__ResearchApp) return Promise.resolve();
+        return new Promise(resolve => {
+            const deadline = Date.now() + timeoutMs;
+            const poll = () => {
+                if (window.__ResearchApp || Date.now() > deadline) return resolve();
+                setTimeout(poll, 200);
+            };
+            poll();
+        });
+    }
+
+    _addHistory(role, content) {
+        this._history.push({ role, content });
+        if (this._history.length > 20) this._history.shift();
+    }
+
     _onEngineError(message) {
         this._notifications.show(`Voice error: ${message}`, 'error');
         this._setState(this._engine.isReady ? 'ready' : 'error');
@@ -549,33 +617,34 @@ export class VoiceCommandManager {
      * @param {Array<{a:string,t?:string}>} actions
      * @returns {string}
      */
-    _describeActions(actions) {
+    _describeSingleAction(a) {
         const APP_LABELS = {
             about: 'About Me', resume: 'Resume', projects: 'Projects',
             skills: 'Skills', contact: 'Contact', social: 'Social Links',
             browser: 'Browser', chat: 'Ask André', game: 'Cast Arena', research: 'Research',
             settings: 'Settings',
         };
-        return actions.map(a => {
-            switch (a.a) {
-                case 'open':     return `Open ${APP_LABELS[a.t] ?? a.t}`;
-                case 'close':    return 'Close window';
-                case 'minimize': return 'Minimize window';
-                case 'desktop':  return 'Show desktop';
-                case 'chat': {
-                    const msg = a.t ?? '';
-                    return `Ask André: “${msg.length > 40 ? msg.slice(0, 38) + '…' : msg}”`;
-                }
-                case 'search': return `Search desktop: "${(a.t ?? '').slice(0, 40)}"`;
-                case 'browse': {
-                    const q = a.t ?? '';
-                    return /^https?:\/\//i.test(q)
-                        ? `Browse to ${q.slice(0, 40)}`
-                        : `Search web: "${q.slice(0, 40)}"`;
-                }
-                default: return a.a;
+        switch (a.a) {
+            case 'open':      return `Open ${APP_LABELS[a.t] ?? a.t}`;
+            case 'open_paper': return `Open paper #${a.n}`;
+            case 'close':    return 'Close window';
+            case 'minimize': return 'Minimize window';
+            case 'desktop':  return 'Show desktop';
+            case 'chat': {
+                const msg = a.t ?? '';
+                return `Ask: "${msg.length > 50 ? msg.slice(0, 48) + '…' : msg}"`;
             }
-        }).join(' → ');
+            case 'search': return `Search: "${(a.t ?? '').slice(0, 40)}"`;
+            case 'browse': {
+                const q = a.t ?? '';
+                return /^https?:\/\//i.test(q) ? `Browse to ${q.slice(0, 40)}` : `Search web: "${q.slice(0, 40)}"`;
+            }
+            default: return a.a;
+        }
+    }
+
+    _describeActions(actions) {
+        return actions.map(a => this._describeSingleAction(a)).join(' → ');
     }
 
     /**
@@ -608,9 +677,31 @@ export class VoiceCommandManager {
                 case 'desktop':
                     this._windowManager.showDesktop();
                     break;
-                case 'chat':
+                case 'open_paper': {
+                    // Open a specific numbered paper in the Research window.
+                    // Wait for the Research app to finish loading its paper list first.
+                    await this._waitForResearchApp();
+                    const ok = window.__ResearchApp?.openPaper(act.n);
+                    if (!ok) this._notifications.show(`No paper #${act.n} in current list`, 'warning');
+                    break;
+                }
+                case 'chat': {
+                    // Before streaming, check if the text contains a contextual
+                    // command (e.g. "open 40th paper") that needs the now-active
+                    // window. Wait for the app to finish loading, dispatch the
+                    // contextual action, then stream the follow-up question.
+                    const ctxMatch = this._parseContextual(act.t ?? '');
+                    if (ctxMatch && ctxMatch.intent !== 'research_question') {
+                        await this._waitForResearchApp();
+                        this._dispatch(ctxMatch);
+                        const ctxReply = `✓ ${ctxMatch.label}`;
+                        this._onMessage('assistant', ctxReply);
+                        this._addHistory('assistant', ctxReply);
+                        await new Promise(r => setTimeout(r, 600));
+                    }
                     await this._streamToSidebar(act.t ?? '');
                     break;
+                }
                 case 'search': {
                     // Focus the desktop search bar and type the query
                     const searchInput = document.querySelector('.search-input');
@@ -635,8 +726,8 @@ export class VoiceCommandManager {
                     break;
                 }
             }
-            // Pause between steps so each window has time to open/focus
-            if (steps.length > 1) await new Promise(r => setTimeout(r, 450));
+            // Pause between steps so each window has time to open and become active
+            if (steps.length > 1) await new Promise(r => setTimeout(r, 700));
         }
     }
 

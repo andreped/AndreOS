@@ -1288,6 +1288,10 @@ body {
         left: 15px;
     }
     
+    .desktop-icon-row-start {
+        grid-column-start: auto;
+    }
+    
     .desktop-icon {
         width: 100px;
         height: 90px;
@@ -1566,6 +1570,10 @@ body {
     height: calc(100% - 80px);
     align-content: start;
     z-index: 201;
+}
+
+.desktop-icon-row-start {
+    grid-column-start: 1;
 }
 
 .desktop-icon {
@@ -3343,6 +3351,9 @@ body {
         grid-template-columns: repeat(3, 100px);
         gap: 18px; top: 15px; left: 50%;
         transform: translateX(-50%); width: auto; align-content: start;
+    }
+    .desktop-icon-row-start {
+        grid-column-start: auto;
     }
     .desktop-icon {
         width: 100px;

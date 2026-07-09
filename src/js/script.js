@@ -397,6 +397,7 @@ class DesktopPortfolio {
                 this.desktop.setupIconListeners();
                 window.__desktopReady = true;
                 document.dispatchEvent(new CustomEvent('andreos:desktop-ready'));
+                this._handleDeepLink();
             }, 300);
             // Only start music if it wasn't already restored by _applySettings
             // (which sets musicPlaying = true on refresh). Calling startMusic()
@@ -442,6 +443,58 @@ class DesktopPortfolio {
                 revealDesktop();
             }, 500);
         }, 3200);
+    }
+
+    // ── Deep-link / URL navigation support ───────────────────────────────────
+    // Supported params:
+    //   ?app=<fileType>   — open a specific app window on load
+    //   ?chat=1           — open the OS Assistant sidebar on load
+    //   ?ask=<message>    — open the sidebar and auto-submit a message
+    //
+    // Examples:
+    //   /?app=browser                        → opens the browser
+    //   /?app=about&chat=1                   → opens About with the sidebar
+    //   /?ask=Tell me about André's research  → opens sidebar and sends query
+    _handleDeepLink() {
+        const params   = new URLSearchParams(window.location.search);
+        const appKey   = params.get('app');
+        const withChat = params.get('chat');
+        const askQuery = params.get('ask');
+
+        if (!appKey && !withChat && !askQuery) return;
+
+        // Open the requested app first (if any)
+        if (appKey) {
+            this.windowManager.openFile(appKey);
+        }
+
+        // ?ask= implies the sidebar must be open
+        const openSidebar = withChat || askQuery;
+        if (openSidebar) {
+            const delay = appKey ? 150 : 0;
+            setTimeout(() => {
+                this.sidebar.open();
+                document.getElementById('asstTrayBtn')?.classList.add('asst-tray-active');
+            }, delay);
+        }
+
+        // Submit the query through the assistant after the sidebar is visible.
+        // If the LLM is loading, wait for it so the two-step routing path is
+        // used instead of the keyword-only fallback.
+        if (askQuery) {
+            const submit = () => this.voice.submitText(askQuery);
+            if (window.AndreChat?.whenReady) {
+                window.AndreChat.whenReady()
+                    .then(submit)
+                    .catch(submit); // timed out or no WebGPU — keyword fallback handles it
+            } else {
+                setTimeout(submit, 300);
+            }
+        }
+
+        // Replace the URL so a page-refresh doesn't re-open/re-submit
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState(null, '', cleanUrl);
     }
 }
 

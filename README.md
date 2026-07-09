@@ -2,6 +2,8 @@
 
 An interactive desktop OS experience serving as my personal portfolio — built entirely with vanilla HTML, CSS, and JavaScript.
 
+Demo is available at https://andreped.dev.
+
 ## Stack
 
 - **Frontend:** Vanilla HTML · CSS · JavaScript
@@ -42,6 +44,47 @@ Runs entirely on WebGPU. Configurable model (Settings → AI Engine):
 | Help | `"help"` | `"hjelp"` |
 
 Compound commands are parsed by the LLM when loaded. Whisper model and language are configurable in Settings → Speech.
+
+</details>
+
+<details open>
+<summary><strong>Deep links</strong> — open any app or start a chat directly from a URL</summary>
+
+Apps can be opened directly via URL query parameters — useful for sharing a specific view or linking to the portfolio with a pre-opened app.
+
+| Parameter | Values | Description |
+|---|---|---|
+| `app` | `about`, `resume`, `projects`, `contact`, `social`, `browser`, `research`, `ironflow`, `game`, `chat`, `settings` | Open the specified app on load |
+| `chat` | `1` | Open the OS Assistant sidebar on load |
+| `ask` | any string | Open the sidebar and auto-submit a message to the assistant |
+
+**Examples**
+
+```
+# Open the About Me window
+https://andreped.dev/?app=about
+
+# Open the Research app
+https://andreped.dev/?app=research
+
+# Open the browser
+https://andreped.dev/?app=browser
+
+# Open Resume with the OS Assistant sidebar
+https://andreped.dev/?app=resume&chat=1
+
+# Open only the OS Assistant sidebar
+https://andreped.dev/?chat=1
+
+# Ask the assistant a question on load
+https://andreped.dev/?ask=Tell%20me%20about%20Andr%C3%A9%27s%20research
+
+# Open the Research app, navigate to the 40th paper, and summarise it
+# (requires the AI model to be loaded first — open Ask André once to cache it)
+https://andreped.dev/?ask=Open%20research%2C%20open%2040th%20paper%2C%20and%20summarize%20important%20topics%20in%20paper
+```
+
+The URL is cleaned up after the windows open, so refreshing the page returns to the normal desktop.
 
 </details>
 
