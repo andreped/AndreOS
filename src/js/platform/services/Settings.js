@@ -31,6 +31,12 @@ export const LLM_LANGUAGES = [
     { id: 'no',   label: 'Norwegian' },
 ];
 
+export const THEMES = [
+    { id: 'light',  label: 'Light',  icon: '☀️', desc: 'Bright surfaces — the default look' },
+    { id: 'dark',   label: 'Dark',   icon: '🌙', desc: 'Dim surfaces, easier on the eyes at night' },
+    { id: 'system', label: 'System', icon: '💻', desc: 'Follow your operating system setting' },
+];
+
 export function getSettings() {
     try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}'); }
     catch { return {}; }
@@ -47,3 +53,4 @@ export function getWhisperModel()   { return getSettings().whisperModel   || 'Xe
 export function getTranscribeLang() { return getSettings().transcribeLang || 'english'; }  // default English — more reliable than auto
 export function getLLMLanguage()    { return getSettings().llmLang        || 'en'; }        // default English
 export function isVoiceAIEnabled()  { return getSettings().voiceAI !== false; }
+export function getTheme()          { return getSettings().theme          || 'light'; }     // default Light

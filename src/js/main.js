@@ -2,8 +2,7 @@ import './apps/index.js'; // registers the app catalog + assistant layer (side e
 import { buildDomCache }        from './platform/core/DomCache.js';
 import { EventBus }             from './platform/core/EventBus.js';
 import { NotificationManager }  from './platform/services/NotificationManager.js';
-import { AudioManager }         from './platform/services/AudioManager.js';
-import { WindowManager }        from './platform/windowing/WindowManager.js';
+import { AudioManager }         from './platform/services/AudioManager.js';import { initTheme }             from './platform/services/ThemeManager.js';import { WindowManager }        from './platform/windowing/WindowManager.js';
 import { Taskbar }              from './platform/shell/Taskbar.js';
 import { Desktop }              from './platform/shell/Desktop.js';
 import { SearchOverlay }        from './platform/shell/SearchOverlay.js';
@@ -74,6 +73,7 @@ class DesktopPortfolio {
 
     init() {
         this.updateClock();
+        initTheme();              // apply the saved Appearance preference (light by default)
         this.audio.init();        // must run before showLoadingScreen so that
                                   // musicPlaying is restored from localStorage
                                   // before revealDesktop() calls startMusic()

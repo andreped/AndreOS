@@ -12,6 +12,20 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Apply the saved theme before first paint to avoid a flash of the wrong colours.
+        (function () {
+            try {
+                var pref = (JSON.parse(localStorage.getItem('andreos_settings') || '{}').theme) || 'light';
+                var resolved = pref === 'system'
+                    ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+                    : (pref === 'dark' ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', resolved);
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
 </head>
 <body>
     <div class="loading-screen" style="display: flex;">
