@@ -1,4 +1,5 @@
-import { getModelId, getSettings, saveSettings, getWhisperModel, getTranscribeLang, getLLMLanguage } from '../../platform/services/Settings.js';
+import { getModelId, getSettings, saveSettings, getWhisperModel, getTranscribeLang, getLLMLanguage, getTheme } from '../../platform/services/Settings.js';
+import { setTheme } from '../../platform/services/ThemeManager.js';
 
 export function setupSettingsWindow(winEl) {
     winEl.querySelectorAll('.settings-nav-item').forEach(item => {
@@ -88,4 +89,18 @@ export function setupSettingsWindow(winEl) {
         voiceToggle.checked = getSettings().voiceAI !== false;
         voiceToggle.addEventListener('change', () => saveSettings({ voiceAI: voiceToggle.checked }));
     }
+
+    // Appearance / theme cards
+    const refreshThemeCards = () => {
+        const cur = getTheme();
+        winEl.querySelectorAll('.theme-card[data-theme-id]').forEach(c => c.classList.toggle('selected', c.dataset.themeId === cur));
+    };
+    refreshThemeCards();
+
+    winEl.querySelectorAll('.theme-card[data-theme-id]').forEach(card => {
+        card.addEventListener('click', () => {
+            setTheme(card.dataset.themeId);
+            refreshThemeCards();
+        });
+    });
 }

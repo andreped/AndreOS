@@ -18,6 +18,21 @@ export function render() {
             </div>
         </div>`).join('');
 
+    const themes = [
+        { id: 'light',  icon: '☀️', name: 'Light',  desc: 'Bright surfaces — the default look' },
+        { id: 'dark',   icon: '🌙', name: 'Dark',   desc: 'Dim surfaces, easier on the eyes at night' },
+        { id: 'system', icon: '💻', name: 'System', desc: 'Follow your operating system setting' },
+    ];
+    const themeCards = themes.map(t => `
+        <div class="theme-card" data-theme-id="${t.id}">
+            <div class="model-card-radio"><span class="model-radio-dot"></span></div>
+            <span class="theme-card-icon">${t.icon}</span>
+            <div class="model-card-info">
+                <div class="model-card-header"><span class="model-name">${t.name}</span></div>
+                <div class="model-desc">${t.desc}</div>
+            </div>
+        </div>`).join('');
+
     return `
         <div class="settings-container">
             <nav class="settings-sidebar">
@@ -27,6 +42,9 @@ export function render() {
                 </div>
                 <div class="settings-nav-item" data-section="voice">
                     <span class="settings-nav-icon">🎙️</span><span>Speech</span>
+                </div>
+                <div class="settings-nav-item" data-section="appearance">
+                    <span class="settings-nav-icon">🎨</span><span>Appearance</span>
                 </div>
             </nav>
             <div class="settings-content-panel">
@@ -99,6 +117,16 @@ export function render() {
                     <div class="settings-apply-row">
                         <span class="settings-apply-status" id="voice-apply-status"></span>
                         <button class="settings-apply-btn" id="voice-apply-btn">Apply Voice Settings</button>
+                    </div>
+                </div>
+
+                <div class="settings-section" data-section="appearance">
+                    <h2 class="settings-section-title">Appearance</h2>
+                    <p class="settings-section-desc">Choose how AndreOS and all its apps look. Light is the default; your choice is saved and applied instantly.</p>
+
+                    <h3 class="settings-subsection-title">Theme</h3>
+                    <div class="theme-cards" id="theme-cards">
+                        ${themeCards}
                     </div>
                 </div>
 

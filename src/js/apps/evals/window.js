@@ -406,7 +406,7 @@ export function setupEvalsWindow(winEl) {
         const meta = SUITE_META[key];
         if (suite.skipped) {
             return `<div class="eval-card"><h3>${meta.label}</h3><div class="eval-desc">${meta.desc}</div>
-                <div class="eval-metric"><span class="val" style="color:#6b7280">—</span></div>
+                <div class="eval-metric"><span class="val" style="color:var(--text-faint)">—</span></div>
                 <span class="eval-badge na">not run</span>
                 <div class="eval-sub">${escapeHtml(suite.reason ?? 'skipped')}</div></div>`;
         }
@@ -426,7 +426,7 @@ export function setupEvalsWindow(winEl) {
             <h3>${meta.label}</h3>
             <div class="eval-desc">${meta.desc} · n=${suite.total ?? '?'}</div>
             <div class="eval-metric">
-                <span class="val" style="color:${pass ? '#e6e6e6' : '#f87171'}">${fmtVal(value, meta.fmt)}</span>
+                <span class="val" style="color:${pass ? 'var(--text-strong)' : '#f87171'}">${fmtVal(value, meta.fmt)}</span>
                 <span class="lbl">${meta.metric}</span>
             </div>
             ${badge}
@@ -687,7 +687,7 @@ function failureTable(suite) {
         const cells = Object.entries(f).map(([k, v]) => `${k}=<code>${escapeHtml(JSON.stringify(v))}</code>`).join('  ');
         return `<tr><td>${cells}</td></tr>`;
     }).join('');
-    return `<div class="eval-section-title" style="font-size:11px;color:#767e8c">${suite.suite} (${suite.failures.length})</div>
+    return `<div class="eval-section-title" style="font-size:11px;color:var(--text-faint)">${suite.suite} (${suite.failures.length})</div>
         <table class="eval-fail-table"><tbody>${rows}</tbody></table>`;
 }
 
