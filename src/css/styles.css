@@ -155,7 +155,7 @@ body {
 }
 
 .desktop.music-playing .window {
-    animation: windowOpen 0.4s cubic-bezier(0.4, 0, 0.2, 1), subtleGlow 5s ease-in-out infinite;
+    animation: subtleGlow 5s ease-in-out infinite;
 }
 
 @keyframes musicPulseBackground {
@@ -3556,10 +3556,6 @@ body {
     .browser-bookmarks { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
 }
 
-.window {
-    animation: windowOpen 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 @keyframes windowOpen {
     from {
         opacity: 0;
@@ -3800,9 +3796,6 @@ body {
 @keyframes focusPulse {
     from { outline-color: rgba(102, 126, 234, 0.8); }
     to { outline-color: rgba(102, 126, 234, 0.4); }
-}
-.window.opening {
-    animation: windowBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 .taskbar.enhanced {
