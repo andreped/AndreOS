@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-10T09:21:45.466Z",
+  "generatedAt": "2026-07-10T18:52:19.038Z",
   "source": "browser",
   "suites": {
     "retrieval": {
@@ -124,7 +124,10 @@
           "expected": "command",
           "predicted": "direct"
         }
-      ]
+      ],
+      "stability": 1,
+      "passAtK": 0.7142857142857143,
+      "repeats": 3
     },
     "commands": {
       "suite": "commands",
@@ -182,7 +185,257 @@
           ],
           "f1": 0
         }
-      ]
+      ],
+      "stability": 1,
+      "passAtK": 0.9285714285714286,
+      "repeats": 3
+    },
+    "plan": {
+      "suite": "plan",
+      "total": 5,
+      "turns": 12,
+      "planExactMatch": 0,
+      "turnExactMatch": 0.4166666666666667,
+      "turnF1": 0.4166666666666667,
+      "byTag": {
+        "multishot": {
+          "total": 5,
+          "planExactMatch": 0
+        },
+        "research": {
+          "total": 2,
+          "planExactMatch": 0
+        },
+        "context-carryover": {
+          "total": 3,
+          "planExactMatch": 0
+        },
+        "open": {
+          "total": 2,
+          "planExactMatch": 0
+        },
+        "switch": {
+          "total": 1,
+          "planExactMatch": 0
+        },
+        "browse": {
+          "total": 1,
+          "planExactMatch": 0
+        },
+        "window": {
+          "total": 1,
+          "planExactMatch": 0
+        },
+        "open_paper": {
+          "total": 1,
+          "planExactMatch": 0
+        }
+      },
+      "failures": [
+        {
+          "id": "research-drilldown",
+          "turns": [
+            {
+              "expected": [
+                "open:research"
+              ],
+              "predicted": [
+                "open:research"
+              ],
+              "exact": true
+            },
+            {
+              "expected": [
+                "open_paper:3"
+              ],
+              "predicted": [],
+              "exact": false
+            },
+            {
+              "expected": [
+                "chat"
+              ],
+              "predicted": [],
+              "exact": false
+            }
+          ]
+        },
+        {
+          "id": "resume-then-ask",
+          "turns": [
+            {
+              "expected": [
+                "open:resume"
+              ],
+              "predicted": [
+                "open:resume"
+              ],
+              "exact": true
+            },
+            {
+              "expected": [
+                "chat"
+              ],
+              "predicted": [],
+              "exact": false
+            }
+          ]
+        },
+        {
+          "id": "projects-to-skills",
+          "turns": [
+            {
+              "expected": [
+                "open:projects"
+              ],
+              "predicted": [
+                "browse:projects"
+              ],
+              "exact": false
+            },
+            {
+              "expected": [
+                "open:skills"
+              ],
+              "predicted": [
+                "open:projects",
+                "chat"
+              ],
+              "exact": false
+            },
+            {
+              "expected": [
+                "close"
+              ],
+              "predicted": [
+                "close"
+              ],
+              "exact": true
+            }
+          ]
+        },
+        {
+          "id": "github-then-desktop",
+          "turns": [
+            {
+              "expected": [
+                "browse:github.com/andreped"
+              ],
+              "predicted": [
+                "browse:github"
+              ],
+              "exact": false
+            },
+            {
+              "expected": [
+                "desktop"
+              ],
+              "predicted": [
+                "desktop"
+              ],
+              "exact": true
+            }
+          ]
+        },
+        {
+          "id": "paper-pronoun",
+          "turns": [
+            {
+              "expected": [
+                "open:research",
+                "open_paper:5"
+              ],
+              "predicted": [
+                "open:research",
+                "open_paper:5"
+              ],
+              "exact": true
+            },
+            {
+              "expected": [
+                "chat"
+              ],
+              "predicted": [],
+              "exact": false
+            }
+          ]
+        }
+      ],
+      "stability": 1,
+      "passAtK": 0,
+      "repeats": 3
+    },
+    "answers": {
+      "suite": "answers",
+      "total": 8,
+      "ragas": 0.5403868474570912,
+      "faithfulness": 0.49495609568763355,
+      "correctness": 0.5951491623766156,
+      "relevancy": 0.5310552843070243,
+      "hallucinationRate": 0,
+      "byTag": {
+        "bio": {
+          "total": 3,
+          "ragas": 0.6438982807944015,
+          "faithfulness": 0.5682876363765116
+        },
+        "career": {
+          "total": 1,
+          "ragas": 0.7692670800513938,
+          "faithfulness": 0.7314814814814815
+        },
+        "education": {
+          "total": 1,
+          "ragas": 0.6674950600395197,
+          "faithfulness": 0.5388888888888889
+        },
+        "research-question": {
+          "total": 3,
+          "ragas": 0.5348379574234035,
+          "faithfulness": 0.5355727220980876
+        },
+        "projects": {
+          "total": 1,
+          "ragas": 0.5890165215742305,
+          "faithfulness": 0.4304347826086956
+        },
+        "skills": {
+          "total": 1,
+          "ragas": 0.3830327674580823,
+          "faithfulness": 0.24019607843137256
+        },
+        "contact": {
+          "total": 1,
+          "ragas": 0.20611093706488445,
+          "faithfulness": 0.260952380952381
+        },
+        "abstain": {
+          "total": 1,
+          "ragas": 0.20611093706488445,
+          "faithfulness": 0.260952380952381
+        }
+      },
+      "failures": [
+        {
+          "id": "programming-languages",
+          "ragas": 0.383,
+          "faithfulness": 0.24,
+          "correctness": 0.433,
+          "relevancy": 0.476,
+          "generated": "André knows several programming languages including Python, C++, C#, JavaScript/TypeScript, and Dart. He has extensive experience working with TensorFlow, PyTor"
+        },
+        {
+          "id": "consulting-availability",
+          "ragas": 0.206,
+          "faithfulness": 0.261,
+          "correctness": 0.18,
+          "relevancy": 0.178,
+          "generated": "André Pedersen is available for consulting. He can help with his expertise in applied machine learning, medical imaging, and building production AI systems for "
+        }
+      ],
+      "stability": 0.921666796056765,
+      "passAtK": 1,
+      "repeats": 3
     }
   }
 }

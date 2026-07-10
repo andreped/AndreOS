@@ -36,5 +36,38 @@
       "routing": 0.7142857142857143,
       "commands": 0.9285714285714286
     }
+  },
+  {
+    "generatedAt": "2026-07-10T18:38:57.496Z",
+    "source": "node",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "scorers": 0
+    }
+  },
+  {
+    "generatedAt": "2026-07-10T18:42:28.714Z",
+    "source": "node",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "scorers": 1
+    }
+  },
+  {
+    "generatedAt": "2026-07-10T18:52:19.038Z",
+    "source": "browser",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "routing": 0.7142857142857143,
+      "commands": 0.9285714285714286,
+      "plan": 0,
+      "answers": 0.5403868474570912
+    }
   }
 ]

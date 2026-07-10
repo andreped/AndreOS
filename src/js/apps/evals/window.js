@@ -15,27 +15,41 @@
  */
 import { BM25 } from '../../assistant/retrieval/BM25.js';
 import { assistantRegistry } from '../../assistant/registry/AssistantRegistry.js';
+import { ActiveContext } from '../../assistant/retrieval/ActiveContext.js';
 
 import { FIXTURE_CORPUS } from '../../../../tests/evals/datasets/fixtureCorpus.js';
 import { RETRIEVAL_DATASET } from '../../../../tests/evals/datasets/retrieval.js';
 import { RESOLUTION_DATASET } from '../../../../tests/evals/datasets/resolution.js';
 import { ROUTING_DATASET } from '../../../../tests/evals/datasets/routing.js';
 import { COMMANDS_DATASET } from '../../../../tests/evals/datasets/commands.js';
+import { PLANS_DATASET } from '../../../../tests/evals/datasets/plans.js';
+import { ANSWERS_DATASET } from '../../../../tests/evals/datasets/answers.js';
 
 import { buildRetrievalRow, summariseRetrieval } from '../../../../tests/evals/harness/scoreRetrieval.js';
 import { summariseRouting } from '../../../../tests/evals/harness/scoreRouting.js';
 import { buildRow, summariseCommands } from '../../../../tests/evals/harness/scoreCommands.js';
+import { scorePlanCase, summarisePlan } from '../../../../tests/evals/harness/scorePlan.js';
+import { scoreAnswerRow, summariseAnswers } from '../../../../tests/evals/harness/scoreAnswers.js';
 import { routeLabel } from '../../../../tests/evals/harness/normalize.js';
+import { mean, stdev, majority, mode, passAtK, repeat } from '../../../../tests/evals/harness/stats.js';
+
+// How many times each LLM sample is re-run to measure nondeterminism. Real
+// model calls vary run-to-run, so a single sample is misleading — we repeat and
+// report both the central metric and its run-to-run stability. Deterministic
+// suites ignore this (their output never changes).
+const REPEATS = 3;
 
 // ── Per-suite display config (headline metric, threshold, description) ─────────
 const SUITE_META = {
-    retrieval:  { label: 'Retrieval',  metric: 'hit3',       fmt: 'pct', min: 0.8,  desc: 'BM25 paper ranking',        subs: [['hit@1', 'hit1', 'pct'], ['MRR', 'mrr', 'num'], ['recall', 'recall', 'pct']] },
-    resolution: { label: 'Resolution', metric: 'accuracy',   fmt: 'pct', min: 0.95, desc: 'App name → id',              subs: [] },
-    integrity:  { label: 'Integrity',  metric: 'pass',       fmt: 'bool', min: 1,   desc: 'Registry structure',        subs: [['profiles', 'total', 'int']] },
-    routing:    { label: 'Routing',    metric: 'accuracy',   fmt: 'pct', min: 0.8,  desc: 'Command vs ask (LLM)',       subs: [['precision', 'precision', 'pct'], ['recall', 'recall', 'pct'], ['F1', 'f1', 'num']] },
-    commands:   { label: 'Commands',   metric: 'exactMatch', fmt: 'pct', min: 0.6,  desc: 'Right actions (LLM)',        subs: [['action F1', 'actionF1', 'num'], ['target acc', 'targetAccuracy', 'pct']] },
+    retrieval:  { label: 'Retrieval',  metric: 'hit3',         fmt: 'pct', min: 0.8,  desc: 'BM25 paper ranking',        subs: [['hit@1', 'hit1', 'pct'], ['MRR', 'mrr', 'num'], ['recall', 'recall', 'pct']] },
+    resolution: { label: 'Resolution', metric: 'accuracy',     fmt: 'pct', min: 0.95, desc: 'App name → id',              subs: [] },
+    integrity:  { label: 'Integrity',  metric: 'pass',         fmt: 'bool', min: 1,   desc: 'Registry structure',        subs: [['profiles', 'total', 'int']] },
+    routing:    { label: 'Routing',    metric: 'accuracy',     fmt: 'pct', min: 0.8,  desc: 'Command vs ask (LLM)',       subs: [['precision', 'precision', 'pct'], ['recall', 'recall', 'pct'], ['stability', 'stability', 'pct'], ['pass@k', 'passAtK', 'pct']] },
+    commands:   { label: 'Commands',   metric: 'exactMatch',   fmt: 'pct', min: 0.6,  desc: 'Right actions · single-shot (LLM)', subs: [['action F1', 'actionF1', 'num'], ['target acc', 'targetAccuracy', 'pct'], ['stability', 'stability', 'pct'], ['pass@k', 'passAtK', 'pct']] },
+    plan:       { label: 'Plan',       metric: 'planExactMatch', fmt: 'pct', min: 0.5, desc: 'Right plan · multi-shot (LLM)', subs: [['turn exact', 'turnExactMatch', 'pct'], ['turn F1', 'turnF1', 'num'], ['stability', 'stability', 'pct'], ['pass@k', 'passAtK', 'pct']] },
+    answers:    { label: 'Answers',    metric: 'ragas',        fmt: 'pct', min: 0.4,  desc: 'RAGAS-style answer quality (LLM)', subs: [['faithful', 'faithfulness', 'pct'], ['correct', 'correctness', 'pct'], ['relevant', 'relevancy', 'pct'], ['halluc.', 'hallucinationRate', 'pct'], ['stability', 'stability', 'pct']] },
 };
-const SUITE_ORDER = ['routing', 'commands', 'retrieval', 'resolution', 'integrity'];
+const SUITE_ORDER = ['routing', 'commands', 'plan', 'answers', 'retrieval', 'resolution', 'integrity'];
 
 // A visitor's own runs are kept privately in localStorage (never committed to the
 // repo). Only the trend history is stored — the default view on open is always the
@@ -465,6 +479,8 @@ function buildRunners(chat) {
         { key: 'integrity',  samples: ['Registry structure & capabilities'], run: integrityRunner },
         { key: 'routing',  needsModel: true, samples: ROUTING_DATASET.map((c) => c.input),  run: (emit) => routingRunner(emit, chat) },
         { key: 'commands', needsModel: true, samples: COMMANDS_DATASET.map((c) => c.input), run: (emit) => commandsRunner(emit, chat) },
+        { key: 'plan',     needsModel: true, samples: PLANS_DATASET.map((c) => c.id),       run: (emit) => planRunner(emit, chat) },
+        { key: 'answers',  needsModel: true, samples: ANSWERS_DATASET.map((c) => c.question), run: (emit) => answersRunner(emit, chat) },
     ];
 }
 
@@ -511,29 +527,95 @@ async function integrityRunner(emit) {
 
 async function routingRunner(emit, chat) {
     const rows = [];
+    const consistencies = [];
+    const passAtKs = [];
     for (let i = 0; i < ROUTING_DATASET.length; i++) {
         const c = ROUTING_DATASET[i];
-        const predicted = routeLabel(await chat.routeIntent(c.input, []));
         const expected = routeLabel(c.expected);
+        // Repeat to expose nondeterminism: take the majority label, and record
+        // how consistent the runs were + whether any run got it right (pass@k).
+        const labels = await repeat(async () => routeLabel(await chat.routeIntent(c.input, [])), REPEATS);
+        const { label: predicted, consistency } = majority(labels);
         const correct = predicted === expected;
+        consistencies.push(consistency);
+        passAtKs.push(passAtK(labels.map((l) => l === expected)));
         rows.push({ input: c.input, expected, predicted, correct, tags: c.tags ?? [] });
         emit(i, correct ? 'pass' : 'fail');
         await raf();
     }
-    return summariseRouting(rows);
+    return summariseRouting(rows, { stability: mean(consistencies), passAtK: mean(passAtKs), repeats: REPEATS });
 }
 
 async function commandsRunner(emit, chat) {
     const rows = [];
+    const stabilities = [];
+    const passAtKs = [];
     for (let i = 0; i < COMMANDS_DATASET.length; i++) {
         const c = COMMANDS_DATASET[i];
-        const actions = (await chat.parseCommand(c.input, [])) ?? [];
-        const row = buildRow(c, actions);
+        // Repeat, score each run, then take the modal action plan as the
+        // representative. Stability = how often the modal plan recurred.
+        const runs = await repeat(async () => buildRow(c, (await chat.parseCommand(c.input, [])) ?? []), REPEATS);
+        const { item: row, consistency } = mode(runs, (r) => r.predicted.join('|'));
+        stabilities.push(consistency);
+        passAtKs.push(passAtK(runs.map((r) => r.exact)));
         rows.push(row);
         emit(i, row.exact ? 'pass' : 'fail');
         await raf();
     }
-    return summariseCommands(rows);
+    return summariseCommands(rows, { stability: mean(stabilities), passAtK: mean(passAtKs), repeats: REPEATS });
+}
+
+// ── Multi-shot planning: whole conversations, history carried across turns ────
+async function planRunner(emit, chat) {
+    const predictTurn = (userText, history) => chat.parseCommand(userText, history);
+    const cases = [];
+    const stabilities = [];
+    const passAtKs = [];
+    for (let i = 0; i < PLANS_DATASET.length; i++) {
+        const c = PLANS_DATASET[i];
+        // Repeat the whole conversation; take the modal plan-correctness outcome.
+        const runs = await repeat(() => scorePlanCase(c, predictTurn), REPEATS);
+        const { item: rep, consistency } = mode(runs, (r) => String(r.planExact));
+        stabilities.push(consistency);
+        passAtKs.push(passAtK(runs.map((r) => r.planExact)));
+        cases.push(rep);
+        emit(i, rep.planExact ? 'pass' : 'fail');
+        await raf();
+    }
+    return summarisePlan(cases, { stability: mean(stabilities), passAtK: mean(passAtKs), repeats: REPEATS });
+}
+
+// ── RAGAS-style answer quality: score the free text the model writes ──────────
+async function answersRunner(emit, chat) {
+    const min = SUITE_META.answers.min;
+    const rows = [];
+    const stabilities = [];
+    const passAtKs = [];
+    for (let i = 0; i < ANSWERS_DATASET.length; i++) {
+        const c = ANSWERS_DATASET[i];
+        ActiveContext.setActiveApp(c.activeApp ?? null);
+        // Repeat generation; average each RAGAS facet and measure run-to-run
+        // stability of the headline (1 − stdev of ragas).
+        const runs = await repeat(async () => {
+            const out = (await chat.answer(c.question)) ?? { text: '', context: '' };
+            return scoreAnswerRow(c, out.text, out.context);
+        }, REPEATS);
+        const avgRow = {
+            ...runs[0],
+            faithfulness: mean(runs.map((r) => r.faithfulness)),
+            correctness:  mean(runs.map((r) => r.correctness)),
+            relevancy:    mean(runs.map((r) => r.relevancy)),
+            ragas:        mean(runs.map((r) => r.ragas)),
+            hallucinated: runs.filter((r) => r.hallucinated).length > runs.length / 2,
+        };
+        stabilities.push(1 - stdev(runs.map((r) => r.ragas)));
+        passAtKs.push(passAtK(runs.map((r) => r.ragas >= min)));
+        rows.push(avgRow);
+        emit(i, avgRow.ragas >= min ? 'pass' : 'fail');
+        await raf();
+    }
+    ActiveContext.setActiveApp(null);
+    return summariseAnswers(rows, { stability: mean(stabilities), passAtK: mean(passAtKs), repeats: REPEATS }, min);
 }
 
 // ── Checklist item helpers (per-sample progress rows) ─────────────────────────
@@ -616,9 +698,20 @@ const DATASET_SECTIONS = [
         ['Expected', (c) => `<code>${c.expected}</code>`],
         ['Tags', (c) => dsTags(c.tags)],
     ] },
-    { title: 'Commands', desc: 'right actions', rows: () => COMMANDS_DATASET, cols: [
+    { title: 'Commands', desc: 'right actions · single-shot', rows: () => COMMANDS_DATASET, cols: [
         ['Input', (c) => escapeHtml(c.input)],
         ['Expected actions', (c) => `<code>${escapeHtml(JSON.stringify(c.expectedActions))}</code>`],
+        ['Tags', (c) => dsTags(c.tags)],
+    ] },
+    { title: 'Plan', desc: 'right plan · multi-shot', rows: () => PLANS_DATASET, cols: [
+        ['Conversation', (c) => `<code>${escapeHtml(c.id)}</code>`],
+        ['Turns', (c) => c.turns.map((t, i) => `${i + 1}. ${escapeHtml(t.user)} → <code>${escapeHtml(JSON.stringify(t.expectedActions))}</code>`).join('<br>')],
+        ['Tags', (c) => dsTags(c.tags)],
+    ] },
+    { title: 'Answers', desc: 'RAGAS-style answer quality', rows: () => ANSWERS_DATASET, cols: [
+        ['Question', (c) => escapeHtml(c.question)],
+        ['Reference', (c) => escapeHtml(c.reference)],
+        ['Key points', (c) => (c.keyPoints ?? []).map((k) => `<code>${escapeHtml(k)}</code>`).join(' ')],
         ['Tags', (c) => dsTags(c.tags)],
     ] },
     { title: 'Retrieval', desc: 'BM25 paper ranking', rows: () => RETRIEVAL_DATASET, cols: [

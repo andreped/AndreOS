@@ -18,9 +18,12 @@ Two properties shape the whole design:
   name resolution, registry structure). These run **headlessly in Node/CI** —
   fast, reproducible, and a hard gate on every push.
 - **Some decisions need the real language model** (routing an *ask* vs a
-  *command*, parsing a command into actions). The model runs on **WebGPU in the
-  browser**, so those suites run **live inside an Evals app** and their results
-  are committed back to the repo.
+  *command*, parsing a command into an action plan, holding a *multi-shot*
+  conversation, and the *free-text answer* itself). The model runs on **WebGPU in
+  the browser**, so those suites run **live inside an Evals app** and their
+  results are committed back to the repo. Because real model calls are
+  **nondeterministic**, every LLM sample is run several times and scored for both
+  quality *and* stability (see §5b).
 
 ```mermaid
 flowchart LR
@@ -28,10 +31,13 @@ flowchart LR
         R["retrieval"]
         RES["resolution"]
         INT["integrity"]
+        SCO["scorers self-test"]
     end
-    subgraph LLM["🤖 Model-dependent (browser)"]
+    subgraph LLM["🤖 Model-dependent (browser · repeated)"]
         RT["routing"]
-        CMD["commands"]
+        CMD["commands · single-shot"]
+        PLN["plan · multi-shot"]
+        ANS["answers · RAGAS"]
     end
 
     DET --> SC["📊 Scorecard<br/>results/latest.json"]
@@ -41,8 +47,8 @@ flowchart LR
 
     classDef det fill:#1f6feb,stroke:#0b3d91,color:#fff;
     classDef llm fill:#8957e5,stroke:#4b2a8a,color:#fff;
-    class R,RES,INT det
-    class RT,CMD llm
+    class R,RES,INT,SCO det
+    class RT,CMD,PLN,ANS llm
 ```
 
 ---
@@ -55,14 +61,19 @@ dataset plus a scorer that emits a single headline metric (and supporting ones).
 | Suite | Assistant code | Question it answers | Headline metric |
 |---|---|---|---|
 | **routing** | `routeIntent()` in `chat.js` | Is this an *ask* or a *command*? | accuracy |
-| **commands** | `parseCommand()` in `chat.js` | Did it produce the *right actions*? | exact-match |
+| **commands** | `parseCommand()` in `chat.js` | Did it produce the *right actions* (single-shot)? | exact-match |
+| **plan** | `parseCommand()` over a dialogue | Does it plan right *across turns* (multi-shot)? | plan exact-match |
+| **answers** | `answer()` in `chat.js` | Is the *written answer* correct, grounded & relevant? | RAGAS score |
 | **retrieval** | `RAGEngine` / `BM25` | Did it surface the *right paper*? | hit@3 |
 | **resolution** | `AssistantRegistry.resolveId()` | Did a spoken name map to the *right app*? | accuracy |
 | **integrity** | the two registries | Are all profiles/capabilities *well-formed*? | pass/fail |
+| **scorers** | `harness/*` | Is the *scoring math itself* correct? | pass/fail |
 
-The first two are the "how well does it follow **ask** questions and do the right
-thing" suites — the reason evals exist. The last three protect the plumbing those
-two rely on.
+The first four are the "how well does it follow **ask** questions and do the
+right thing" suites — the reason evals exist. `commands` scores a single
+utterance; `plan` scores a whole conversation where later turns depend on earlier
+ones; `answers` grades the free text the model actually writes. The last four
+protect the plumbing (and the scorers) those rely on.
 
 ---
 
@@ -145,6 +156,57 @@ flowchart TB
 
 ---
 
+## 5b. Nondeterminism: score quality *and* stability
+
+Real model calls are not reproducible — the same prompt can route differently,
+plan differently, or word an answer differently on each run. Scoring an LLM
+sample **once** is therefore misleading. Every model-dependent runner repeats
+each sample `REPEATS` times (default **3**) and aggregates with the shared
+`harness/stats.js` helpers:
+
+- **stability** — how often the runs agreed. For categorical suites (routing) it
+  is the *majority consistency*; for plans/commands it is how often the *modal
+  action plan* recurred; for answers it is `1 − stdev(ragas)`. High quality with
+  low stability is a red flag the scorecard now makes visible.
+- **pass@k** — did *any* of the k runs succeed? This separates "the model *can*
+  do this but is flaky" from "the model *can't* do this at all".
+- The representative row fed to the shared scorer is the **majority label** or
+  **modal plan**, so a single lucky/unlucky sample can't swing the headline.
+
+```mermaid
+flowchart LR
+    S["one sample"] --> RPT["run × REPEATS"]
+    RPT --> AGG{"aggregate"}
+    AGG --> REP["majority / modal → scored"]
+    AGG --> STB["stability"]
+    AGG --> PAK["pass@k"]
+    REP --> HEAD["headline metric"]
+```
+
+## 5c. Answer quality — a RAGAS-style, embedding-free scorer
+
+The **answers** suite grades the free text the model writes, modelled on
+[RAGAS](https://docs.ragas.io): instead of one fuzzy "is it good?", it decomposes
+answer quality into independent facets, each a lexical proxy computed by
+`harness/scoreAnswers.js` (backed by `harness/text.js`):
+
+| Facet | What it asks | How it's approximated |
+|---|---|---|
+| **faithfulness** | Grounded in context, or hallucinated? | fraction of answer content tokens supported by *reference + curated ground-truth facts + the actually-retrieved RAG context*; `mustNotContain` markers hard-cap it |
+| **correctness** | Matches the reference answer? | token-set F1 with the reference, blended with coverage of expected key points |
+| **relevancy** | Addresses *this* question? | key-point recall blended with question/answer overlap |
+| **ragas** | headline | mean of the three facets |
+
+The proxies are deliberately **lexical** (token overlap, keyword coverage, strict
+phrase match) rather than embedding- or judge-based, so the exact same numbers
+are reproducible with **no model download** and can be **self-tested in CI**. A
+`judge` hook is left open for a future LLM-as-judge upgrade without changing the
+suite shape. Each answer's golden case carries a `reference`, `keyPoints`,
+`groundTruth`, and `mustNotContain` — everything the scorer needs, all sourced
+from the assistant's own profile so a faithful model *can* score well.
+
+---
+
 ## 6. Where metrics live
 
 Metrics are committed to the repo — no backend required — which gives the Evals
@@ -155,15 +217,21 @@ tests/evals/
 ├── datasets/            📁 golden truth (data only)
 │   ├── routing.js
 │   ├── commands.js
+│   ├── plans.js             multi-shot conversations
+│   ├── answers.js           RAGAS-style Q + reference + facts
 │   ├── retrieval.js
 │   ├── fixtureCorpus.js
 │   └── resolution.js
 ├── harness/             🧮 pure scorers (shared Node + browser)
 │   ├── normalize.js
+│   ├── text.js              lexical helpers for answer scoring
+│   ├── stats.js             nondeterminism aggregation (mean/stdev/majority/pass@k)
 │   ├── scoreRouting.js
 │   ├── scoreCommands.js
+│   ├── scorePlan.js         multi-shot plan scoring (reuses scoreCommands)
+│   ├── scoreAnswers.js      RAGAS-style facets
 │   └── scoreRetrieval.js
-├── runNode.js           ▶️ deterministic runner (writes the scorecard)
+├── runNode.js           ▶️ deterministic runner + scorer self-test (writes the scorecard)
 └── results/
     ├── latest.json          the current scorecard
     └── history.json         trimmed per-run headline metrics (trend)
@@ -195,17 +263,21 @@ only run in a browser — reach the deployed site.
 
 1. Build a BM25 index over the fixture corpus → score retrieval.
 2. Import the registries → score resolution + integrity.
-3. Write `latest.json` + append to `history.json`.
-4. **Exit non-zero** if any suite falls below its threshold in `THRESHOLDS`.
+3. Run the **scorer self-test** — feed the plan + answers scorers a *perfect* and
+   a *broken* simulated model and assert the metrics move correctly (guards the
+   RAGAS-style and multi-shot math without needing a model).
+4. Write `latest.json` + append to `history.json`.
+5. **Exit non-zero** if any suite falls below its threshold in `THRESHOLDS`.
 
 **In the browser** (the 🧪 Evals app → *Run live evals*):
 
 1. Re-run the deterministic suites in-page (instant, for parity).
-2. If the Ask André model is loaded, run **routing** and **commands** through
-   `window.AndreChat` and score them with the shared scorers.
-3. Render the scorecard with pass/below-threshold badges and trend sparklines.
-   The run stays private (localStorage); a **developer** can **Export for
-   commit** to publish it.
+2. If the Ask André model is loaded, run **routing**, **commands**, **plan**, and
+   **answers** through `window.AndreChat` — each sample repeated `REPEATS` times
+   for stability — and score them with the shared scorers.
+3. Render the scorecard with pass/below-threshold badges, stability/pass@k, and
+   trend sparklines. The run stays private (localStorage); a **developer** can
+   **Export for commit** to publish it.
 
 ```mermaid
 flowchart LR
