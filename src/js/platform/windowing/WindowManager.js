@@ -55,12 +55,15 @@ export class WindowManager {
 
     // ── Public API ────────────────────────────────────────────────────────────
 
-    /** Opens an app by file-type key. Prevents duplicate chat windows. */
+    /**
+     * Opens an app by file-type key. Apps are single-instance: if a window for
+     * this app is already open, it is focused instead of opening a duplicate.
+     * (Prevents the assistant from stacking e.g. two Browser windows when a
+     * sequence both opens an app and then acts inside it.)
+     */
     openFile(fileType) {
-        if (fileType === 'chat') {
-            const existing = this._windows.find(w => w.title === 'Ask André');
-            if (existing) { this.setActiveWindow(existing.id); return; }
-        }
+        const existing = this._windows.find(w => w.appType === fileType);
+        if (existing) { this.setActiveWindow(existing.id); return; }
         const data = appRegistry.toWindowData(fileType);
         if (data) this.createWindow(data);
     }
