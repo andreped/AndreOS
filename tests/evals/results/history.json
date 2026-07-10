@@ -25,5 +25,16 @@
       "resolution": 1,
       "integrity": 1
     }
+  },
+  {
+    "generatedAt": "2026-07-10T09:21:45.466Z",
+    "source": "browser",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "routing": 0.7142857142857143,
+      "commands": 0.9285714285714286
+    }
   }
 ]

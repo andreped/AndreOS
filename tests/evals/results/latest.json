@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-10T07:28:57.505Z",
-  "source": "node",
+  "generatedAt": "2026-07-10T09:21:45.466Z",
+  "source": "browser",
   "suites": {
     "retrieval": {
       "suite": "retrieval",
@@ -23,6 +23,166 @@
       "total": 12,
       "pass": 1,
       "problems": []
+    },
+    "routing": {
+      "suite": "routing",
+      "total": 28,
+      "accuracy": 0.7142857142857143,
+      "precision": 1,
+      "recall": 0.4666666666666667,
+      "f1": 0.6363636363636364,
+      "confusion": {
+        "tp": 7,
+        "fp": 0,
+        "fn": 8,
+        "tn": 13
+      },
+      "byTag": {
+        "open": {
+          "total": 4,
+          "accuracy": 0.75
+        },
+        "window": {
+          "total": 4,
+          "accuracy": 0.5
+        },
+        "browse": {
+          "total": 3,
+          "accuracy": 0.3333333333333333
+        },
+        "research-action": {
+          "total": 4,
+          "accuracy": 0.25
+        },
+        "norwegian": {
+          "total": 3,
+          "accuracy": 0.6666666666666666
+        },
+        "bio": {
+          "total": 7,
+          "accuracy": 1
+        },
+        "research-question": {
+          "total": 3,
+          "accuracy": 1
+        },
+        "skills": {
+          "total": 1,
+          "accuracy": 1
+        },
+        "contact": {
+          "total": 1,
+          "accuracy": 1
+        },
+        "tricky": {
+          "total": 5,
+          "accuracy": 0.6
+        },
+        "meta": {
+          "total": 1,
+          "accuracy": 1
+        }
+      },
+      "failures": [
+        {
+          "input": "show me the projects app",
+          "expected": "command",
+          "predicted": "direct"
+        },
+        {
+          "input": "show desktop",
+          "expected": "command",
+          "predicted": "direct"
+        },
+        {
+          "input": "search the web for medical imaging",
+          "expected": "command",
+          "predicted": "direct"
+        },
+        {
+          "input": "sort by most cited",
+          "expected": "command",
+          "predicted": "direct"
+        },
+        {
+          "input": "filter to only journals",
+          "expected": "command",
+          "predicted": "direct"
+        },
+        {
+          "input": "lukk vinduet",
+          "expected": "command",
+          "predicted": "direct"
+        },
+        {
+          "input": "find pathology papers",
+          "expected": "command",
+          "predicted": "direct"
+        },
+        {
+          "input": "take me to his github",
+          "expected": "command",
+          "predicted": "direct"
+        }
+      ]
+    },
+    "commands": {
+      "suite": "commands",
+      "total": 14,
+      "exactMatch": 0.9285714285714286,
+      "actionF1": 0.9285714285714286,
+      "precision": 0.9285714285714286,
+      "recall": 0.9285714285714286,
+      "targetAccuracy": 1,
+      "byTag": {
+        "open": {
+          "total": 7,
+          "exactMatch": 1,
+          "actionF1": 1
+        },
+        "window": {
+          "total": 3,
+          "exactMatch": 1,
+          "actionF1": 1
+        },
+        "browse": {
+          "total": 2,
+          "exactMatch": 0.5,
+          "actionF1": 0.5
+        },
+        "compound": {
+          "total": 4,
+          "exactMatch": 1,
+          "actionF1": 1
+        },
+        "chat": {
+          "total": 3,
+          "exactMatch": 1,
+          "actionF1": 1
+        },
+        "research": {
+          "total": 2,
+          "exactMatch": 1,
+          "actionF1": 1
+        },
+        "open_paper": {
+          "total": 2,
+          "exactMatch": 1,
+          "actionF1": 1
+        }
+      },
+      "failures": [
+        {
+          "input": "search the web for digital pathology",
+          "expected": [
+            "browse:digital pathology"
+          ],
+          "predicted": [
+            "search:digital pathology"
+          ],
+          "f1": 0
+        }
+      ]
     }
   }
 }

@@ -37,8 +37,9 @@ const SUITE_META = {
 };
 const SUITE_ORDER = ['routing', 'commands', 'retrieval', 'resolution', 'integrity'];
 
-// Persist the last in-browser run so it survives closing/reopening the app.
-const LS_LAST    = 'andreos:evals:last-run';
+// A visitor's own runs are kept privately in localStorage (never committed to the
+// repo). Only the trend history is stored — the default view on open is always the
+// committed latest.json, so everyone sees the published, canonical results first.
 const LS_HISTORY = 'andreos:evals:history';
 
 export function setupEvalsWindow(winEl) {
@@ -50,6 +51,7 @@ export function setupEvalsWindow(winEl) {
     const statusEl   = winEl.querySelector('#evals-status');
     const sourceEl   = winEl.querySelector('#evals-source');
     const runBtn     = winEl.querySelector('#evals-run');
+    const exportBtn  = winEl.querySelector('#evals-export');
     const copyBtn    = winEl.querySelector('#evals-copy');
     const jsonEl     = winEl.querySelector('#evals-json');
     const datasetEl  = winEl.querySelector('#evals-dataset');
@@ -115,7 +117,10 @@ export function setupEvalsWindow(winEl) {
         failuresView.style.display = scView === 'failures' ? '' : 'none';
     }
 
-    // ── Load results: committed scorecard + persisted last browser run ────────
+    // ── Load results ─────────────────────────────────────────────────────────
+    // Default view = the committed latest.json (the published, canonical results).
+    // A visitor's own runs live only in localStorage and feed the trend sparklines;
+    // they never override the default on open and are never persisted to the repo.
     (async () => {
         let committedHistory = [];
         try {
@@ -127,15 +132,10 @@ export function setupEvalsWindow(winEl) {
             current = latest;
         } catch { /* no committed scorecard yet */ }
 
-        // Overlay the last browser run (persisted locally). The most recent
-        // result by timestamp is what the user should see as current performance.
+        // Merge the visitor's private local runs into the trend history only.
         try {
             const localHistory = JSON.parse(localStorage.getItem(LS_HISTORY) || '[]');
             history = [...committedHistory, ...(Array.isArray(localHistory) ? localHistory : [])];
-            const localLast = JSON.parse(localStorage.getItem(LS_LAST) || 'null');
-            if (localLast && (!current || new Date(localLast.generatedAt) >= new Date(current.generatedAt))) {
-                current = localLast;
-            }
         } catch { history = committedHistory; }
 
         if (current) paint();
@@ -278,9 +278,9 @@ export function setupEvalsWindow(winEl) {
     };
 
     // ── Buttons ─────────────────────────────────────────────────────────────
-    function persistRun(scorecard, entry) {
+    // Record a run's headline metrics in the visitor's private local trend only.
+    function persistRun(entry) {
         try {
-            localStorage.setItem(LS_LAST, JSON.stringify(scorecard));
             const stored = JSON.parse(localStorage.getItem(LS_HISTORY) || '[]');
             const arr = Array.isArray(stored) ? stored : [];
             arr.push(entry);
@@ -302,9 +302,10 @@ export function setupEvalsWindow(winEl) {
             reporter.onAllDone();
             const entry = historyEntry(current);
             history = [...history, entry];
-            persistRun(current, entry);
+            persistRun(entry);
             paint();
             statusEl.textContent = summaryLine(current);
+            if (import.meta.env.DEV) await saveToDiskDev(current, entry);
         } catch (err) {
             statusEl.textContent = `Run failed: ${err.message}`;
         } finally {
@@ -323,6 +324,36 @@ export function setupEvalsWindow(winEl) {
             setTimeout(() => { copyBtn.textContent = '⧉ Copy'; }, 1500);
         } catch { /* clipboard blocked — ignore */ }
     });
+
+    // Export the current scorecard as latest.json (same format runNode.js writes).
+    // Anyone can download it to inspect; a developer drops it into
+    // tests/evals/results/ to publish (in dev mode this is saved automatically).
+    exportBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!current) return;
+        const blob = new Blob([JSON.stringify(current, null, 2) + '\n'], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'latest.json';
+        a.click();
+        URL.revokeObjectURL(a.href);
+        exportBtn.textContent = '✓ Downloaded';
+        setTimeout(() => { exportBtn.textContent = '⬇ Export'; }, 2000);
+    });
+
+    // In `vite dev` on localhost, save runs straight to the repo file on disk via
+    // a dev-only server endpoint (browsers can't write files themselves). No-op
+    // in a production build, where import.meta.env.DEV is false.
+    async function saveToDiskDev(scorecard, entry) {
+        try {
+            const res = await fetch('/__evals/save', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ scorecard, entry }),
+            });
+            if (res.ok) statusEl.textContent = `${summaryLine(scorecard)} · saved to tests/evals/results/latest.json`;
+        } catch { /* dev endpoint unavailable — ignore */ }
+    }
 
     // ── Render ──────────────────────────────────────────────────────────────
     function paint() {

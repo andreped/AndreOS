@@ -140,8 +140,8 @@ flowchart TB
 - **Resolution** and **integrity** import the live registries (with a tiny DOM
   shim) and inspect them directly.
 - **Routing** and **commands** call the real in-browser engine. They cannot run
-  in headless CI without WebGPU, so the Evals app is their home; a run can be
-  downloaded as JSON and committed.
+  in headless CI without WebGPU, so the Evals app is their home; a developer can
+  **export** a run and commit it to publish those numbers.
 
 ---
 
@@ -172,6 +172,21 @@ tests/evals/
 - `latest.json` — the canonical scorecard the app and CI both read.
 - `history.json` — one small entry per run, powering the sparklines.
 
+### Default view & privacy
+
+The Evals app **always opens on the committed `latest.json`** — the published,
+canonical results that everyone sees first. When a *visitor* runs the evals in
+their browser, that run is shown in-session and its headline metrics are kept
+**privately in their own `localStorage`** (feeding only their trend sparklines).
+Visitor runs are **never** written back to the repo and never override the
+default on open — their actions stay private to their browser.
+
+Publishing new numbers is a deliberate **developer** action: run the evals
+locally, click **⬇ Export for commit** to download a `latest.json` (identical in
+format to what `runNode.js` writes), drop it into `tests/evals/results/`, and
+commit. This is the only way the LLM suites (routing + commands) — which can
+only run in a browser — reach the deployed site.
+
 ---
 
 ## 7. How a run happens
@@ -188,8 +203,9 @@ tests/evals/
 1. Re-run the deterministic suites in-page (instant, for parity).
 2. If the Ask André model is loaded, run **routing** and **commands** through
    `window.AndreChat` and score them with the shared scorers.
-3. Render the scorecard with pass/below-threshold badges and trend sparklines;
-   offer a **Download JSON** to commit the run.
+3. Render the scorecard with pass/below-threshold badges and trend sparklines.
+   The run stays private (localStorage); a **developer** can **Export for
+   commit** to publish it.
 
 ```mermaid
 flowchart LR
@@ -200,8 +216,10 @@ flowchart LR
     CIG -->|no| PASS["✅ CI passes"]
 
     BTN["Evals app · Run live evals"] --> ALL["all 5 suites<br/>(routing+commands need model)"]
-    ALL --> DL["⬇ download JSON → commit"]
-    FILE --> APPVIEW["🧪 scorecard + trend"]
+    ALL --> LS["🔒 private localStorage trend"]
+    ALL --> EXP["⬇ Export for commit<br/>(developer)"]
+    EXP --> FILE
+    FILE --> APPVIEW["🧪 default view on open"]
 ```
 
 ---

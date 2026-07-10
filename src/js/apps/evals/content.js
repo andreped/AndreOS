@@ -133,6 +133,7 @@ export function render() {
             <h1>🧪 Assistant Evals</h1>
             <span class="evals-sub" id="evals-source"></span>
             <div class="evals-spacer"></div>
+            <button class="evals-btn secondary" id="evals-export" title="Download the current scorecard as JSON">⬇ Export</button>
             <button class="evals-btn" id="evals-run">▶ Run live evals</button>
         </div>
 
