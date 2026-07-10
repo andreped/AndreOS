@@ -63,8 +63,9 @@ export function buildRow(c, predictedActions) {
 
 /**
  * @param {ReturnType<typeof buildRow>[]} rows
+ * @param {object} [extra]  nondeterminism fields (stability, passAtK) to fold in
  */
-export function summariseCommands(rows) {
+export function summariseCommands(rows, extra = {}) {
     const n = rows.length || 1;
     const exactMatches = rows.filter((r) => r.exact).length;
     const avg = (sel) => rows.reduce((s, r) => s + sel(r), 0) / n;
@@ -86,6 +87,7 @@ export function summariseCommands(rows) {
         failures: rows
             .filter((r) => !r.exact)
             .map((r) => ({ input: r.input, expected: r.expected, predicted: r.predicted, f1: round(r.f1) })),
+        ...extra,
     };
 }
 

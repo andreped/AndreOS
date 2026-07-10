@@ -468,6 +468,49 @@ window.AndreChat = {
         }
     },
 
+    /**
+     * Non-streaming answer used by the evals harness (RAGAS-style answer suite).
+     * Runs the exact same RAG pipeline as the chat window — active-app context
+     * takes priority over general retrieval — but returns the final text plus the
+     * context block that was fed to the model, so the harness can measure
+     * faithfulness against what the model was actually given.
+     * @param {string} text
+     * @param {{ history?: {role:string,content:string}[], temperature?: number }} [opts]
+     * @returns {Promise<{ text: string, context: string } | null>}
+     */
+    async answer(text, { history = [], temperature = 0.7 } = {}) {
+        if (engineState !== 'ready') return null;
+        const langSetting = getLLMLanguage();
+        const langInstruction = langSetting === 'no' ? '\n\nAlways respond in Norwegian (Bokmål).'
+            : langSetting === 'en' ? '\n\nAlways respond in English.'
+            : '';
+        const activeCtx  = ActiveContext.getContextBlock(text);
+        const ragContext = activeCtx ? '' : ragEngine.query(text);
+        const context    = activeCtx || ragContext || '';
+        const systemContent = [
+            SYSTEM_PROMPT,
+            activeCtx || null,
+            ragContext
+                ? `## Relevant Research Papers\nThese papers from André's publications are relevant to this question:\n\n${ragContext}\n\nCite paper titles when relevant.`
+                : null,
+        ].filter(Boolean).join('\n\n') + langInstruction;
+        try {
+            const res = await engine.chat.completions.create({
+                messages: [
+                    { role: 'system', content: systemContent },
+                    ...history.filter(m => m.role !== 'system'),
+                    { role: 'user', content: text },
+                ],
+                max_tokens: 300,
+                temperature,
+            });
+            return { text: res.choices[0]?.message?.content?.trim() ?? '', context };
+        } catch (err) {
+            console.error('[AndreChat] answer error:', err);
+            return { text: '', context };
+        }
+    },
+
     async parseCommand(text, history = []) {
         if (engineState !== 'ready') return null;
         const histCtx = history.slice(-6)

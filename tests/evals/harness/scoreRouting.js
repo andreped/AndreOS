@@ -29,10 +29,12 @@ export function scoreRouting(dataset, predict) {
 
 /**
  * Build the summary from already-predicted rows. Used by the async in-browser
- * path where predictions come from the LLM.
+ * path where predictions come from the LLM. `extra` lets the runner fold in
+ * nondeterminism fields (stability, passAtK) measured across repeated runs.
  * @param {RoutingRow[]} rows
+ * @param {object} [extra]
  */
-export function summariseRouting(rows) {
+export function summariseRouting(rows, extra = {}) {
     const n = rows.length || 1;
     const correct = rows.filter((r) => r.correct).length;
 
@@ -56,6 +58,7 @@ export function summariseRouting(rows) {
         confusion: { tp, fp, fn, tn },
         byTag: tagBreakdown(rows),
         failures: rows.filter((r) => !r.correct).map((r) => ({ input: r.input, expected: r.expected, predicted: r.predicted })),
+        ...extra,
     };
 }
 

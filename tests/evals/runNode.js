@@ -40,6 +40,7 @@ const THRESHOLDS = {
     retrieval: { metric: 'hit3', min: 0.8 },
     resolution: { metric: 'accuracy', min: 0.95 },
     integrity: { metric: 'pass', min: 1 },
+    scorers: { metric: 'pass', min: 1 },
 };
 
 async function main() {
@@ -71,6 +72,13 @@ async function main() {
         suites.resolution = { suite: 'resolution', skipped: true, reason: err.message };
         suites.integrity = { suite: 'integrity', skipped: true, reason: err.message };
     }
+
+    // ── 4. Scorer self-test ─────────────────────────────────────────────────────
+    // The plan + answers suites can only *run* against the real in-browser model,
+    // but their scoring math is pure — so we validate it here, deterministically,
+    // and gate CI on it. This guards the RAGAS-style metrics and multi-shot plan
+    // scoring against regressions even though generation happens in the browser.
+    suites.scorers = await scoreScorers();
 
     // ── Assemble scorecard ──────────────────────────────────────────────────────
     const scorecard = {
@@ -127,6 +135,72 @@ function scoreIntegrity(registry) {
     return { suite: 'integrity', total: registry.all().length, pass: problems.length === 0 ? 1 : 0, problems };
 }
 
+// ── Scorer self-test — validates the plan + answers scoring math (no model) ────
+// Feeds the pure scorers a *perfect* simulated model and a *broken* one, then
+// asserts the metrics move the way they must (perfect → high, broken → low).
+// A green run here means the RAGAS-style and multi-shot metrics are trustworthy
+// when the browser later feeds them real model output.
+async function scoreScorers() {
+    const [{ scorePlan }, { scoreAnswerRow, summariseAnswers }, { PLANS_DATASET }, { ANSWERS_DATASET }, stats] =
+        await Promise.all([
+            import('./harness/scorePlan.js'),
+            import('./harness/scoreAnswers.js'),
+            import('./datasets/plans.js'),
+            import('./datasets/answers.js'),
+            import('./harness/stats.js'),
+        ]);
+
+    const problems = [];
+    const check = (name, cond) => { if (!cond) problems.push(name); };
+
+    // ── stats helpers ────────────────────────────────────────────────────────
+    check('stats.mean', stats.mean([1, 2, 3]) === 2);
+    check('stats.stdev(constant)=0', stats.stdev([2, 2, 2]) === 0);
+    check('stats.majority', stats.majority(['a', 'b', 'a']).label === 'a');
+    check('stats.majority.consistency', Math.abs(stats.majority(['a', 'b', 'a']).consistency - 2 / 3) < 1e-9);
+    check('stats.passAtK', stats.passAtK([false, true, false]) === 1 && stats.passAtK([false, false]) === 0);
+    check('stats.mode', stats.mode([{ x: 1 }, { x: 1 }, { x: 2 }], (o) => String(o.x)).item.x === 1);
+
+    // ── plan scorer: perfect predictor → all plans exact ─────────────────────
+    const perfectPlan = await scorePlan(PLANS_DATASET, (userText, _hist, activeApp) => {
+        // Find the matching turn by user text (unique within the dataset here).
+        for (const c of PLANS_DATASET) {
+            const t = c.turns.find((t) => t.user === userText && (t.activeApp ?? undefined) === (activeApp ?? undefined));
+            if (t) return t.expectedActions;
+        }
+        return [];
+    });
+    check('plan.perfect.planExactMatch=1', perfectPlan.planExactMatch === 1);
+    check('plan.perfect.turnF1≈1', perfectPlan.turnF1 > 0.99);
+
+    const brokenPlan = await scorePlan(PLANS_DATASET, () => []);
+    check('plan.broken.planExactMatch=0', brokenPlan.planExactMatch === 0);
+
+    // ── answers scorer: perfect vs empty vs hallucinated ─────────────────────
+    const perfectRows = ANSWERS_DATASET.map((c) =>
+        scoreAnswerRow(c, `${c.reference} ${(c.keyPoints ?? []).join(' ')}`, (c.groundTruth ?? []).join(' ')),
+    );
+    const perfect = summariseAnswers(perfectRows);
+    check('answers.perfect.ragas>0.7', perfect.ragas > 0.7);
+    check('answers.perfect.correctness>0.7', perfect.correctness > 0.7);
+    check('answers.perfect.noHallucination', perfect.hallucinationRate === 0);
+
+    const emptyRows = ANSWERS_DATASET.map((c) => scoreAnswerRow(c, ''));
+    const empty = summariseAnswers(emptyRows);
+    check('answers.empty.ragas<0.2', empty.ragas < 0.2);
+    check('answers.empty<perfect', empty.ragas < perfect.ragas);
+
+    // Hallucination: inject a banned phrase → faithfulness must be hard-capped.
+    const hallCases = ANSWERS_DATASET.filter((c) => (c.mustNotContain ?? []).length);
+    for (const c of hallCases) {
+        const row = scoreAnswerRow(c, `${c.reference} ${c.mustNotContain[0]}`, (c.groundTruth ?? []).join(' '));
+        check(`answers.halluc.flagged[${c.id}]`, row.hallucinated === true);
+        check(`answers.halluc.faithfulnessCapped[${c.id}]`, row.faithfulness <= 0.15);
+    }
+
+    return { suite: 'scorers', total: problems.length ? undefined : perfectRows.length + PLANS_DATASET.length, pass: problems.length === 0 ? 1 : 0, problems };
+}
+
 // ── Threshold evaluation ──────────────────────────────────────────────────────
 function evaluateThresholds(scorecard) {
     const failed = [];
@@ -169,8 +243,11 @@ function headlineMetric(name, suite) {
         case 'retrieval': return suite.hit3;
         case 'resolution': return suite.accuracy;
         case 'integrity': return suite.pass;
+        case 'scorers': return suite.pass;
         case 'routing': return suite.accuracy;
         case 'commands': return suite.exactMatch;
+        case 'plan': return suite.planExactMatch;
+        case 'answers': return suite.ragas;
         default: return null;
     }
 }
@@ -184,6 +261,8 @@ function printReport(scorecard) {
     if (res) console.log(res.skipped ? `  Resolution  skipped (${res.reason})` : `  Resolution  n=${res.total}  accuracy=${fmt(res.accuracy)}`);
     const it = scorecard.suites.integrity;
     if (it) console.log(it.skipped ? `  Integrity   skipped (${it.reason})` : `  Integrity   profiles=${it.total}  pass=${it.pass ? 'yes' : 'NO'}${it.problems?.length ? `\n    ${it.problems.join('\n    ')}` : ''}`);
+    const sc = scorecard.suites.scorers;
+    if (sc) console.log(`  Scorers     self-test pass=${sc.pass ? 'yes' : 'NO'}${sc.problems?.length ? `\n    ${sc.problems.join('\n    ')}` : ''}`);
 
     for (const suite of Object.values(scorecard.suites)) {
         if (suite.failures?.length) {
