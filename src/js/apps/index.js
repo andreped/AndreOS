@@ -30,11 +30,12 @@ import * as game     from './game/index.js';
 import * as research from './research/index.js';
 import * as settings from './settings/index.js';
 import * as ironflow from './ironflow/index.js';
+import * as evals    from './evals/index.js';
 
 /** Registration order = natural app order. */
 const apps = [
     about, resume, projects, skills, contact, social,
-    browser, chat, game, research, settings, ironflow,
+    browser, chat, game, research, settings, ironflow, evals,
 ];
 
 for (const app of apps) {
