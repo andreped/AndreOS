@@ -1564,7 +1564,7 @@ body {
     top: 20px;
     left: 20px;
     display: grid;
-    grid-template-columns: repeat(6, 120px);
+    grid-template-columns: repeat(7, 120px);
     gap: 30px;
     width: calc(100% - 40px);
     height: calc(100% - 80px);

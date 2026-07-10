@@ -1,0 +1,28 @@
+{
+  "generatedAt": "2026-07-10T07:28:57.505Z",
+  "source": "node",
+  "suites": {
+    "retrieval": {
+      "suite": "retrieval",
+      "total": 10,
+      "k": 5,
+      "hit1": 1,
+      "hit3": 1,
+      "recall": 1,
+      "mrr": 1,
+      "failures": []
+    },
+    "resolution": {
+      "suite": "resolution",
+      "total": 17,
+      "accuracy": 1,
+      "failures": []
+    },
+    "integrity": {
+      "suite": "integrity",
+      "total": 12,
+      "pass": 1,
+      "problems": []
+    }
+  }
+}
