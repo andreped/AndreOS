@@ -104,10 +104,14 @@ export class WindowManager {
         this._dom.windowsContainer?.appendChild(el);
 
         this._scheduleUpdate(() => {
-            el.style.transform = 'scale(1) rotate(0deg) translateZ(0)';
-            el.style.opacity   = '1';
+            // Bouncy entrance — a single-source overshoot easing so it can't fight
+            // any CSS keyframe animation (which used to cause an open/close flicker).
+            el.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.28s ease-out';
+            el.style.transform  = 'scale(1) rotate(0deg) translateZ(0)';
+            el.style.opacity    = '1';
             setTimeout(() => {
                 el.style.willChange = 'auto';
+                el.style.transition = '';   // restore the base transition for hover/drag/resize
                 el.classList.remove('opening');
             }, 600);
         });
