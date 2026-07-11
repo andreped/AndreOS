@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-11T10:56:52.180Z",
+  "generatedAt": "2026-07-10T18:52:19.038Z",
   "source": "browser",
   "suites": {
     "retrieval": {
@@ -27,44 +27,44 @@
     "routing": {
       "suite": "routing",
       "total": 28,
-      "accuracy": 0.8214285714285714,
-      "precision": 0.75,
-      "recall": 1,
-      "f1": 0.8571428571428571,
+      "accuracy": 0.7142857142857143,
+      "precision": 1,
+      "recall": 0.4666666666666667,
+      "f1": 0.6363636363636364,
       "confusion": {
-        "tp": 15,
-        "fp": 5,
-        "fn": 0,
-        "tn": 8
+        "tp": 7,
+        "fp": 0,
+        "fn": 8,
+        "tn": 13
       },
       "byTag": {
         "open": {
           "total": 4,
-          "accuracy": 1
+          "accuracy": 0.75
         },
         "window": {
           "total": 4,
-          "accuracy": 1
+          "accuracy": 0.5
         },
         "browse": {
           "total": 3,
-          "accuracy": 1
+          "accuracy": 0.3333333333333333
         },
         "research-action": {
           "total": 4,
-          "accuracy": 1
+          "accuracy": 0.25
         },
         "norwegian": {
           "total": 3,
-          "accuracy": 1
+          "accuracy": 0.6666666666666666
         },
         "bio": {
           "total": 7,
-          "accuracy": 0.7142857142857143
+          "accuracy": 1
         },
         "research-question": {
           "total": 3,
-          "accuracy": 0
+          "accuracy": 1
         },
         "skills": {
           "total": 1,
@@ -85,33 +85,48 @@
       },
       "failures": [
         {
-          "input": "summarize his PhD research",
-          "expected": "direct",
-          "predicted": "command"
+          "input": "show me the projects app",
+          "expected": "command",
+          "predicted": "direct"
         },
         {
-          "input": "how many publications does he have?",
-          "expected": "direct",
-          "predicted": "command"
+          "input": "show desktop",
+          "expected": "command",
+          "predicted": "direct"
         },
         {
-          "input": "explain what FastPathology is",
-          "expected": "direct",
-          "predicted": "command"
+          "input": "search the web for medical imaging",
+          "expected": "command",
+          "predicted": "direct"
         },
         {
-          "input": "can you tell me about his projects",
-          "expected": "direct",
-          "predicted": "command"
+          "input": "sort by most cited",
+          "expected": "command",
+          "predicted": "direct"
         },
         {
-          "input": "show me what he worked on at SINTEF",
-          "expected": "direct",
-          "predicted": "command"
+          "input": "filter to only journals",
+          "expected": "command",
+          "predicted": "direct"
+        },
+        {
+          "input": "lukk vinduet",
+          "expected": "command",
+          "predicted": "direct"
+        },
+        {
+          "input": "find pathology papers",
+          "expected": "command",
+          "predicted": "direct"
+        },
+        {
+          "input": "take me to his github",
+          "expected": "command",
+          "predicted": "direct"
         }
       ],
       "stability": 1,
-      "passAtK": 0.8214285714285714,
+      "passAtK": 0.7142857142857143,
       "repeats": 3
     },
     "commands": {
@@ -130,13 +145,13 @@
         },
         "window": {
           "total": 3,
-          "exactMatch": 0.6666666666666666,
-          "actionF1": 0.6666666666666666
+          "exactMatch": 1,
+          "actionF1": 1
         },
         "browse": {
           "total": 2,
-          "exactMatch": 1,
-          "actionF1": 1
+          "exactMatch": 0.5,
+          "actionF1": 0.5
         },
         "compound": {
           "total": 4,
@@ -161,12 +176,12 @@
       },
       "failures": [
         {
-          "input": "close this window",
+          "input": "search the web for digital pathology",
           "expected": [
-            "close"
+            "browse:digital pathology"
           ],
           "predicted": [
-            "minimize"
+            "search:digital pathology"
           ],
           "f1": 0
         }
@@ -177,46 +192,42 @@
     },
     "plan": {
       "suite": "plan",
-      "total": 9,
-      "turns": 22,
-      "planExactMatch": 0.1111111111111111,
-      "turnExactMatch": 0.5,
-      "turnF1": 0.5606060606060606,
+      "total": 5,
+      "turns": 12,
+      "planExactMatch": 0,
+      "turnExactMatch": 0.4166666666666667,
+      "turnF1": 0.4166666666666667,
       "byTag": {
         "multishot": {
-          "total": 9,
-          "planExactMatch": 0.1111111111111111
-        },
-        "research": {
-          "total": 3,
-          "planExactMatch": 0
-        },
-        "context-carryover": {
           "total": 5,
           "planExactMatch": 0
         },
+        "research": {
+          "total": 2,
+          "planExactMatch": 0
+        },
+        "context-carryover": {
+          "total": 3,
+          "planExactMatch": 0
+        },
         "open": {
-          "total": 4,
+          "total": 2,
           "planExactMatch": 0
         },
         "switch": {
-          "total": 2,
-          "planExactMatch": 0
-        },
-        "browse": {
-          "total": 2,
-          "planExactMatch": 0.5
-        },
-        "window": {
-          "total": 2,
-          "planExactMatch": 0.5
-        },
-        "open_paper": {
           "total": 1,
           "planExactMatch": 0
         },
-        "paraphrase": {
-          "total": 4,
+        "browse": {
+          "total": 1,
+          "planExactMatch": 0
+        },
+        "window": {
+          "total": 1,
+          "planExactMatch": 0
+        },
+        "open_paper": {
+          "total": 1,
           "planExactMatch": 0
         }
       },
@@ -244,10 +255,8 @@
               "expected": [
                 "chat"
               ],
-              "predicted": [
-                "chat"
-              ],
-              "exact": true
+              "predicted": [],
+              "exact": false
             }
           ]
         },
@@ -280,15 +289,18 @@
                 "open:projects"
               ],
               "predicted": [
-                "open:projects"
+                "browse:projects"
               ],
-              "exact": true
+              "exact": false
             },
             {
               "expected": [
                 "open:skills"
               ],
-              "predicted": [],
+              "predicted": [
+                "open:projects",
+                "chat"
+              ],
               "exact": false
             },
             {
@@ -297,6 +309,29 @@
               ],
               "predicted": [
                 "close"
+              ],
+              "exact": true
+            }
+          ]
+        },
+        {
+          "id": "github-then-desktop",
+          "turns": [
+            {
+              "expected": [
+                "browse:github.com/andreped"
+              ],
+              "predicted": [
+                "browse:github"
+              ],
+              "exact": false
+            },
+            {
+              "expected": [
+                "desktop"
+              ],
+              "predicted": [
+                "desktop"
               ],
               "exact": true
             }
@@ -324,192 +359,83 @@
               "exact": false
             }
           ]
-        },
-        {
-          "id": "research-drilldown-casual",
-          "turns": [
-            {
-              "expected": [
-                "open:research"
-              ],
-              "predicted": [
-                "browse:research"
-              ],
-              "exact": false
-            },
-            {
-              "expected": [
-                "open_paper:2"
-              ],
-              "predicted": [
-                "open:research",
-                "open_paper:2"
-              ],
-              "exact": false
-            },
-            {
-              "expected": [
-                "chat"
-              ],
-              "predicted": [
-                "chat"
-              ],
-              "exact": true
-            }
-          ]
-        },
-        {
-          "id": "resume-then-ask-casual",
-          "turns": [
-            {
-              "expected": [
-                "open:resume"
-              ],
-              "predicted": [
-                "open:resume",
-                "chat"
-              ],
-              "exact": false
-            },
-            {
-              "expected": [
-                "chat"
-              ],
-              "predicted": [],
-              "exact": false
-            }
-          ]
-        },
-        {
-          "id": "github-then-desktop-casual",
-          "turns": [
-            {
-              "expected": [
-                "browse:github.com/andreped"
-              ],
-              "predicted": [
-                "open:github.com/andreped"
-              ],
-              "exact": false
-            },
-            {
-              "expected": [
-                "desktop"
-              ],
-              "predicted": [
-                "open:github.com/andreped",
-                "close"
-              ],
-              "exact": false
-            }
-          ]
-        },
-        {
-          "id": "projects-to-skills-casual",
-          "turns": [
-            {
-              "expected": [
-                "open:projects"
-              ],
-              "predicted": [
-                "open:projects"
-              ],
-              "exact": true
-            },
-            {
-              "expected": [
-                "open:skills"
-              ],
-              "predicted": [],
-              "exact": false
-            },
-            {
-              "expected": [
-                "close"
-              ],
-              "predicted": [
-                "close"
-              ],
-              "exact": true
-            }
-          ]
         }
       ],
       "stability": 1,
-      "passAtK": 0.1111111111111111,
+      "passAtK": 0,
       "repeats": 3
     },
     "answers": {
       "suite": "answers",
       "total": 8,
-      "ragas": 0.5455587455274769,
-      "faithfulness": 0.4529364710434993,
-      "correctness": 0.6335232077983319,
-      "relevancy": 0.5502165577405993,
+      "ragas": 0.5403868474570912,
+      "faithfulness": 0.49495609568763355,
+      "correctness": 0.5951491623766156,
+      "relevancy": 0.5310552843070243,
       "hallucinationRate": 0,
       "byTag": {
         "bio": {
           "total": 3,
-          "ragas": 0.5971292961139573,
-          "faithfulness": 0.41765890558994007
+          "ragas": 0.6438982807944015,
+          "faithfulness": 0.5682876363765116
         },
         "career": {
           "total": 1,
-          "ragas": 0.6166910126451537,
-          "faithfulness": 0.4482758620689655
+          "ragas": 0.7692670800513938,
+          "faithfulness": 0.7314814814814815
         },
         "education": {
           "total": 1,
-          "ragas": 0.6257391845627139,
-          "faithfulness": 0.4444444444444444
+          "ragas": 0.6674950600395197,
+          "faithfulness": 0.5388888888888889
         },
         "research-question": {
           "total": 3,
-          "ragas": 0.5911001741814704,
-          "faithfulness": 0.5961836612999404
+          "ragas": 0.5348379574234035,
+          "faithfulness": 0.5355727220980876
         },
         "projects": {
           "total": 1,
-          "ragas": 0.6195200760974557,
-          "faithfulness": 0.5116279069767442
+          "ragas": 0.5890165215742305,
+          "faithfulness": 0.4304347826086956
         },
         "skills": {
           "total": 1,
-          "ragas": 0.3986699574934869,
-          "faithfulness": 0.23076923076923078
+          "ragas": 0.3830327674580823,
+          "faithfulness": 0.24019607843137256
         },
         "contact": {
           "total": 1,
-          "ragas": 0.28278533635676495,
-          "faithfulness": 0.1836734693877551
+          "ragas": 0.20611093706488445,
+          "faithfulness": 0.260952380952381
         },
         "abstain": {
           "total": 1,
-          "ragas": 0.28278533635676495,
-          "faithfulness": 0.1836734693877551
+          "ragas": 0.20611093706488445,
+          "faithfulness": 0.260952380952381
         }
       },
       "failures": [
         {
           "id": "programming-languages",
-          "ragas": 0.399,
-          "faithfulness": 0.231,
-          "correctness": 0.48,
-          "relevancy": 0.485,
-          "generated": "André knows several programming languages, including Python (primary), C++, C#, JavaScript/TypeScript, and Dart. He also has experience with other languages lik"
+          "ragas": 0.383,
+          "faithfulness": 0.24,
+          "correctness": 0.433,
+          "relevancy": 0.476,
+          "generated": "André knows several programming languages including Python, C++, C#, JavaScript/TypeScript, and Dart. He has extensive experience working with TensorFlow, PyTor"
         },
         {
           "id": "consulting-availability",
-          "ragas": 0.283,
-          "faithfulness": 0.184,
-          "correctness": 0.361,
-          "relevancy": 0.304,
-          "generated": "André Pedersen is available for consulting. He can help with a variety of AI-related projects, including but not limited to:\n\n- Building custom AI solutions tai"
+          "ragas": 0.206,
+          "faithfulness": 0.261,
+          "correctness": 0.18,
+          "relevancy": 0.178,
+          "generated": "André Pedersen is available for consulting. He can help with his expertise in applied machine learning, medical imaging, and building production AI systems for "
         }
       ],
-      "stability": 1,
-      "passAtK": 0.75,
-      "repeats": 1
+      "stability": 0.921666796056765,
+      "passAtK": 1,
+      "repeats": 3
     }
   }
 }

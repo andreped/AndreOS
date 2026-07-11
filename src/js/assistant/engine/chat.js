@@ -518,20 +518,40 @@ window.AndreChat = {
             .join('\n');
         const appIds = appRegistry.launchable().map(m => m.id).join(', ');
         const prompt =
-`You are an OS command parser. Convert the request into a JSON array of actions.
-Apps: ${appIds}
-Actions: {"a":"open","t":"<app>"} | {"a":"open_paper","n":<number>} | {"a":"close"} | {"a":"minimize"} | {"a":"desktop"} | {"a":"browse","t":"<url-or-query>"} | {"a":"search","t":"<query>"} | {"a":"chat","t":"<message>"}
+`You are AndreOS's command planner. Turn the request into a JSON array of actions that, run in order, fulfil it.
+Apps (use with "open"): ${appIds}
+Actions:
+  {"a":"open","t":"<app>"}         open one of the apps listed above
+  {"a":"open_paper","n":<number>}  open a specific numbered paper in the Research app
+  {"a":"close"} | {"a":"minimize"} | {"a":"desktop"}   window management
+  {"a":"browse","t":"<url-or-web-query>"}   open the web browser (external sites, or "search the web for …")
+  {"a":"search","t":"<query>"}     type into the AndreOS desktop/taskbar search bar
+  {"a":"chat","t":"<message>"}     answer a question or do a task about André (needs no OS action)
 Rules:
-- Use {"a":"open_paper","n":<number>} when the user wants to open a specific numbered paper in the Research app.
-- Use {"a":"chat","t":"<message>"} for questions or follow-up tasks AFTER other actions.
-- Never add {"a":"open","t":"chat"} — the sidebar handles chat automatically.
-- Always include a trailing {"a":"chat",...} when the request ends with a question or task like "summarize", "tell me", "give me a brief summary".
+- The apps listed above are ALWAYS {"a":"open","t":"<app>"} — for "open/show/pull up/see/switch to/what about <app>". Never {"a":"browse"} an app, and never {"a":"open","t":"chat"}.
+- "desktop"/"show the desktop"/"back to the desktop" → {"a":"desktop"}. "close"/"minimize" are OS actions too. These are NOT apps — never {"a":"open","t":"desktop"}.
+- Follow-ups that switch apps ("what about his skills?", "actually his projects", "switch to resume") → {"a":"open"} for that app.
+- External websites are ALWAYS {"a":"browse"} (never {"a":"open"}): github → github.com/andreped, linkedin → linkedin.com/in/andré-pedersen, scholar → his Google Scholar. Also "search/look/google … on the web" → {"a":"browse"} with the query. Only use {"a":"search"} to search AndreOS itself.
+- A bare question, follow-up, or task about André ("summarise it", "what is it about?", "tell me about his experience", "what's his background") → a single {"a":"chat","t":"…"}. Rewrite pronouns from the conversation so the message stands alone. Do NOT return an empty array for these.
+- Add a trailing {"a":"chat"} ONLY when the request itself asks a question or task. A plain "open X" has no chat.
+- Plan the LATEST request only. Any earlier conversation is context for resolving references ("it", "that paper", "the 3rd one") — never skip an action or return an empty array just because something was already opened earlier.
 Examples:
 "open research" → [{"a":"open","t":"research"}]
+"show me the projects" → [{"a":"open","t":"projects"}]
+"what about his skills?" → [{"a":"open","t":"skills"}]
 "show desktop" → [{"a":"desktop"}]
+"ok show the desktop" → [{"a":"desktop"}]
+"open the 3rd paper" → [{"a":"open_paper","n":3}]
+"summarise it for me" → [{"a":"chat","t":"summarise this paper"}]
+"what is it about?" → [{"a":"chat","t":"what is this about"}]
+"pop open his github page" → [{"a":"browse","t":"github.com/andreped"}]
+"search the web for digital pathology" → [{"a":"browse","t":"digital pathology"}]
 "open resume and tell me about his experience" → [{"a":"open","t":"resume"},{"a":"chat","t":"tell me about his experience"}]
 "open research, open 40th paper, and summarize important topics" → [{"a":"open","t":"research"},{"a":"open_paper","n":40},{"a":"chat","t":"summarize important topics in this paper"}]
-Reply with ONLY the JSON array.${histCtx ? `\nRecent conversation:\n${histCtx}` : ''}
+Multi-turn example (earlier turns already ran — still plan the latest request):
+  [earlier: user "open research" → assistant "Opened research."]
+  "open the 3rd paper" → [{"a":"open_paper","n":3}]
+Reply with ONLY the JSON array for the latest request.${histCtx ? `\nEarlier conversation (context only — do not re-plan it):\n${histCtx}` : ''}
 Request: "${text.replace(/"/g, "'")}"`;
 
         try {
@@ -557,9 +577,25 @@ Request: "${text.replace(/"/g, "'")}"`;
             .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
             .join('\n');
         const prompt =
-`You are an OS intent router. Decide if the user message is an OS command (open/close/navigate apps) or a direct question/conversation.
+`You are AndreOS's intent router. Classify the user's latest message as "command" or "direct".
+- "command" = an OS action: open/show/close/minimize an app or window; show desktop; browse or search the web; open a numbered paper; or act on the current app (sort, filter, find papers). Includes non-English, e.g. Norwegian ("åpne", "lukk", "vis").
+- "direct" = a question or conversation to answer about André (bio, career, research, skills, opinions).
 ${histCtx ? `Recent conversation:\n${histCtx}\n` : ''}Reply with ONLY "command" or "direct".
-Examples: "open research" → command | "who is André?" → direct | "go to github.com" → command | "tell me about his work" → direct | "close this window" → command
+Examples:
+"open research" → command
+"show me the projects app" → command
+"show desktop" → command
+"go to github.com" → command
+"take me to his github" → command
+"search the web for medical imaging" → command
+"sort by most cited" → command
+"filter to only journals" → command
+"find pathology papers" → command
+"lukk vinduet" → command
+"who is André?" → direct
+"tell me about his work" → direct
+"what programming languages does he know?" → direct
+"can you tell me about his projects" → direct
 Message: "${text.replace(/"/g, "'")}"`;
         try {
             const res = await engine.chat.completions.create({

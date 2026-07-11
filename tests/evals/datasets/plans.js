@@ -68,4 +68,54 @@ export const PLANS_DATASET = [
             { user: 'what is it about?', expectedActions: [{ a: 'chat', t: 'what is this paper about' }], activeApp: 'research' },
         ],
     },
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Paraphrase set — the SAME plans a real visitor would phrase casually.
+    // Verbs and framing vary, filler words creep in, and follow-ups lean on
+    // pronouns ("the second one", "give me the gist", "back to the desktop").
+    // The key app/target noun is still present so a small model can resolve it;
+    // the challenge is the loose phrasing and the context-carryover.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // ── research-drilldown, phrased loosely ──────────────────────────────────
+    {
+        id: 'research-drilldown-casual',
+        tags: ['multishot', 'research', 'context-carryover', 'paraphrase'],
+        turns: [
+            { user: 'can you pull up his research for me?', expectedActions: [{ a: 'open', t: 'research' }] },
+            { user: 'let me see the second one', expectedActions: [{ a: 'open_paper', n: 2 }], activeApp: 'research' },
+            { user: 'give me the gist of it', expectedActions: [{ a: 'chat', t: 'summarise this paper' }], activeApp: 'research' },
+        ],
+    },
+
+    // ── resume then a follow-up question with no explicit noun ────────────────
+    {
+        id: 'resume-then-ask-casual',
+        tags: ['multishot', 'open', 'context-carryover', 'paraphrase'],
+        turns: [
+            { user: "let's open up his résumé", expectedActions: [{ a: 'open', t: 'resume' }] },
+            { user: 'so what has he been working on lately?', expectedActions: [{ a: 'chat', t: 'what has he been working on lately' }], activeApp: 'resume' },
+        ],
+    },
+
+    // ── browse to github (canonical path) then window management ──────────────
+    {
+        id: 'github-then-desktop-casual',
+        tags: ['multishot', 'browse', 'window', 'paraphrase'],
+        turns: [
+            { user: 'pop open his github page', expectedActions: [{ a: 'browse', t: 'github.com/andreped' }] },
+            { user: 'cool, take me back to the desktop', expectedActions: [{ a: 'desktop' }] },
+        ],
+    },
+
+    // ── switch apps mid-conversation, casual phrasing ────────────────────────
+    {
+        id: 'projects-to-skills-casual',
+        tags: ['multishot', 'open', 'switch', 'paraphrase'],
+        turns: [
+            { user: "let's see his projects", expectedActions: [{ a: 'open', t: 'projects' }] },
+            { user: 'actually switch to his skills', expectedActions: [{ a: 'open', t: 'skills' }], activeApp: 'projects' },
+            { user: 'ok close it', expectedActions: [{ a: 'close' }], activeApp: 'skills' },
+        ],
+    },
 ];

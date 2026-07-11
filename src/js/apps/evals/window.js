@@ -588,6 +588,9 @@ async function planRunner(emit, chat) {
 // ── RAGAS-style answer quality: score the free text the model writes ──────────
 async function answersRunner(emit, chat) {
     const min = SUITE_META.answers.min;
+    // The answer suite is expensive (full RAG generation per case) and its
+    // metric moves slowly, so a single pass is enough — no 3× repeats here.
+    const ANSWERS_REPEATS = 1;
     const rows = [];
     const stabilities = [];
     const passAtKs = [];
@@ -599,7 +602,7 @@ async function answersRunner(emit, chat) {
         const runs = await repeat(async () => {
             const out = (await chat.answer(c.question)) ?? { text: '', context: '' };
             return scoreAnswerRow(c, out.text, out.context);
-        }, REPEATS);
+        }, ANSWERS_REPEATS);
         const avgRow = {
             ...runs[0],
             faithfulness: mean(runs.map((r) => r.faithfulness)),
@@ -615,7 +618,7 @@ async function answersRunner(emit, chat) {
         await raf();
     }
     ActiveContext.setActiveApp(null);
-    return summariseAnswers(rows, { stability: mean(stabilities), passAtK: mean(passAtKs), repeats: REPEATS }, min);
+    return summariseAnswers(rows, { stability: mean(stabilities), passAtK: mean(passAtKs), repeats: ANSWERS_REPEATS }, min);
 }
 
 // ── Checklist item helpers (per-sample progress rows) ─────────────────────────
