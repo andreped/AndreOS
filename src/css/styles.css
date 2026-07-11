@@ -5855,6 +5855,87 @@ body {
     border-bottom-left-radius: 4px;
 }
 
+/* Plan checklist block — a live TODO list, distinct from chat bubbles. */
+.asst-plan {
+    align-self: stretch;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    animation: asstBubbleIn 0.18s ease;
+}
+.asst-plan-header {
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+}
+.asst-plan-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.asst-plan-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.55);
+    transition: color 0.15s;
+}
+.asst-plan-marker {
+    flex-shrink: 0;
+    width: 16px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.3);
+}
+.asst-plan-label { flex: 1; word-break: break-word; }
+
+.asst-plan-step[data-status="active"] {
+    color: rgba(255, 255, 255, 0.92);
+}
+.asst-plan-step[data-status="done"] {
+    color: rgba(255, 255, 255, 0.7);
+}
+.asst-plan-step[data-status="done"] .asst-plan-marker { color: #4ecdc4; }
+.asst-plan-step[data-status="failed"] {
+    color: rgba(255, 255, 255, 0.6);
+}
+.asst-plan-step[data-status="failed"] .asst-plan-marker { color: #e66060; }
+.asst-plan-step[data-status="skipped"] {
+    color: rgba(255, 255, 255, 0.32);
+}
+.asst-plan-step[data-status="skipped"] .asst-plan-label { text-decoration: line-through; }
+
+/* Spinner shown on the in-progress step */
+.asst-plan-spinner {
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    border: 2px solid rgba(104, 126, 234, 0.35);
+    border-top-color: #687eea;
+    border-radius: 50%;
+    animation: asstPlanSpin 0.7s linear infinite;
+}
+@keyframes asstPlanSpin {
+    to { transform: rotate(360deg); }
+}
+
+
 /* Input row */
 .asst-input-row {
     display: flex;

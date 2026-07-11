@@ -83,15 +83,17 @@ export class VoiceCommandManager {
      *   onStateChange?:   (state: 'idle'|'loading'|'ready'|'recording'|'processing'|'error') => void,
      *   onMessage?:       (role: 'user'|'assistant'|'system', text: string) => void,
      *   onStreamMessage?: (role: 'assistant') => (text: string) => void,
+     *   onPlan?:          (steps: string[]) => object,
      *   isSidebarOpen?:   () => boolean,
      * }} opts
      */
-    constructor({ windowManager, notifications, onStateChange, onMessage, onStreamMessage, isSidebarOpen }) {
+    constructor({ windowManager, notifications, onStateChange, onMessage, onStreamMessage, onPlan, isSidebarOpen }) {
         this._windowManager   = windowManager;
         this._notifications   = notifications;
         this._onStateChange   = onStateChange   ?? (() => {});
         this._onMessage       = onMessage       ?? (() => {});
         this._onStreamMessage = onStreamMessage ?? null;
+        this._onPlan          = onPlan          ?? null;
         this._isSidebarOpen   = isSidebarOpen   ?? (() => false);
 
         this._state       = 'idle';
@@ -260,15 +262,14 @@ export class VoiceCommandManager {
                 if (route === 'command') {
                     const actions = await window.AndreChat.parseCommand(text, this._history);
                     if (actions?.length) {
-                        // Show the planned steps as a message before executing
-                        const plan = actions
+                        // Record the plan in history (for LLM context) but render
+                        // it as a live checklist block instead of a chat bubble.
+                        const planText = actions
                             .map((a, i) => `${i + 1}. ${this._describeSingleAction(a)}`)
                             .join('\n');
-                        const planMsg = `📋 Plan:\n${plan}`;
-                        this._onMessage('assistant', planMsg);
-                        this._addHistory('assistant', planMsg);
+                        this._addHistory('assistant', `📋 Plan:\n${planText}`);
 
-                        await this._executeSequence(actions);
+                        await this._executeSequence(actions, { showPlan: true });
                         if (!actions.some(a => a.a === 'chat')) {
                             const reply = `✓ Done`;
                             this._onMessage('assistant', reply);
@@ -552,8 +553,10 @@ export class VoiceCommandManager {
     /**
      * Execute a sequence of AI-parsed actions with a short delay between steps.
      * @param {Array<{a:string,t?:string}>} actions
+     * @param {{ showPlan?: boolean }} [opts] when showPlan is set the steps are
+     *        rendered as a live checklist block that updates as each step runs.
      */
-    async _executeSequence(actions) {
+    async _executeSequence(actions, { showPlan = false } = {}) {
         // When the sidebar is open and the sequence includes a chat reply,
         // drop any redundant “open chat” step — the answer streams inline.
         const hasChat = actions.some(a => a.a === 'chat');
@@ -561,50 +564,66 @@ export class VoiceCommandManager {
             ? actions.filter(a => !(a.a === 'open' && a.t === 'chat'))
             : actions;
 
-        for (const act of steps) {
-            if (this._aborted) break; // user pressed Stop — cancel remaining steps
-            switch (act.a) {
-                case 'open':
-                    this._actions.openApp(act.t);
-                    break;
-                case 'close':
-                    this._actions.closeActive();
-                    break;
-                case 'minimize':
-                    this._actions.minimizeActive();
-                    break;
-                case 'desktop':
-                    this._actions.showDesktop();
-                    break;
-                case 'open_paper': {
-                    // Wait for the Research app to finish loading its paper list.
-                    await this._actions.waitForApp('research');
-                    await this._actions.runCapability('research', 'openPaper', { n: act.n });
-                    break;
-                }
-                case 'chat': {
-                    // Before streaming, check if the text contains a contextual
-                    // command (e.g. "open 40th paper") that needs the now-active
-                    // window. Wait for the app to finish loading, dispatch the
-                    // contextual action, then stream the follow-up question.
-                    const ctxMatch = this._parseContextual(act.t ?? '');
-                    if (ctxMatch && ctxMatch.intent !== 'research_question') {
+        // Render a live plan checklist (distinct from chat bubbles) when asked.
+        const plan = (showPlan && this._onPlan && steps.length)
+            ? this._onPlan(steps.map(a => this._describeSingleAction(a)))
+            : null;
+
+        for (let i = 0; i < steps.length; i++) {
+            const act = steps[i];
+            if (this._aborted) {
+                // User pressed Stop — mark this and every remaining step skipped.
+                if (plan) for (let j = i; j < steps.length; j++) plan.setSkipped(j);
+                break;
+            }
+            plan?.setActive(i);
+            try {
+                switch (act.a) {
+                    case 'open':
+                        this._actions.openApp(act.t);
+                        break;
+                    case 'close':
+                        this._actions.closeActive();
+                        break;
+                    case 'minimize':
+                        this._actions.minimizeActive();
+                        break;
+                    case 'desktop':
+                        this._actions.showDesktop();
+                        break;
+                    case 'open_paper': {
+                        // Wait for the Research app to finish loading its paper list.
                         await this._actions.waitForApp('research');
-                        this._dispatch(ctxMatch);
-                        const ctxReply = `✓ ${ctxMatch.label}`;
-                        this._onMessage('assistant', ctxReply);
-                        this._addHistory('assistant', ctxReply);
-                        await new Promise(r => setTimeout(r, 600));
+                        await this._actions.runCapability('research', 'openPaper', { n: act.n });
+                        break;
                     }
-                    await this._streamToSidebar(act.t ?? '');
-                    break;
+                    case 'chat': {
+                        // Before streaming, check if the text contains a contextual
+                        // command (e.g. "open 40th paper") that needs the now-active
+                        // window. Wait for the app to finish loading, dispatch the
+                        // contextual action, then stream the follow-up question.
+                        const ctxMatch = this._parseContextual(act.t ?? '');
+                        if (ctxMatch && ctxMatch.intent !== 'research_question') {
+                            await this._actions.waitForApp('research');
+                            this._dispatch(ctxMatch);
+                            const ctxReply = `✓ ${ctxMatch.label}`;
+                            this._onMessage('assistant', ctxReply);
+                            this._addHistory('assistant', ctxReply);
+                            await new Promise(r => setTimeout(r, 600));
+                        }
+                        await this._streamToSidebar(act.t ?? '');
+                        break;
+                    }
+                    case 'search':
+                        this._actions.desktopSearch(act.t ?? '');
+                        break;
+                    case 'browse':
+                        await this._actions.browse(act.t ?? '');
+                        break;
                 }
-                case 'search':
-                    this._actions.desktopSearch(act.t ?? '');
-                    break;
-                case 'browse':
-                    await this._actions.browse(act.t ?? '');
-                    break;
+                plan?.setDone(i);
+            } catch {
+                plan?.setFailed(i);
             }
             // Pause between steps so each window has time to open and become active
             if (steps.length > 1) await new Promise(r => setTimeout(r, 700));
