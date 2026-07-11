@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-11T10:56:52.180Z",
+  "generatedAt": "2026-07-11T11:14:19.680Z",
   "source": "browser",
   "suites": {
     "retrieval": {
@@ -117,10 +117,10 @@
     "commands": {
       "suite": "commands",
       "total": 14,
-      "exactMatch": 0.9285714285714286,
-      "actionF1": 0.9285714285714286,
-      "precision": 0.9285714285714286,
-      "recall": 0.9285714285714286,
+      "exactMatch": 1,
+      "actionF1": 1,
+      "precision": 1,
+      "recall": 1,
       "targetAccuracy": 1,
       "byTag": {
         "open": {
@@ -130,8 +130,8 @@
         },
         "window": {
           "total": 3,
-          "exactMatch": 0.6666666666666666,
-          "actionF1": 0.6666666666666666
+          "exactMatch": 1,
+          "actionF1": 1
         },
         "browse": {
           "total": 2,
@@ -159,57 +159,46 @@
           "actionF1": 1
         }
       },
-      "failures": [
-        {
-          "input": "close this window",
-          "expected": [
-            "close"
-          ],
-          "predicted": [
-            "minimize"
-          ],
-          "f1": 0
-        }
-      ],
+      "failures": [],
       "stability": 1,
-      "passAtK": 0.9285714285714286,
+      "passAtK": 1,
       "repeats": 3
     },
     "plan": {
       "suite": "plan",
       "total": 9,
       "turns": 22,
-      "planExactMatch": 0.1111111111111111,
-      "turnExactMatch": 0.5,
-      "turnF1": 0.5606060606060606,
+      "planExactMatch": 0.6666666666666666,
+      "turnExactMatch": 0.8181818181818182,
+      "turnF1": 0.8484848484848484,
       "byTag": {
         "multishot": {
           "total": 9,
-          "planExactMatch": 0.1111111111111111
+          "planExactMatch": 0.6666666666666666
         },
         "research": {
           "total": 3,
-          "planExactMatch": 0
+          "planExactMatch": 0.6666666666666666
         },
         "context-carryover": {
           "total": 5,
-          "planExactMatch": 0
+          "planExactMatch": 0.6
         },
         "open": {
           "total": 4,
-          "planExactMatch": 0
+          "planExactMatch": 0.5
         },
         "switch": {
           "total": 2,
-          "planExactMatch": 0
+          "planExactMatch": 0.5
         },
         "browse": {
           "total": 2,
-          "planExactMatch": 0.5
+          "planExactMatch": 1
         },
         "window": {
           "total": 2,
-          "planExactMatch": 0.5
+          "planExactMatch": 1
         },
         "open_paper": {
           "total": 1,
@@ -217,61 +206,10 @@
         },
         "paraphrase": {
           "total": 4,
-          "planExactMatch": 0
+          "planExactMatch": 0.75
         }
       },
       "failures": [
-        {
-          "id": "research-drilldown",
-          "turns": [
-            {
-              "expected": [
-                "open:research"
-              ],
-              "predicted": [
-                "open:research"
-              ],
-              "exact": true
-            },
-            {
-              "expected": [
-                "open_paper:3"
-              ],
-              "predicted": [],
-              "exact": false
-            },
-            {
-              "expected": [
-                "chat"
-              ],
-              "predicted": [
-                "chat"
-              ],
-              "exact": true
-            }
-          ]
-        },
-        {
-          "id": "resume-then-ask",
-          "turns": [
-            {
-              "expected": [
-                "open:resume"
-              ],
-              "predicted": [
-                "open:resume"
-              ],
-              "exact": true
-            },
-            {
-              "expected": [
-                "chat"
-              ],
-              "predicted": [],
-              "exact": false
-            }
-          ]
-        },
         {
           "id": "projects-to-skills",
           "turns": [
@@ -326,39 +264,6 @@
           ]
         },
         {
-          "id": "research-drilldown-casual",
-          "turns": [
-            {
-              "expected": [
-                "open:research"
-              ],
-              "predicted": [
-                "browse:research"
-              ],
-              "exact": false
-            },
-            {
-              "expected": [
-                "open_paper:2"
-              ],
-              "predicted": [
-                "open:research",
-                "open_paper:2"
-              ],
-              "exact": false
-            },
-            {
-              "expected": [
-                "chat"
-              ],
-              "predicted": [
-                "chat"
-              ],
-              "exact": true
-            }
-          ]
-        },
-        {
           "id": "resume-then-ask-casual",
           "turns": [
             {
@@ -379,132 +284,78 @@
               "exact": false
             }
           ]
-        },
-        {
-          "id": "github-then-desktop-casual",
-          "turns": [
-            {
-              "expected": [
-                "browse:github.com/andreped"
-              ],
-              "predicted": [
-                "open:github.com/andreped"
-              ],
-              "exact": false
-            },
-            {
-              "expected": [
-                "desktop"
-              ],
-              "predicted": [
-                "open:github.com/andreped",
-                "close"
-              ],
-              "exact": false
-            }
-          ]
-        },
-        {
-          "id": "projects-to-skills-casual",
-          "turns": [
-            {
-              "expected": [
-                "open:projects"
-              ],
-              "predicted": [
-                "open:projects"
-              ],
-              "exact": true
-            },
-            {
-              "expected": [
-                "open:skills"
-              ],
-              "predicted": [],
-              "exact": false
-            },
-            {
-              "expected": [
-                "close"
-              ],
-              "predicted": [
-                "close"
-              ],
-              "exact": true
-            }
-          ]
         }
       ],
       "stability": 1,
-      "passAtK": 0.1111111111111111,
+      "passAtK": 0.6666666666666666,
       "repeats": 3
     },
     "answers": {
       "suite": "answers",
       "total": 8,
-      "ragas": 0.5455587455274769,
-      "faithfulness": 0.4529364710434993,
-      "correctness": 0.6335232077983319,
-      "relevancy": 0.5502165577405993,
+      "ragas": 0.514634570975102,
+      "faithfulness": 0.43851622233975174,
+      "correctness": 0.5747852340639222,
+      "relevancy": 0.530602256521632,
       "hallucinationRate": 0,
       "byTag": {
         "bio": {
           "total": 3,
-          "ragas": 0.5971292961139573,
-          "faithfulness": 0.41765890558994007
+          "ragas": 0.6899841147569509,
+          "faithfulness": 0.5955840455840457
         },
         "career": {
           "total": 1,
-          "ragas": 0.6166910126451537,
-          "faithfulness": 0.4482758620689655
+          "ragas": 0.7989417989417991,
+          "faithfulness": 0.7777777777777778
         },
         "education": {
           "total": 1,
-          "ragas": 0.6257391845627139,
-          "faithfulness": 0.4444444444444444
+          "ragas": 0.31934087417958384,
+          "faithfulness": 0.23636363636363636
         },
         "research-question": {
           "total": 3,
-          "ragas": 0.5911001741814704,
-          "faithfulness": 0.5961836612999404
+          "ragas": 0.5804260912181651,
+          "faithfulness": 0.46960784313725495
         },
         "projects": {
           "total": 1,
-          "ragas": 0.6195200760974557,
-          "faithfulness": 0.5116279069767442
+          "ragas": 0.6569244049821187,
+          "faithfulness": 0.5588235294117647
         },
         "skills": {
           "total": 1,
-          "ragas": 0.3986699574934869,
-          "faithfulness": 0.23076923076923078
+          "ragas": 0.4196859903381642,
+          "faithfulness": 0.25
         },
         "contact": {
           "total": 1,
-          "ragas": 0.28278533635676495,
-          "faithfulness": 0.1836734693877551
+          "ragas": 0.08390022675736962,
+          "faithfulness": 0.14285714285714285
         },
         "abstain": {
           "total": 1,
-          "ragas": 0.28278533635676495,
-          "faithfulness": 0.1836734693877551
+          "ragas": 0.08390022675736962,
+          "faithfulness": 0.14285714285714285
         }
       },
       "failures": [
         {
-          "id": "programming-languages",
-          "ragas": 0.399,
-          "faithfulness": 0.231,
-          "correctness": 0.48,
-          "relevancy": 0.485,
-          "generated": "André knows several programming languages, including Python (primary), C++, C#, JavaScript/TypeScript, and Dart. He also has experience with other languages lik"
+          "id": "education",
+          "ragas": 0.319,
+          "faithfulness": 0.236,
+          "correctness": 0.407,
+          "relevancy": 0.315,
+          "generated": "André Pedersen has a strong educational background, starting with his Master of Science in Applied Physics & Mathematics from UiT - The Arctic University of Nor"
         },
         {
           "id": "consulting-availability",
-          "ragas": 0.283,
-          "faithfulness": 0.184,
-          "correctness": 0.361,
-          "relevancy": 0.304,
-          "generated": "André Pedersen is available for consulting. He can help with a variety of AI-related projects, including but not limited to:\n\n- Building custom AI solutions tai"
+          "ragas": 0.084,
+          "faithfulness": 0.143,
+          "correctness": 0.061,
+          "relevancy": 0.048,
+          "generated": "André Pedersen is available for consulting and has experience leading technical teams across various projects. If you have a specific topic or area of expertise"
         }
       ],
       "stability": 1,

@@ -95,5 +95,18 @@
       "plan": 0.1111111111111111,
       "answers": 0.5455587455274769
     }
+  },
+  {
+    "generatedAt": "2026-07-11T11:14:19.680Z",
+    "source": "browser",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "routing": 0.8214285714285714,
+      "commands": 1,
+      "plan": 0.6666666666666666,
+      "answers": 0.514634570975102
+    }
   }
 ]
