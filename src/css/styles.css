@@ -4261,6 +4261,8 @@ body {
 .chat-send:hover  { opacity: 0.85; }
 .chat-send:active { transform: scale(0.93); }
 .chat-send:disabled { opacity: 0.3; cursor: default; }
+/* Stop state: while a response streams the send button becomes a stop button. */
+.chat-send.chat-send-stop { background: linear-gradient(135deg, #4a4f5a, #2f333c); }
 
 .chat-clear {
     background: none;
@@ -5953,6 +5955,13 @@ body {
     font-family: inherit;
 }
 .asst-send-btn:hover { background: rgba(104, 126, 234, 0.6); }
+/* Stop state: while a response is streaming the send button becomes a stop button. */
+.asst-send-btn.asst-send-stop {
+    background: rgba(230, 96, 96, 0.35);
+    border-color: rgba(230, 96, 96, 0.5);
+    font-size: 14px;
+}
+.asst-send-btn.asst-send-stop:hover { background: rgba(230, 96, 96, 0.6); }
 
 /* Taskbar tray toggle button */
 .asst-tray-btn {
