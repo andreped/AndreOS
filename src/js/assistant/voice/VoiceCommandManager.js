@@ -98,6 +98,10 @@ export class VoiceCommandManager {
         this._loadStarted = false;
         this._liveCardId  = 'voice-model-load';
         this._history     = [];   // { role: 'user'|'assistant', content: string }[]
+        this._aborted     = false; // set when the user stops generation mid-plan
+
+        // The user pressing Stop aborts generation and any queued plan steps.
+        document.addEventListener('andreos:assistant-abort', () => { this._aborted = true; });
 
         // Executes OS actions + app capabilities uniformly (reads the registry).
         this._actions = new ActionDispatcher({ windowManager, notifications });
@@ -218,6 +222,7 @@ export class VoiceCommandManager {
             if (fromVoice) this._setState('ready');
             return;
         }
+        this._aborted = false; // fresh request — clear any earlier stop
 
         // Show the user's words in the sidebar immediately
         this._onMessage('user', text);
@@ -557,6 +562,7 @@ export class VoiceCommandManager {
             : actions;
 
         for (const act of steps) {
+            if (this._aborted) break; // user pressed Stop — cancel remaining steps
             switch (act.a) {
                 case 'open':
                     this._actions.openApp(act.t);

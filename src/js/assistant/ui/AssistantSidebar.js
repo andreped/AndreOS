@@ -23,7 +23,9 @@ export class AssistantSidebar {
         this._messages    = document.getElementById('asstMessages');
         this._input       = null;
         this._micBtn      = null;
+        this._sendBtn     = null;
         this._isOpen      = false;
+        this._streaming   = false;
         this._setup();
     }
 
@@ -141,6 +143,7 @@ export class AssistantSidebar {
         const sendBtn  = this._panel.querySelector('.asst-send-btn');
         const closeBtn = this._panel.querySelector('.asst-close');
         const clearBtn = this._panel.querySelector('.asst-clear');
+        this._sendBtn = sendBtn;
 
         const submit = () => {
             const text = this._input?.value?.trim();
@@ -154,15 +157,39 @@ export class AssistantSidebar {
         });
         this._input?.addEventListener('click',     e => e.stopPropagation());
         this._input?.addEventListener('mousedown', e => e.stopPropagation());
-        sendBtn?.addEventListener('click',  e => { e.stopPropagation(); submit(); });
+        // While a response is streaming the send button becomes a stop button.
+        sendBtn?.addEventListener('click',  e => {
+            e.stopPropagation();
+            if (this._streaming) window.AndreChat?.stopGeneration?.();
+            else submit();
+        });
         this._micBtn?.addEventListener('click', e => { e.stopPropagation(); this._onMicToggle(); });
         closeBtn?.addEventListener('click',  () => this.close());
-        clearBtn?.addEventListener('click',  e => { e.stopPropagation(); this.clear(); this._input?.focus(); });
+        // Clear aborts any in-flight generation first, then wipes the transcript.
+        clearBtn?.addEventListener('click',  e => {
+            e.stopPropagation();
+            window.AndreChat?.stopGeneration?.();
+            this.clear();
+            this._input?.focus();
+        });
+
+        // Reflect generation lifecycle on the send/stop button.
+        document.addEventListener('andreos:generation-start', () => this._setStreaming(true));
+        document.addEventListener('andreos:generation-end',   () => this._setStreaming(false));
 
         // Keep _isOpen in sync if an external caller removes the class directly
         new MutationObserver(() => {
             this._isOpen = this._panel.classList.contains('asst-open');
         }).observe(this._panel, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    /** Toggle the send button between ↑ (send) and ■ (stop generating). */
+    _setStreaming(on) {
+        this._streaming = on;
+        if (!this._sendBtn) return;
+        this._sendBtn.classList.toggle('asst-send-stop', on);
+        this._sendBtn.textContent = on ? '■' : '↑';
+        this._sendBtn.title = on ? 'Stop generating' : 'Send';
     }
 
     _scroll() {

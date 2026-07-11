@@ -32,6 +32,16 @@ let lastProgress  = { text: 'Starting model download…', pct: 0 };
 const registeredWindows = new Set();
 const messageHistory    = [];
 
+// ── Generation lifecycle (drives the stop/cancel control) ──────────────────────
+let generating     = false; // true while a streaming completion is in flight
+let abortRequested = false;  // set by stopGeneration(); streaming loops check it
+
+// Broadcast start/end so UI (e.g. the sidebar send↔stop button) can react.
+function setGenerating(active) {
+    generating = active;
+    document.dispatchEvent(new CustomEvent(active ? 'andreos:generation-start' : 'andreos:generation-end'));
+}
+
 // ── Desktop-ready gate ────────────────────────────────────────────────────────
 // Notifications are buffered until the OS signals the desktop is visible,
 // so toasts never appear over the loading screen.
@@ -50,6 +60,24 @@ function whenReady(fn) {
 }
 
 document.addEventListener('andreos:desktop-ready', onDesktopReady, { once: true });
+
+// ── Chat-window send/stop button (mirrors the sidebar ↑⇄■ toggle) ─────────────
+const CHAT_SEND_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>';
+const CHAT_STOP_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
+
+// While a response streams, every open chat window's send button becomes a stop
+// button; it reverts when generation ends.
+function applyChatSendState(winEl, streaming) {
+    const sendBtn = winEl.querySelector('.chat-send');
+    if (!sendBtn) return;
+    sendBtn.classList.toggle('chat-send-stop', streaming);
+    sendBtn.disabled = false;
+    sendBtn.innerHTML = streaming ? CHAT_STOP_ICON : CHAT_SEND_ICON;
+    sendBtn.dataset.tooltip = streaming ? 'Stop generating' : 'Send message';
+}
+
+document.addEventListener('andreos:generation-start', () => registeredWindows.forEach(w => applyChatSendState(w, true)));
+document.addEventListener('andreos:generation-end',   () => registeredWindows.forEach(w => applyChatSendState(w, false)));
 
 // ── Toast notification ────────────────────────────────────────────────────────
 function showToast(message, { type = 'info', duration = 5000, action = null } = {}) {
@@ -135,7 +163,8 @@ async function sendMessage(winEl, userText) {
     const input   = winEl.querySelector('.chat-input');
     const sendBtn = winEl.querySelector('.chat-send');
     if (input)   input.disabled   = true;
-    if (sendBtn) sendBtn.disabled = true;
+    // The send button is intentionally NOT disabled — the generation-start/-end
+    // listeners turn it into a Stop button while streaming so it can cancel.
 
     appendBubble(winEl, 'user', userText);
     registeredWindows.forEach(w => { if (w !== winEl) appendBubble(w, 'user', userText, false); });
@@ -172,6 +201,8 @@ async function sendMessage(winEl, userText) {
         ...messageHistory.slice(0, -1).filter(m => m.role !== 'system')
     ];
 
+    abortRequested = false;
+    setGenerating(true);
     try {
         const stream = await engine.chat.completions.create({
             messages,
@@ -180,8 +211,13 @@ async function sendMessage(winEl, userText) {
             temperature: 0.7,
         });
         let fullText = '';
+        let frozen = null;
         for await (const chunk of stream) {
             fullText += chunk.choices[0]?.delta?.content || '';
+            // On stop: keep draining the stream so the engine finalises cleanly
+            // (breaking out mid-stream leaves WebLLM in a stuck state and the
+            // NEXT generation hangs), but freeze the text at the stop point.
+            if (abortRequested) { if (frozen === null) frozen = fullText; continue; }
             assistantEntry.content = fullText;
             typingBubbles.forEach((bubble, w) => {
                 if (bubble) {
@@ -191,12 +227,16 @@ async function sendMessage(winEl, userText) {
                 }
             });
         }
-        typingBubbles.forEach(b => { if (b) b.textContent = fullText; });
+        const finalText = frozen ?? fullText;
+        assistantEntry.content = finalText;
+        typingBubbles.forEach(b => { if (b) b.textContent = finalText; });
     } catch (err) {
         const msg = 'Sorry, something went wrong. Please try again.';
         assistantEntry.content = msg;
         typingBubbles.forEach(b => { if (b) b.textContent = msg; });
         console.error('[AndreChat] send error:', err);
+    } finally {
+        setGenerating(false);
     }
 
     if (input)   { input.disabled = false; input.focus(); }
@@ -352,7 +392,11 @@ window.AndreChat = {
             input.addEventListener('click',     e => e.stopPropagation());
             input.addEventListener('mousedown', e => e.stopPropagation());
         }
-        if (sendBtn) sendBtn.addEventListener('click', e => { e.stopPropagation(); submit(); });
+        if (sendBtn) sendBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            if (generating) window.AndreChat.stopGeneration();
+            else submit();
+        });
 
         if (clearBtn) {
             clearBtn.addEventListener('click', e => {
@@ -421,6 +465,23 @@ window.AndreChat = {
     searchPapers(query) { return ragEngine.searchPapers(query); },
 
     /**
+     * Stop an in-flight streaming generation, if any. Interrupts the WebLLM
+     * engine and signals the streaming loops (and any queued plan steps) to
+     * abort. Returns true if a generation was actually running.
+     * @returns {boolean}
+     */
+    stopGeneration() {
+        if (!generating) return false;
+        abortRequested = true;
+        try { engine?.interruptGenerate?.(); } catch (err) { console.warn('[AndreChat] interrupt failed:', err); }
+        document.dispatchEvent(new CustomEvent('andreos:assistant-abort'));
+        return true;
+    },
+
+    /** @returns {boolean} true while a streaming completion is in flight. */
+    isGenerating() { return generating; },
+
+    /**
      * Stream a conversational LLM response without touching the chat window.
      * Used by the OS Assistant sidebar for non-command queries.
      * @param {string}                     text
@@ -446,6 +507,8 @@ window.AndreChat = {
                 ? `## Relevant Research Papers\nThese papers from André's publications are relevant to this question:\n\n${ragContext}\n\nCite paper titles when relevant.`
                 : null,
         ].filter(Boolean).join('\n\n') + langInstruction;
+        abortRequested = false;
+        setGenerating(true);
         try {
             const stream = await engine.chat.completions.create({
                 messages: [
@@ -457,14 +520,21 @@ window.AndreChat = {
                 temperature: 0.7,
             });
             let fullText = '';
+            let frozen = null;
             for await (const chunk of stream) {
                 fullText += chunk.choices[0]?.delta?.content || '';
+                // On stop: keep draining so the engine finalises cleanly (breaking
+                // out mid-stream leaves WebLLM stuck and the next call hangs);
+                // just freeze the displayed text at the stop point.
+                if (abortRequested) { if (frozen === null) frozen = fullText; continue; }
                 onChunk?.(fullText + '▋');
             }
-            onDone?.(fullText);
+            onDone?.(frozen ?? fullText);
         } catch (err) {
             console.error('[AndreChat] querySidebar error:', err);
             onDone?.('Sorry, something went wrong.');
+        } finally {
+            setGenerating(false);
         }
     },
 
