@@ -69,5 +69,31 @@
       "plan": 0,
       "answers": 0.5403868474570912
     }
+  },
+  {
+    "generatedAt": "2026-07-11T10:47:16.944Z",
+    "source": "browser",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "routing": 0.8214285714285714,
+      "commands": 0.9285714285714286,
+      "plan": 0.1111111111111111,
+      "answers": 0.5394013194116017
+    }
+  },
+  {
+    "generatedAt": "2026-07-11T10:56:52.180Z",
+    "source": "browser",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "routing": 0.8214285714285714,
+      "commands": 0.9285714285714286,
+      "plan": 0.1111111111111111,
+      "answers": 0.5455587455274769
+    }
   }
 ]
