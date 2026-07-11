@@ -51,6 +51,47 @@ const SUITE_META = {
 };
 const SUITE_ORDER = ['routing', 'commands', 'plan', 'answers', 'retrieval', 'resolution', 'integrity'];
 
+// The order suites actually execute in a live run (mirrors buildRunners). The Run
+// tab reuses this so a reconstructed "last run" reads like a real one.
+const RUN_ORDER = ['retrieval', 'resolution', 'integrity', 'routing', 'commands', 'plan', 'answers'];
+
+// How to rebuild a suite's per-sample checklist from a finished scorecard: the
+// ordered sample rows (label shown + id used to match failures) and the field a
+// failure carries to identify which sample it was. Integrity is handled inline
+// (a single synthetic sample driven by its pass flag).
+const RUN_SAMPLES = {
+    retrieval:  { rows: () => RETRIEVAL_DATASET.map((c) => ({ label: c.query, id: c.query })),  failId: (f) => f.query },
+    resolution: { rows: () => RESOLUTION_DATASET.map((c) => ({ label: c.input, id: c.input })), failId: (f) => f.input },
+    routing:    { rows: () => ROUTING_DATASET.map((c) => ({ label: c.input, id: c.input })),    failId: (f) => f.input },
+    commands:   { rows: () => COMMANDS_DATASET.map((c) => ({ label: c.input, id: c.input })),   failId: (f) => f.input },
+    plan:       { rows: () => PLANS_DATASET.map((c) => ({ label: c.id, id: c.id })),            failId: (f) => f.id },
+    answers:    { rows: () => ANSWERS_DATASET.map((c) => ({ label: c.question, id: c.id })),    failId: (f) => f.id },
+};
+
+// Rebuild one Run-panel suite (labels + per-sample pass/fail/skip statuses) from
+// a committed/last scorecard suite. Failed samples are those whose id appears in
+// the suite's failure list; everything else counts as passed.
+function reconstructSuite(key, suite) {
+    if (suite.skipped) {
+        const labels = RUN_SAMPLES[key] ? RUN_SAMPLES[key].rows().map((r) => r.label) : [];
+        return { key, labels, statuses: labels.map(() => 'skip'), status: 'skip', reason: suite.reason ?? 'skipped' };
+    }
+    if (key === 'integrity') {
+        const ok = suite.pass === 1 && !(suite.problems?.length);
+        return { key, labels: ['Registry structure & capabilities'], statuses: [ok ? 'pass' : 'fail'], status: 'done', reason: null };
+    }
+    const cfg = RUN_SAMPLES[key];
+    const failed = new Set((suite.failures ?? []).map(cfg.failId));
+    const rows = cfg.rows();
+    return {
+        key,
+        labels: rows.map((r) => r.label),
+        statuses: rows.map((r) => (failed.has(r.id) ? 'fail' : 'pass')),
+        status: 'done',
+        reason: null,
+    };
+}
+
 // A visitor's own runs are kept privately in localStorage (never committed to the
 // repo). Only the trend history is stored — the default view on open is always the
 // committed latest.json, so everyone sees the published, canonical results first.
@@ -152,7 +193,7 @@ export function setupEvalsWindow(winEl) {
             history = [...committedHistory, ...(Array.isArray(localHistory) ? localHistory : [])];
         } catch { history = committedHistory; }
 
-        if (current) paint();
+        if (current) { paint(); showLastRun(current); }
         else statusEl.textContent = 'No results yet — click “Run live evals”.';
     })();
 
@@ -209,6 +250,27 @@ export function setupEvalsWindow(winEl) {
         renderViewedSuite();
     }
 
+    // Populate the Run tab from a finished scorecard (committed latest.json or the
+    // last local run) so it shows the last run instead of an empty placeholder.
+    // Never clobbers an in-flight live run.
+    function showLastRun(scorecard) {
+        if (running || !scorecard?.suites) return;
+        const order = RUN_ORDER.filter((k) => scorecard.suites[k]);
+        if (!order.length) return;
+        runState = {
+            suites: order.map((k) => reconstructSuite(k, scorecard.suites[k])),
+            total: order.length, completed: order.length,
+            runningIdx: -1, activeIdx: 0, follow: false,
+        };
+        runEmpty.style.display = 'none';
+        runProgress.style.display = '';
+        renderSuiteTabs();
+        renderFollowBtn();
+        viewSuite(0);
+        updateParent(0);
+        parentFill.classList.add('done');
+    }
+
     suiteTabsEl.addEventListener('click', (e) => {
         const btn = e.target.closest('[data-idx]');
         if (!btn || !runState) return;
@@ -237,6 +299,8 @@ export function setupEvalsWindow(winEl) {
                 })),
                 total: descs.length, completed: 0, runningIdx: -1, activeIdx: 0, follow: true,
             };
+            parentFill.classList.remove('done');
+            childFill.classList.remove('done');
             renderSuiteTabs();
             renderFollowBtn();
             viewSuite(0);
