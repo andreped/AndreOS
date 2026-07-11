@@ -93,6 +93,66 @@ export class AssistantSidebar {
     }
 
     /**
+     * Render a plan as a live checklist block, distinct from chat bubbles.
+     * Each step starts pending (○); the returned controller flips steps to a
+     * spinner while running, then ✓ (done), ✗ (failed) or ⊘ (skipped).
+     * @param {string[]} steps human-readable step descriptions
+     * @returns {{ setActive:(i:number)=>void, setDone:(i:number)=>void,
+     *            setFailed:(i:number)=>void, setSkipped:(i:number)=>void }}
+     */
+    startPlan(steps = []) {
+        this._messages?.querySelector('.asst-welcome')?.remove();
+
+        const block = document.createElement('div');
+        block.className = 'asst-plan';
+
+        const header = document.createElement('div');
+        header.className = 'asst-plan-header';
+        header.innerHTML = '<span class="asst-plan-title">📋 Plan</span>';
+        block.appendChild(header);
+
+        const list = document.createElement('ol');
+        list.className = 'asst-plan-list';
+
+        const items = steps.map(text => {
+            const li = document.createElement('li');
+            li.className = 'asst-plan-step';
+            li.dataset.status = 'pending';
+
+            const marker = document.createElement('span');
+            marker.className = 'asst-plan-marker';
+            marker.textContent = '○';
+
+            const label = document.createElement('span');
+            label.className = 'asst-plan-label';
+            label.textContent = text;
+
+            li.append(marker, label);
+            list.appendChild(li);
+            return { li, marker };
+        });
+
+        block.appendChild(list);
+        this._messages?.appendChild(block);
+        this._scroll();
+
+        const set = (i, status, markerHtml) => {
+            const it = items[i];
+            if (!it) return;
+            it.li.dataset.status = status;
+            it.marker.innerHTML = markerHtml;
+            this._scroll();
+        };
+
+        return {
+            setActive:  (i) => set(i, 'active',  '<span class="asst-plan-spinner"></span>'),
+            setDone:    (i) => set(i, 'done',    '✓'),
+            setFailed:  (i) => set(i, 'failed',  '✗'),
+            setSkipped: (i) => set(i, 'skipped', '⊘'),
+        };
+    }
+
+    /**
      * Reflect the current voice-engine state on the mic button.
      * @param {'idle'|'loading'|'ready'|'recording'|'processing'|'error'} state
      */

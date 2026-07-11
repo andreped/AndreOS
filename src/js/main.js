@@ -55,6 +55,7 @@ class DesktopPortfolio {
             },
             onMessage:       (role, text) => this.sidebar.appendMessage(role, text),
             onStreamMessage: (role)       => this.sidebar.startStreamMessage(role),
+            onPlan:          (steps)      => this.sidebar.startPlan(steps),
             isSidebarOpen:   ()           => this.sidebar.isOpen,
         });
 
