@@ -309,7 +309,7 @@ export function setupEvalsWindow(winEl) {
         runBtn.disabled = true;
         runIndicator.style.display = 'inline-block';
         runEmpty.style.display = 'none';
-        runProgress.style.display = 'block';
+        runProgress.style.display = ''; // let CSS drive the flex column layout
         activateTab('run');
         try {
             current = await runLive(reporter);

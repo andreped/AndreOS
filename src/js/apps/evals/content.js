@@ -36,9 +36,29 @@ export function render() {
                 background: var(--accent); margin-left: 6px; vertical-align: middle; animation: evalsPulse 1s infinite; }
 
             .evals-status { font-size: 11px; color: var(--text-faint); padding: 9px 18px 0; flex: 0 0 auto; }
-            .evals-body { flex: 1 1 auto; overflow-y: auto; padding: 14px 18px 18px; }
-            .evals-panel { display: none; }
-            .evals-panel.active { display: block; }
+            /* Body is a non-scrolling flex column; each active panel owns a fixed
+               sub-header plus a single scrollable region below it. */
+            .evals-body { flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+            .evals-panel { display: none; flex: 1 1 auto; min-height: 0; }
+            .evals-panel.active { display: flex; flex-direction: column; min-height: 0; }
+            /* Fixed sub-header inside a panel (sub-tabs / run controls). */
+            .evals-subhead { flex: 0 0 auto; padding: 14px 18px 12px; background: var(--surface); }
+            .evals-subhead > *:last-child { margin-bottom: 0; }
+            /* The single scrollable region inside a panel. */
+            .evals-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 14px 18px 18px; }
+
+            /* Short viewports (e.g. mobile): fall back to scrolling the whole body,
+               so the fixed sub-header doesn't eat the limited height. */
+            @media (max-height: 560px) {
+                .evals-body { overflow-y: auto; display: block; }
+                .evals-panel.active { display: block; min-height: 0; }
+                .evals-subhead { position: sticky; top: 0; z-index: 3; }
+                .evals-scroll { overflow: visible; }
+                #evals-run-progress { display: block; }
+                .eval-checklist { display: block; }
+                #evals-checklist { overflow: visible; }
+                .evals-panel[data-panel="json"] .evals-json { flex: none; }
+            }
 
             /* Scorecard */
             .evals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
@@ -63,6 +83,8 @@ export function render() {
             .eval-empty { color: var(--text-faint); font-size: 12px; padding: 24px 0; text-align: center; }
 
             /* Run (progress) */
+            #evals-run-progress { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
+            #evals-run-empty { padding: 28px 18px; }
             .eval-prog { margin-bottom: 14px; }
             .eval-prog-head { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
             .eval-prog-head .lbl { color: var(--text-secondary); font-weight: 600; }
@@ -86,9 +108,12 @@ export function render() {
             .eval-suite-tab[data-status="skip"] .eval-suite-dot { background: #7a818c; }
             .eval-follow-btn { flex: 0 0 auto; padding: 5px 10px; }
 
-            .eval-checklist { margin-top: 14px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+            .eval-checklist { margin: 14px 18px 18px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+                display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
             .eval-checklist-head { font-size: 11px; color: var(--text-muted); font-weight: 600; padding: 8px 12px;
                 background: var(--surface-raised); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: .04em; }
+            .eval-checklist-head { flex: 0 0 auto; }
+            #evals-checklist { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
             .eval-chk { display: flex; align-items: center; gap: 10px; padding: 6px 12px; font-size: 12px; border-bottom: 1px solid var(--border-soft); }
             .eval-chk:last-child { border-bottom: none; }
             .eval-chk-box { width: 16px; height: 16px; border-radius: 4px; flex: 0 0 auto; display: flex;
@@ -107,7 +132,7 @@ export function render() {
             .evals-json-toolbar { display: flex; justify-content: flex-end; margin-bottom: 8px; }
             .evals-json { background: var(--surface-sunken); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px;
                 font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; line-height: 1.5;
-                color: var(--text-secondary); white-space: pre; overflow: auto; margin: 0; }
+                color: var(--text-secondary); white-space: pre; overflow: auto; margin: 14px 18px 18px; flex: 1 1 auto; min-height: 0; }
 
             /* Dataset */
             .eval-ds-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
@@ -148,29 +173,35 @@ export function render() {
 
         <div class="evals-body">
             <div class="evals-panel active" data-panel="scorecard">
-                <div class="eval-ds-tabs" id="evals-sc-tabs"></div>
-                <div id="evals-sc-metrics">
-                    <div class="evals-grid" id="evals-grid"></div>
+                <div class="evals-subhead">
+                    <div class="eval-ds-tabs" id="evals-sc-tabs"></div>
                 </div>
-                <div id="evals-sc-failures" style="display:none">
-                    <div id="evals-failures"></div>
+                <div class="evals-scroll">
+                    <div id="evals-sc-metrics">
+                        <div class="evals-grid" id="evals-grid"></div>
+                    </div>
+                    <div id="evals-sc-failures" style="display:none">
+                        <div id="evals-failures"></div>
+                    </div>
                 </div>
             </div>
 
             <div class="evals-panel" data-panel="run">
                 <div id="evals-run-empty" class="eval-empty">Click “Run live evals” to benchmark the assistant live.</div>
                 <div id="evals-run-progress" style="display:none">
-                    <div class="eval-runbar">
-                        <div class="eval-suite-tabs" id="evals-suite-tabs"></div>
-                        <button class="evals-btn secondary eval-follow-btn" id="evals-follow" style="display:none" title="Auto-follow the running suite">👁 Follow run</button>
-                    </div>
-                    <div class="eval-prog">
-                        <div class="eval-prog-head"><span class="lbl">Suites <small id="evals-parent-name"></small></span><span class="cnt" id="evals-parent-cnt">0 / 0</span></div>
-                        <div class="eval-prog-track"><div class="eval-prog-fill" id="evals-parent-fill"></div></div>
-                    </div>
-                    <div class="eval-prog">
-                        <div class="eval-prog-head"><span class="lbl" id="evals-child-name">—</span><span class="cnt" id="evals-child-cnt">0 / 0</span></div>
-                        <div class="eval-prog-track"><div class="eval-prog-fill child" id="evals-child-fill"></div></div>
+                    <div class="evals-subhead">
+                        <div class="eval-runbar">
+                            <div class="eval-suite-tabs" id="evals-suite-tabs"></div>
+                            <button class="evals-btn secondary eval-follow-btn" id="evals-follow" style="display:none" title="Auto-follow the running suite">👁 Follow run</button>
+                        </div>
+                        <div class="eval-prog">
+                            <div class="eval-prog-head"><span class="lbl">Suites <small id="evals-parent-name"></small></span><span class="cnt" id="evals-parent-cnt">0 / 0</span></div>
+                            <div class="eval-prog-track"><div class="eval-prog-fill" id="evals-parent-fill"></div></div>
+                        </div>
+                        <div class="eval-prog">
+                            <div class="eval-prog-head"><span class="lbl" id="evals-child-name">—</span><span class="cnt" id="evals-child-cnt">0 / 0</span></div>
+                            <div class="eval-prog-track"><div class="eval-prog-fill child" id="evals-child-fill"></div></div>
+                        </div>
                     </div>
                     <div class="eval-checklist">
                         <div class="eval-checklist-head" id="evals-checklist-head">Samples</div>
@@ -180,12 +211,18 @@ export function render() {
             </div>
 
             <div class="evals-panel" data-panel="dataset">
-                <div class="eval-ds-tabs" id="evals-ds-tabs"></div>
-                <div id="evals-dataset"></div>
+                <div class="evals-subhead">
+                    <div class="eval-ds-tabs" id="evals-ds-tabs"></div>
+                </div>
+                <div class="evals-scroll">
+                    <div id="evals-dataset"></div>
+                </div>
             </div>
 
             <div class="evals-panel" data-panel="json">
-                <div class="evals-json-toolbar"><button class="evals-btn secondary" id="evals-copy">⧉ Copy</button></div>
+                <div class="evals-subhead">
+                    <div class="evals-json-toolbar"><button class="evals-btn secondary" id="evals-copy">⧉ Copy</button></div>
+                </div>
                 <pre class="evals-json" id="evals-json">{}</pre>
             </div>
         </div>
