@@ -3,7 +3,7 @@ import { setupBrowserWindow } from './window.js';
 
 /** @type {import('../registry/AppRegistry.js').AppManifest} */
 export const catalog = {
-    id: 'browser', name: 'Browser', title: 'Browser', icon: '🌐', kind: 'browser',
+    id: 'browser', name: 'Browser', title: 'Browser', icon: '🌐', iconSvg: 'assets/icons/browser.svg', kind: 'browser',
     window: {
         width: 960, height: 680, render, startUrl: 'https://yep.com',
         setup: (el, wd) => setupBrowserWindow(el, wd.startUrl ?? 'https://andreped.dev'),

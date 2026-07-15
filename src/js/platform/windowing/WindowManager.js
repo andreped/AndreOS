@@ -117,7 +117,7 @@ export class WindowManager {
         });
 
         this._windows.push({ id, element: el, title: windowData.title, isMaximized: false,
-            appType: windowData.appType, icon: windowData.icon });
+            appType: windowData.appType, icon: windowData.icon, iconSvg: windowData.iconSvg });
         this.setActiveWindow(id);
 
         this._setupWindowControls(el, id);
@@ -128,7 +128,7 @@ export class WindowManager {
         windowData.setup?.(el, windowData);
 
         this._audio.addSoundEffect('open');
-        this._eventBus.emit('window:created', { id, title: windowData.title, appType: windowData.appType, icon: windowData.icon });
+        this._eventBus.emit('window:created', { id, title: windowData.title, appType: windowData.appType, icon: windowData.icon, iconSvg: windowData.iconSvg });
     }
 
     closeWindow(id) {

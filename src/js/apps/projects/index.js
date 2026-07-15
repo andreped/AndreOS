@@ -3,7 +3,7 @@ import { makeContentContext } from '../../assistant/retrieval/contentContext.js'
 
 /** @type {import('../registry/AppRegistry.js').AppManifest} */
 export const catalog = {
-    id: 'projects', name: 'Projects', title: 'Projects', icon: '📁', kind: 'content',
+    id: 'projects', name: 'Projects', title: 'Projects', icon: '📁', iconSvg: 'assets/icons/folder.svg', kind: 'content',
     window: { width: 800, height: 600, render },
     searchable: true,
     search: { icon: '📁', subtitle: 'Open-source and research projects', keywords: 'projects github open source software' },

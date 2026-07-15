@@ -2548,6 +2548,16 @@ body {
     margin-right: 4px;
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
     flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.taskbar-icon img {
+    width: 16px;
+    height: 16px;
+    filter: brightness(0) invert(1);
+    pointer-events: none;
 }
 
 .taskbar-title {

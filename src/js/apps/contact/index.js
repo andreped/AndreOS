@@ -3,7 +3,7 @@ import { makeContentContext } from '../../assistant/retrieval/contentContext.js'
 
 /** @type {import('../registry/AppRegistry.js').AppManifest} */
 export const catalog = {
-    id: 'contact', name: 'Contact', title: 'Contact.txt', icon: '✉️', kind: 'content',
+    id: 'contact', name: 'Contact', title: 'Contact.txt', icon: '✉️', iconSvg: 'assets/icons/mail.svg', kind: 'content',
     window: { width: 500, height: 400, render },
     searchable: true,
     search: { icon: '✉️', subtitle: 'Get in touch with André', keywords: 'contact email reach out message' },

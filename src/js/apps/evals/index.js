@@ -12,7 +12,7 @@ import { setupEvalsWindow } from './window.js';
 
 /** @type {import('../registry/AppRegistry.js').AppManifest} */
 export const catalog = {
-    id: 'evals', name: 'Evals', title: 'Assistant Evals', icon: '🧪', kind: 'evals',
+    id: 'evals', name: 'Evals', title: 'Assistant Evals', icon: '🧪', iconSvg: 'assets/icons/evals.svg', kind: 'evals',
     window: { width: 860, height: 640, render, setup: (el) => setupEvalsWindow(el) },
     searchable: true,
     search: { icon: '🧪', subtitle: 'Assistant quality scorecard & benchmarks', keywords: 'evals eval benchmark metrics quality test assistant score' },
