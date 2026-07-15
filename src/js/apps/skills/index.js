@@ -3,7 +3,7 @@ import { makeContentContext } from '../../assistant/retrieval/contentContext.js'
 
 /** @type {import('../registry/AppRegistry.js').AppManifest} */
 export const catalog = {
-    id: 'skills', name: 'Skills', title: 'Skills.exe', icon: '⚙️', iconSvg: 'assets/icons/code.svg', kind: 'content',
+    id: 'skills', name: 'Skills', title: 'Skills.exe', icon: '⚙️', iconSvg: new URL('../../../../assets/icons/code.svg', import.meta.url).href, kind: 'content',
     window: { width: 700, height: 500, render },
     // Not surfaced in desktop search (matches previous behaviour).
     searchable: false,

@@ -3,7 +3,7 @@ import { makeContentContext } from '../../assistant/retrieval/contentContext.js'
 
 /** @type {import('../registry/AppRegistry.js').AppManifest} */
 export const catalog = {
-    id: 'social', name: 'Social Links', title: 'Social Links', icon: '🔗', iconSvg: 'assets/icons/network.svg', kind: 'content',
+    id: 'social', name: 'Social Links', title: 'Social Links', icon: '🔗', iconSvg: new URL('../../../../assets/icons/network.svg', import.meta.url).href, kind: 'content',
     window: { width: 600, height: 500, render },
     searchable: true,
     search: { icon: '🔗', subtitle: 'GitHub, LinkedIn, Google Scholar and more', keywords: 'social github linkedin twitter scholar publications links' },

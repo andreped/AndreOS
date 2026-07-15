@@ -10,7 +10,7 @@ import { setupResearchWindow } from './window.js';
 
 /** @type {import('../registry/AppRegistry.js').AppManifest} */
 export const catalog = {
-    id: 'research', name: 'Research', title: 'Research', icon: '🔬', iconSvg: 'assets/icons/research.svg', kind: 'research',
+    id: 'research', name: 'Research', title: 'Research', icon: '🔬', iconSvg: new URL('../../../../assets/icons/research.svg', import.meta.url).href, kind: 'research',
     window: { width: 1040, height: 660, render, setup: (el) => setupResearchWindow(el) },
     searchable: false, // publications are added to search dynamically via RAG
 };
