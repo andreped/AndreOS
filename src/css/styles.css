@@ -3983,6 +3983,14 @@ body {
     font-size: 16px;
 }
 
+.histolite-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+    background: #fff;
+}
+
 .url-bar {
     flex: 1;
     background: var(--surface-sunken);

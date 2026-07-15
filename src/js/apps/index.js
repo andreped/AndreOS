@@ -31,11 +31,12 @@ import * as research from './research/index.js';
 import * as settings from './settings/index.js';
 import * as ironflow from './ironflow/index.js';
 import * as evals    from './evals/index.js';
+import * as histolite from './histolite/index.js';
 
 /** Registration order = natural app order. */
 const apps = [
     about, resume, projects, skills, contact, social,
-    browser, chat, game, research, settings, ironflow, evals,
+    browser, chat, game, research, settings, ironflow, evals, histolite,
 ];
 
 for (const app of apps) {
