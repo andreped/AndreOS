@@ -3,7 +3,7 @@ import { makeContentContext } from '../../assistant/retrieval/contentContext.js'
 
 /** @type {import('../registry/AppRegistry.js').AppManifest} */
 export const catalog = {
-    id: 'about', name: 'About Me', title: 'About Me.txt', icon: '👤', kind: 'content',
+    id: 'about', name: 'About Me', title: 'About Me.txt', icon: '👤', iconSvg: 'assets/icons/user.svg', kind: 'content',
     window: { width: 600, height: 500, render },
     searchable: true,
     search: { icon: '👤', subtitle: 'Who André Pedersen is', keywords: 'about andre pedersen background bio profile' },

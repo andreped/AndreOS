@@ -36,7 +36,7 @@ export class Taskbar {
 
     _subscribeToEvents() {
         const eb = this._eventBus;
-        eb.on('window:created',   ({ id, title, appType, icon }) => this._addItem(id, title, appType, icon));
+        eb.on('window:created',   ({ id, title, appType, icon, iconSvg }) => this._addItem(id, title, appType, icon, iconSvg));
         eb.on('window:closed',    ({ id })         => this._removeItem(id));
         eb.on('window:minimized', ({ id })         => this._setItemState(id, true));
         eb.on('window:restored',  ({ id })         => this._setItemState(id, false));
@@ -46,7 +46,7 @@ export class Taskbar {
 
     // ── Private: add / remove / state ────────────────────────────────────────
 
-    _addItem(windowId, title, appType, icon) {
+    _addItem(windowId, title, appType, icon, iconSvg) {
         const taskbarItems = this._dom.taskbarItems;
         if (!taskbarItems) return;
 
@@ -62,8 +62,12 @@ export class Taskbar {
             item.dataset.windowId = windowId;
             item.dataset.appType  = appType;
 
+            const iconMarkup = iconSvg
+                ? `<img src="${iconSvg}" alt="" aria-hidden="true">`
+                : '';
+
             item.innerHTML = `
-                <span class="taskbar-icon">${icon}</span>
+                <span class="taskbar-icon">${iconMarkup}</span>
                 <span class="taskbar-title">${title}</span>
                 <div class="window-preview hidden">
                     <div class="preview-thumbnail"></div>

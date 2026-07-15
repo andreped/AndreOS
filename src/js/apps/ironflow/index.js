@@ -7,7 +7,7 @@ import { setupIronFlowWindow } from './window.js';
  * @type {import('../registry/AppRegistry.js').AppManifest}
  */
 export const catalog = {
-    id: 'ironflow', name: 'IronFlow', title: 'IronFlow', icon: '🏋️', kind: 'ironflow',
+    id: 'ironflow', name: 'IronFlow', title: 'IronFlow', icon: '🏋️', iconSvg: 'assets/icons/ironflow.svg', kind: 'ironflow',
     window: { width: 420, height: 780, render, setup: (el) => setupIronFlowWindow(el) },
     launchable: false,
     searchable: false,

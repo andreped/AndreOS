@@ -3,7 +3,7 @@ import { setupSettingsWindow } from './window.js';
 
 /** @type {import('../registry/AppRegistry.js').AppManifest} */
 export const catalog = {
-    id: 'settings', name: 'Settings', title: 'Settings', icon: '⚙️', kind: 'settings',
+    id: 'settings', name: 'Settings', title: 'Settings', icon: '⚙️', iconSvg: 'assets/icons/settings.svg', kind: 'settings',
     window: { width: 720, height: 600, render, setup: (el) => setupSettingsWindow(el) },
     searchable: true,
     search: { icon: '⚙️', subtitle: 'AI model, voice commands, preferences', keywords: 'settings model ai voice preferences configure' },

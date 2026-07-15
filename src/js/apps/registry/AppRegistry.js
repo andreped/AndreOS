@@ -26,6 +26,7 @@
  * @property {string}     name       Human label (e.g. 'Research').
  * @property {string}     title      Window title-bar text.
  * @property {string}     icon       Emoji icon.
+ * @property {string}    [iconSvg]   Path to an SVG icon asset (used by desktop & taskbar).
  * @property {AppKind}    kind
  * @property {WindowSpec} window
  * @property {boolean}    [launchable]  Can be opened by name. Default true.
@@ -89,6 +90,7 @@ export class AppRegistry {
             setup:   m.window.setup,
             appType: m.id,
             icon:    m.icon,
+            iconSvg: m.iconSvg,
         };
         switch (m.kind) {
             case 'browser':  return { ...base, isBrowser: true, startUrl: m.window.startUrl };
