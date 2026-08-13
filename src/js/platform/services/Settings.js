@@ -9,8 +9,34 @@ export const DEFAULT_MODEL_ID = 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC';
 export const MODELS = [
     { id: 'SmolLM2-135M-Instruct-q0f16-MLC',   name: 'SmolLM2 135M',  size: '~265 MB', desc: 'Fastest load · English only',                            badge: null },
     { id: 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC', name: 'Qwen2.5 1.5B',  size: '~1 GB',   desc: 'Multilingual · Norwegian ✓ · Best speed/quality balance', badge: 'Recommended' },
-    { id: 'Llama-3.2-1B-Instruct-q4f16_1-MLC', name: 'Llama 3.2 1B',  size: '~800 MB', desc: 'Multilingual · Compact · Meta',                           badge: null },
-    { id: 'Llama-3.2-3B-Instruct-q4f16_1-MLC', name: 'Llama 3.2 3B',  size: '~2 GB',   desc: 'Best response quality · Multilingual',                    badge: 'Best Quality' },
+    { id: 'Llama-3.2-3B-Instruct-q4f16_1-MLC', name: 'Llama 3.2 3B',  size: '~2 GB',   desc: 'Multilingual · Meta',                                     badge: null },
+    { id: 'Qwen3.5-2B-q4f16_1-MLC',            name: 'Qwen3.5 2B',    size: '~1.4 GB', desc: 'Newest · 201 languages · Reasoning',                     badge: null },
+];
+
+/**
+ * Custom (non-prebuilt) WebLLM models. Each entry is an MLC ModelRecord that gets
+ * merged into the engine's `appConfig.model_list` (see chat.js), so a compiled
+ * MLC model hosted anywhere can be selected like a built-in one.
+ *
+ * Requires an MLC build — NOT a raw Hugging Face checkpoint:
+ *   • `model`     URL to the MLC-format weights (e.g. an `…-MLC` HF repo).
+ *   • `model_lib` URL to the compiled WebAssembly kernel. Its version segment
+ *                 (e.g. `v0_2_84/base`) must match the installed web-llm runtime.
+ *   • `overrides` optional ChatConfig tweaks (e.g. context window, KV history).
+ * See https://llm.mlc.ai/docs/deploy/webllm.html to compile new weights/libs.
+ *
+ * @type {{ model: string, model_id: string, model_lib: string, overrides?: object }[]}
+ */
+export const CUSTOM_MODELS = [
+    // Qwen3.5 2B — official MLC build. Not in web-llm 0.2.84's bundled config yet,
+    // but the wasm is compiled for the v0_2_84 runtime, so it loads on our version.
+    // max_history_size: 1 is required — Qwen3.5 is a hybrid/recurrent architecture.
+    {
+        model: 'https://huggingface.co/mlc-ai/Qwen3.5-2B-q4f16_1-MLC',
+        model_id: 'Qwen3.5-2B-q4f16_1-MLC',
+        model_lib: 'https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/main/web-llm-models/v0_2_84/base/Qwen3.5-2B-q4f16_1_cs1k-webgpu.wasm',
+        overrides: { context_window_size: 8192, max_history_size: 1 },
+    },
 ];
 
 export const WHISPER_MODELS = [
@@ -29,6 +55,19 @@ export const LLM_LANGUAGES = [
     { id: 'auto', label: 'Auto (match user)' },
     { id: 'en',   label: 'English' },
     { id: 'no',   label: 'Norwegian' },
+];
+
+/**
+ * Reasoning effort levels (OpenAI-style). Each maps to whether the model thinks
+ * (`enable_thinking`) and its total token budget (thinking + answer). Consumed
+ * in chat.js. WebLLM has no separate thinking cap, so higher effort = a larger
+ * overall budget plus a prompt nudge to reason proportionately.
+ */
+export const REASONING_LEVELS = [
+    { id: 'none',   label: 'None',   think: false, maxTokens: 512,  nudge: '' },
+    { id: 'low',    label: 'Low',    think: true,  maxTokens: 1536, nudge: 'Think briefly — a sentence or two — then answer.' },
+    { id: 'medium', label: 'Medium', think: true,  maxTokens: 3072, nudge: 'Think concisely before answering.' },
+    { id: 'high',   label: 'High',   think: true,  maxTokens: 6144, nudge: 'Think thoroughly, step by step, before answering.' },
 ];
 
 export const THEMES = [
@@ -53,4 +92,5 @@ export function getWhisperModel()   { return getSettings().whisperModel   || 'Xe
 export function getTranscribeLang() { return getSettings().transcribeLang || 'english'; }  // default English — more reliable than auto
 export function getLLMLanguage()    { return getSettings().llmLang        || 'en'; }        // default English
 export function isVoiceAIEnabled()  { return getSettings().voiceAI !== false; }
+export function getReasoningEffort(){ return getSettings().reasoningEffort || 'none'; }     // none | low | medium | high
 export function getTheme()          { return getSettings().theme          || 'light'; }     // default Light

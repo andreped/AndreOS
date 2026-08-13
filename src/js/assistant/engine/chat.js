@@ -5,7 +5,7 @@ import * as webllm from "@mlc-ai/web-llm";
 import { SYSTEM_PROMPT } from "./andre-profile.js";
 import { RAGEngine }   from "../retrieval/RAGEngine.js";
 import { ActiveContext } from "../retrieval/ActiveContext.js";
-import { getModelId, MODELS, getLLMLanguage } from "../../platform/services/Settings.js";
+import { getModelId, MODELS, getLLMLanguage, CUSTOM_MODELS, getReasoningEffort, REASONING_LEVELS } from "../../platform/services/Settings.js";
 import { appRegistry } from "../../apps/index.js";
 
 const MODEL_ID = getModelId(); // resolved from Settings at load time — re-read on retry()
@@ -40,6 +40,19 @@ let abortRequested = false;  // set by stopGeneration(); streaming loops check i
 function setGenerating(active) {
     generating = active;
     document.dispatchEvent(new CustomEvent(active ? 'andreos:generation-start' : 'andreos:generation-end'));
+}
+
+/**
+ * Detect a degenerate repetition loop: the trailing chunk of text recurring
+ * several times (small models like Qwen3.5-2B can get stuck repeating a phrase).
+ */
+function looksLooping(text) {
+    if (text.length < 300) return false;
+    const tail = text.slice(-48);
+    if (!tail.trim()) return false;
+    let count = 0, idx = 0;
+    while ((idx = text.indexOf(tail, idx)) !== -1) { count++; idx += tail.length; }
+    return count >= 3;
 }
 
 // ── Desktop-ready gate ────────────────────────────────────────────────────────
@@ -285,7 +298,12 @@ async function loadEngine() {
 
     try {
         await assertGPULimits();
+        // Merge any custom MLC models into the app config so they load like built-ins.
+        const appConfig = CUSTOM_MODELS.length
+            ? { ...webllm.prebuiltAppConfig, model_list: [...webllm.prebuiltAppConfig.model_list, ...CUSTOM_MODELS] }
+            : undefined;
         engine = await webllm.CreateMLCEngine(getModelId(), {
+            appConfig,
             initProgressCallback: (report) => {
                 const pct  = Math.round((report.progress || 0) * 100);
                 const text = report.text || 'Loading…';
@@ -512,6 +530,7 @@ window.AndreChat = {
         const langInstruction = langSetting === 'no' ? '\n\nAlways respond in Norwegian (Bokmål).'
             : langSetting === 'en' ? '\n\nAlways respond in English.'
             : '';
+        const effort = REASONING_LEVELS.find(l => l.id === getReasoningEffort()) ?? REASONING_LEVELS[0];
         const activeCtx  = ActiveContext.getContextBlock(text);
         // A viewed paper takes priority over general RAG retrieval.
         const ragContext = activeCtx ? '' : ragEngine.query(text);
@@ -521,23 +540,35 @@ window.AndreChat = {
             ragContext
                 ? `## Relevant Research Papers\nThese papers from André's publications are relevant to this question:\n\n${ragContext}\n\nCite paper titles when relevant.`
                 : null,
+            effort.think ? effort.nudge : null,
         ].filter(Boolean).join('\n\n') + langInstruction;
         abortRequested = false;
         setGenerating(true);
         try {
             const stream = await engine.chat.completions.create({
                 messages: [
-                    { role: 'system', content: systemContent },
-                    { role: 'user',   content: text },
+                    { role: "system", content: systemContent },
+                    { role: "user",   content: text },
                 ],
                 stream: true,
-                max_tokens: 300,
+                max_tokens: effort.maxTokens,
                 temperature: 0.7,
+                top_p: 0.9,
+                // Penalise repeats so the small model doesn't fall into a
+                // reasoning loop (Qwen recommends presence_penalty for this).
+                frequency_penalty: 0.4,
+                presence_penalty: 1.3,
+                extra_body: { enable_thinking: effort.think },
             });
             let fullText = '';
             let frozen = null;
             for await (const chunk of stream) {
                 fullText += chunk.choices[0]?.delta?.content || '';
+                // Safety net: if it still starts repeating itself, cut it off.
+                if (!abortRequested && looksLooping(fullText)) {
+                    abortRequested = true;
+                    try { engine.interruptGenerate?.(); } catch { /* ignore */ }
+                }
                 // On stop: keep draining so the engine finalises cleanly (breaking
                 // out mid-stream leaves WebLLM stuck and the next call hangs);
                 // just freeze the displayed text at the stop point.

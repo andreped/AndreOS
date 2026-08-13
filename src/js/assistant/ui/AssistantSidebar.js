@@ -82,6 +82,7 @@ export class AssistantSidebar {
             this._attachRetry(row, text);
             this._messages?.appendChild(row);
         } else {
+            bubble._answerText = text; // clean text for retry/history
             this._messages?.appendChild(bubble);
         }
         this._scroll();
@@ -114,7 +115,7 @@ export class AssistantSidebar {
             this._messages?.querySelectorAll('.asst-bubble').forEach((b) => {
                 const r = b.classList.contains('asst-bubble-user') ? 'user'
                     : b.classList.contains('asst-bubble-assistant') ? 'assistant' : null;
-                if (r) history.push({ role: r, content: (b.textContent || '').trim() });
+                if (r) history.push({ role: r, content: (b._answerText ?? b.textContent ?? '').trim() });
             });
 
             const update = this.startStreamMessage('assistant');
@@ -132,12 +133,43 @@ export class AssistantSidebar {
      * @returns {(text: string) => void}
      */
     startStreamMessage(role = 'assistant') {
-        const bubble = this.appendMessage(role, '▋');
+        const bubble = this.appendMessage(role, '');
         this._timedBubble = bubble; // stamped with its inference runtime on generation-end
+
+        const think = document.createElement('details');
+        think.className = 'asst-think';
+        think.style.display = 'none';
+        think.innerHTML = '<summary>💭 Reasoning</summary><div class="asst-think-body"></div>';
+        const answer = document.createElement('div');
+        answer.className = 'asst-answer';
+        answer.textContent = '▋';
+        bubble.append(think, answer);
+        const thinkBody = think.querySelector('.asst-think-body');
+
         return (text) => {
-            bubble.textContent = text || '';
+            const { reasoning, answer: ans } = this._splitThink(text || '');
+            if (reasoning.trim()) {
+                think.style.display = '';
+                thinkBody.textContent = reasoning;
+                think.open = !ans; // expanded while thinking, collapsed once answering
+            } else {
+                think.style.display = 'none';
+            }
+            answer.textContent = ans;
+            bubble._answerText = ans; // clean answer for retry/history
             this._scroll();
         };
+    }
+
+    /** Split a Qwen-style `<think>…</think>` reasoning block from the answer. */
+    _splitThink(text) {
+        const open = text.indexOf('<think>');
+        if (open === -1) return { reasoning: '', answer: text };
+        const close = text.indexOf('</think>', open);
+        if (close === -1) return { reasoning: text.slice(open + 7), answer: '' };
+        const reasoning = text.slice(open + 7, close);
+        const answer = (text.slice(0, open) + text.slice(close + 8)).trim();
+        return { reasoning, answer };
     }
 
     /** Append a small "took N ms/s" runtime tag under the timed answer bubble. */

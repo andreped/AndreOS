@@ -1,4 +1,4 @@
-import { getModelId, getSettings, saveSettings, getWhisperModel, getTranscribeLang, getLLMLanguage, getTheme } from '../../platform/services/Settings.js';
+import { getModelId, getSettings, saveSettings, getWhisperModel, getTranscribeLang, getLLMLanguage, getReasoningEffort, getTheme } from '../../platform/services/Settings.js';
 import { setTheme } from '../../platform/services/ThemeManager.js';
 
 export function setupSettingsWindow(winEl) {
@@ -56,6 +56,15 @@ export function setupSettingsWindow(winEl) {
     }
 
     initLangPills('llm-lang-pills', getLLMLanguage, 'llmLang');
+
+    // Reasoning effort pills — read at query time, so no AI restart needed.
+    const effortPills = winEl.querySelector('#reasoning-effort-pills');
+    if (effortPills) {
+        const pills = effortPills.querySelectorAll('.lang-pill');
+        const refresh = () => { const cur = getReasoningEffort(); pills.forEach(p => p.classList.toggle('active', p.dataset.effort === cur)); };
+        refresh();
+        pills.forEach(p => p.addEventListener('click', () => { saveSettings({ reasoningEffort: p.dataset.effort }); refresh(); }));
+    }
 
     // Voice section
     const voiceApplyBtn = winEl.querySelector('#voice-apply-btn');

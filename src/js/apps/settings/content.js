@@ -3,8 +3,8 @@ export function render() {
     const modelCards = [
         { id: 'SmolLM2-135M-Instruct-q0f16-MLC',      name: 'SmolLM2 135M',  size: '~265 MB', desc: 'Fastest load · English only',                          badge: null },
         { id: 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC',    name: 'Qwen2.5 1.5B',  size: '~1 GB',   desc: 'Multilingual · Norwegian ✓ · Best speed/quality balance', badge: 'Recommended' },
-        { id: 'Llama-3.2-1B-Instruct-q4f16_1-MLC',    name: 'Llama 3.2 1B',  size: '~800 MB', desc: 'Multilingual · Compact · Meta',                         badge: null },
-        { id: 'Llama-3.2-3B-Instruct-q4f16_1-MLC',    name: 'Llama 3.2 3B',  size: '~2 GB',   desc: 'Best response quality · Multilingual',                  badge: 'Best Quality' },
+        { id: 'Llama-3.2-3B-Instruct-q4f16_1-MLC',    name: 'Llama 3.2 3B',  size: '~2 GB',   desc: 'Multilingual · Meta',                                   badge: null },
+        { id: 'Qwen3.5-2B-q4f16_1-MLC',               name: 'Qwen3.5 2B',    size: '~1.4 GB', desc: 'Newest · 201 languages · Reasoning',                   badge: null },
     ].map(m => `
         <div class="model-card" data-model-id="${m.id}">
             <div class="model-card-radio"><span class="model-radio-dot"></span></div>
@@ -53,6 +53,15 @@ export function render() {
                     <h2 class="settings-section-title">AI Engine</h2>
                     <p class="settings-section-desc">Powers Ask André chat and the AI voice command parser. The model is downloaded once and cached in your browser.</p>
                     <div class="model-cards">${modelCards}</div>
+
+                    <h3 class="settings-subsection-title">Reasoning effort</h3>
+                    <p class="settings-section-desc">How much the model thinks before answering (Qwen3.5). Higher = deeper reasoning and a larger token budget; None skips thinking for the fastest reply.</p>
+                    <div class="lang-pills" id="reasoning-effort-pills">
+                        <button class="lang-pill" data-effort="none">None</button>
+                        <button class="lang-pill" data-effort="low">Low</button>
+                        <button class="lang-pill" data-effort="medium">Medium</button>
+                        <button class="lang-pill" data-effort="high">High</button>
+                    </div>
 
                     <h3 class="settings-subsection-title">Response Language</h3>
                     <div class="lang-pills" id="llm-lang-pills">

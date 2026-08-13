@@ -5910,6 +5910,27 @@ body {
     font-variant-numeric: tabular-nums;
 }
 
+/* Collapsible reasoning block (Qwen3.5 thinking), hidden when empty. */
+.asst-think {
+    margin-bottom: 6px;
+    font-size: 12px;
+    border-left: 2px solid rgba(255, 255, 255, 0.15);
+    padding-left: 8px;
+}
+.asst-think > summary {
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.5);
+    list-style: none;
+    user-select: none;
+}
+.asst-think > summary::-webkit-details-marker { display: none; }
+.asst-think-body {
+    margin-top: 4px;
+    color: rgba(255, 255, 255, 0.55);
+    white-space: pre-wrap;
+}
+.asst-answer { white-space: pre-wrap; }
+
 
 /* Plan checklist block — a live TODO list, distinct from chat bubbles. */
 .asst-plan {
