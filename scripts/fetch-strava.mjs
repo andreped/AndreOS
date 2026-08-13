@@ -19,9 +19,10 @@ import { writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 
 const COOKIE = process.env.STRAVA_COOKIE;
-const PER_PAGE = Number(process.env.STRAVA_PER_PAGE || 20);
+const PER_PAGE = Number(process.env.STRAVA_PER_PAGE || 50);
+const MAX_PAGES = Number(process.env.STRAVA_MAX_PAGES || 500); // safety cap
 const OUT = path.resolve('public/strava/activities.json');
-const ENDPOINT = `https://www.strava.com/athlete/training_activities?per_page=${PER_PAGE}&page=1`;
+const pageUrl = (page) => `https://www.strava.com/athlete/training_activities?per_page=${PER_PAGE}&page=${page}`;
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 
 if (!COOKIE) {
@@ -100,10 +101,9 @@ function normalise(m) {
     };
 }
 
-async function main() {
-    const cookies = await warmSession(parseCookies(COOKIE));
-
-    const res = await fetch(ENDPOINT, {
+/** Fetch one page of activities. Returns the raw models array (may be empty). */
+async function fetchPage(cookies, page) {
+    const res = await fetch(pageUrl(page), {
         headers: {
             cookie: serialise(cookies),
             accept: 'text/javascript, application/json, */*',
@@ -116,7 +116,7 @@ async function main() {
     if (res.status === 401 || res.status === 302) {
         throw new Error('Session rejected after warm-up — the remember cookie is likely expired. Refresh STRAVA_COOKIE.');
     }
-    if (!res.ok) throw new Error(`Unexpected status ${res.status}`);
+    if (!res.ok) throw new Error(`Unexpected status ${res.status} on page ${page}`);
 
     const text = await res.text();
     let data;
@@ -125,13 +125,24 @@ async function main() {
     } catch {
         throw new Error('Response was not JSON (probably a login page). Refresh STRAVA_COOKIE.');
     }
+    return Array.isArray(data) ? data : (data.models || []);
+}
 
-    const models = Array.isArray(data) ? data : (data.models || []);
-    if (!models.length) throw new Error('No activities returned (cookie may be invalid).');
+async function main() {
+    const cookies = await warmSession(parseCookies(COOKIE));
 
-    console.log('First activity keys:', Object.keys(models[0]).join(', '));
+    const all = [];
+    for (let page = 1; page <= MAX_PAGES; page++) {
+        const models = await fetchPage(cookies, page);
+        if (page === 1) {
+            if (!models.length) throw new Error('No activities returned (cookie may be invalid).');
+            console.log('First activity keys:', Object.keys(models[0]).join(', '));
+        }
+        all.push(...models);
+        if (models.length < PER_PAGE) break; // last page reached
+    }
 
-    const activities = models.map(normalise);
+    const activities = all.map(normalise);
     await mkdir(path.dirname(OUT), { recursive: true });
     await writeFile(OUT, JSON.stringify(activities, null, 2) + '\n');
     console.log(`✓ Wrote ${activities.length} activities to ${path.relative(process.cwd(), OUT)}`);
