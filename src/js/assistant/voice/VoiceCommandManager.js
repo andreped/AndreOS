@@ -350,6 +350,27 @@ export class VoiceCommandManager {
         if (this._history.length > 20) this._history.shift();
     }
 
+    /**
+     * Re-run a question after the sidebar rewound the conversation to it.
+     * `history` is the surviving transcript (ending at this question) and becomes
+     * the new memory; the regenerated answer streams into `update`.
+     * @param {string} text
+     * @param {(partial: string) => void} update
+     * @param {{role:string, content:string}[]} history
+     */
+    async retryQuery(text, update, history) {
+        if (Array.isArray(history)) this._history = history.slice(-20);
+        if (!window.AndreChat?.querySidebar) {
+            update('The AI model isn\'t loaded yet — open Ask André to load it first.');
+            return;
+        }
+        await window.AndreChat.querySidebar(text, update, (full) => {
+            const reply = full || 'No response.';
+            update(reply);
+            this._addHistory('assistant', reply);
+        });
+    }
+
     _onEngineError(message) {
         this._notifications.show(`Voice error: ${message}`, 'error');
         this._setState(this._engine.isReady ? 'ready' : 'error');

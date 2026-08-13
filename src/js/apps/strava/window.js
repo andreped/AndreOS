@@ -5,35 +5,48 @@
  * arrays are also accepted — normaliseActivity() in content.js maps either shape.
  */
 import { activityCardHTML, STRAVA_PROFILE_URL } from './content.js';
+import { ensureLoaded } from './data.js';
 
-const SOURCES = ['/api/strava-feed', '/strava/activities.json'];
-const MAX_ITEMS = 15;
+const BATCH_SIZE = 20;
 
 export function setupStravaWindow(winEl) {
     const feed = winEl.querySelector('[data-strava-feed]');
     if (feed) loadFeed(feed);
 }
 
-/** Try each source in turn; the first that yields activities wins. */
-async function fetchActivities() {
-    for (const url of SOURCES) {
-        try {
-            const res = await fetch(url, { headers: { accept: 'application/json' } });
-            if (!res.ok) continue;
-            const data = await res.json();
-            // Accept a bare array, or a `{ models|activities: [...] }` wrapper.
-            const list = Array.isArray(data) ? data : (data.models || data.activities || []);
-            if (list.length) return list;
-        } catch { /* try next source */ }
-    }
-    return null;
+async function loadFeed(feed) {
+    const list = await ensureLoaded();
+    if (!list.length) { feed.innerHTML = setupHint(); return; }
+    renderInfinite(feed, list);
 }
 
-async function loadFeed(feed) {
-    const list = await fetchActivities();
-    if (!list) { feed.innerHTML = setupHint(); return; }
-    feed.innerHTML = list.slice(0, MAX_ITEMS).map(activityCardHTML).join('');
+/** Render the feed in batches, appending more as a sentinel scrolls into view. */
+function renderInfinite(feed, list) {
+    feed.innerHTML = '';
+    const sentinel = document.createElement('div');
+    sentinel.className = 'strava-sentinel';
+    feed.appendChild(sentinel);
+
+    let rendered = 0;
+    const renderMore = () => {
+        const next = list.slice(rendered, rendered + BATCH_SIZE);
+        if (!next.length) return;
+        sentinel.insertAdjacentHTML('beforebegin', next.map(activityCardHTML).join(''));
+        rendered += next.length;
+        if (rendered >= list.length) {
+            observer.disconnect();
+            sentinel.remove();
+        }
+    };
+
+    const observer = new IntersectionObserver(
+        (entries) => { if (entries.some((e) => e.isIntersecting)) renderMore(); },
+        { root: feed, rootMargin: '300px' },
+    );
+    observer.observe(sentinel);
+    renderMore(); // first batch (observer fills the rest as needed)
 }
+
 
 function setupHint() {
     return `

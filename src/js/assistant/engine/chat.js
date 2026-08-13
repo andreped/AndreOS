@@ -490,8 +490,23 @@ window.AndreChat = {
      */
     async querySidebar(text, onChunk, onDone) {
         if (engineState !== 'ready') {
-            onDone?.('The AI model isn\'t loaded yet — open Ask André to load it first.');
-            return;
+            if (!navigator.gpu) {
+                onDone?.('This browser has no WebGPU support, so the local AI model can\'t run. Try Chrome/Edge 113+ or Safari 18+.');
+                return;
+            }
+            // Auto-(re)start loading if it never started or previously failed,
+            // then wait — so the sidebar recovers on its own instead of dead-ending.
+            if (engineState === 'idle' || engineState === 'error') {
+                if (engineState === 'error') { engineState = 'idle'; engine = null; }
+                loadEngine();
+            }
+            onChunk?.('⏳ Loading the AI model… (first run downloads the weights, then it\'s cached)');
+            try {
+                await window.AndreChat.whenReady(180_000);
+            } catch {
+                onDone?.('The AI model couldn\'t load. Please try again in a moment.');
+                return;
+            }
         }
         const langSetting = getLLMLanguage();
         const langInstruction = langSetting === 'no' ? '\n\nAlways respond in Norwegian (Bokmål).'

@@ -20,7 +20,7 @@ import path from 'node:path';
 
 const COOKIE = process.env.STRAVA_COOKIE;
 const PER_PAGE = Number(process.env.STRAVA_PER_PAGE || 50);
-const MAX_PAGES = Number(process.env.STRAVA_MAX_PAGES || 500); // safety cap
+const MAX_PAGES = Number(process.env.STRAVA_MAX_PAGES || 2000); // safety cap
 const OUT = path.resolve('public/strava/activities.json');
 const pageUrl = (page) => `https://www.strava.com/athlete/training_activities?per_page=${PER_PAGE}&page=${page}`;
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
