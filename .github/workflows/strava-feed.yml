@@ -3,7 +3,12 @@ name: Update Strava feed
 on:
   schedule:
     - cron: '0 6 * * 1'   # weekly, Mondays at 06:00 UTC
-  workflow_dispatch: {}    # allow manual runs from the Actions tab
+  workflow_dispatch:       # allow manual runs from the Actions tab
+    inputs:
+      full:
+        description: 'Full re-fetch (ignore existing feed)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -22,9 +27,23 @@ jobs:
         with:
           node-version: 20
 
+      - name: Load current feed from KV
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_KV_NAMESPACE_ID: ${{ secrets.CF_KV_NAMESPACE_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          code=$(curl -sS -o existing.json -w '%{http_code}' \
+            "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/activities" \
+            -H "Authorization: Bearer ${CF_API_TOKEN}") || true
+          echo "KV GET → HTTP $code"
+          if [ "$code" != "200" ]; then echo '[]' > existing.json; fi
+
       - name: Fetch Strava activities
         env:
           STRAVA_COOKIE: ${{ secrets.STRAVA_COOKIE }}
+          EXISTING_PATH: existing.json
+          STRAVA_FULL: ${{ (github.event.inputs.full == 'true') && '1' || '' }}
         run: node scripts/fetch-strava.mjs
 
       - name: Upload feed to Cloudflare KV
