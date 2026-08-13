@@ -1,11 +1,17 @@
 name: Update Strava feed
 
-# Refreshes public/strava/activities.json from your own Strava session cookie.
+# Refreshes the Strava activities feed from your own Strava session cookie and
+# pushes it to Cloudflare Workers KV (read live by /api/strava-feed).
 # No login automation: it reuses a cookie you paste once into the STRAVA_COOKIE
 # repository secret. For a weekly job, include the long-lived "Remember me"
 # cookies so the session survives — set STRAVA_COOKIE to the full cookie string
-# containing `remember_token` and `remember_id` (plus `_strava4_session`).
-# When it eventually expires, just update the secret.
+# containing `strava_remember_token` and `strava_remember_id` (plus
+# `_strava4_session`). When it eventually expires, just update the secret.
+#
+# Also requires these repository secrets for the KV upload:
+#   CF_ACCOUNT_ID        Cloudflare account ID.
+#   CF_KV_NAMESPACE_ID   The KV namespace ID bound to the Pages project as STRAVA_KV.
+#   CF_API_TOKEN         API token with "Workers KV Storage: Edit" permission.
 
 on:
   schedule:
@@ -14,7 +20,7 @@ on:
   push: {}                 # TEMPORARY: run on push to any branch — remove after first successful run
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: strava-feed
@@ -35,14 +41,17 @@ jobs:
           STRAVA_COOKIE: ${{ secrets.STRAVA_COOKIE }}
         run: node scripts/fetch-strava.mjs
 
-      - name: Commit if changed
+      - name: Upload feed to Cloudflare KV
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_KV_NAMESPACE_ID: ${{ secrets.CF_KV_NAMESPACE_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
         run: |
-          git add public/strava/activities.json
-          if git diff --cached --quiet; then
-            echo "No changes."
-            exit 0
-          fi
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore: refresh Strava activities feed"
-          git push
+          resp=$(curl -sS -X PUT \
+            "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/activities" \
+            -H "Authorization: Bearer ${CF_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            --data-binary @public/strava/activities.json)
+          echo "$resp"
+          echo "$resp" | grep -q '"success":true' || { echo "✖ KV upload failed"; exit 1; }
+          echo "✓ Uploaded feed to Cloudflare KV"
