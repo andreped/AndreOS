@@ -132,14 +132,20 @@ async function main() {
     const cookies = await warmSession(parseCookies(COOKIE));
 
     const all = [];
+    const seen = new Set();
     for (let page = 1; page <= MAX_PAGES; page++) {
         const models = await fetchPage(cookies, page);
         if (page === 1) {
             if (!models.length) throw new Error('No activities returned (cookie may be invalid).');
             console.log('First activity keys:', Object.keys(models[0]).join(', '));
         }
-        all.push(...models);
-        if (models.length < PER_PAGE) break; // last page reached
+        // The endpoint may cap page size below PER_PAGE, so page count isn't a
+        // reliable "done" signal. Stop when a page brings nothing new (empty
+        // page, or the `page` param being ignored → repeated results).
+        const fresh = models.filter((m) => !seen.has(m.id));
+        if (!fresh.length) break;
+        for (const m of fresh) seen.add(m.id);
+        all.push(...fresh);
     }
 
     const activities = all.map(normalise);
