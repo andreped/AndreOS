@@ -165,6 +165,15 @@ The `public/_headers` file sets the required COOP/COEP headers automatically.
 
 </details>
 
+<details>
+<summary><strong>Strava feed (free, no API)</strong></summary>
+
+The **Strava** app shows André's activity history (and the OS Assistant can answer questions about it) **without** Strava's paid API. A weekly GitHub Action reuses your own session cookie to fetch your activities, caches them in **Cloudflare Workers KV**, and serves them via a Pages Function — fully free and static.
+
+See **[docs/strava-feed.md](docs/strava-feed.md)** for how it works and the one-time setup.
+
+</details>
+
 ---
 
 ## Acknowledgements
