@@ -7,7 +7,7 @@
 import { activityCardHTML, STRAVA_PROFILE_URL } from './content.js';
 
 const SOURCES = ['/api/strava-feed', '/strava/activities.json'];
-const MAX_ITEMS = 15;
+const BATCH_SIZE = 20;
 
 export function setupStravaWindow(winEl) {
     const feed = winEl.querySelector('[data-strava-feed]');
@@ -32,8 +32,36 @@ async function fetchActivities() {
 async function loadFeed(feed) {
     const list = await fetchActivities();
     if (!list) { feed.innerHTML = setupHint(); return; }
-    feed.innerHTML = list.slice(0, MAX_ITEMS).map(activityCardHTML).join('');
+    renderInfinite(feed, list);
 }
+
+/** Render the feed in batches, appending more as a sentinel scrolls into view. */
+function renderInfinite(feed, list) {
+    feed.innerHTML = '';
+    const sentinel = document.createElement('div');
+    sentinel.className = 'strava-sentinel';
+    feed.appendChild(sentinel);
+
+    let rendered = 0;
+    const renderMore = () => {
+        const next = list.slice(rendered, rendered + BATCH_SIZE);
+        if (!next.length) return;
+        sentinel.insertAdjacentHTML('beforebegin', next.map(activityCardHTML).join(''));
+        rendered += next.length;
+        if (rendered >= list.length) {
+            observer.disconnect();
+            sentinel.remove();
+        }
+    };
+
+    const observer = new IntersectionObserver(
+        (entries) => { if (entries.some((e) => e.isIntersecting)) renderMore(); },
+        { root: feed, rootMargin: '300px' },
+    );
+    observer.observe(sentinel);
+    renderMore(); // first batch (observer fills the rest as needed)
+}
+
 
 function setupHint() {
     return `
