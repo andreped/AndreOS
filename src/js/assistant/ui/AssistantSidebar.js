@@ -14,11 +14,13 @@ export class AssistantSidebar {
      * @param {{
      *   onSubmit:    (text: string) => void,
      *   onMicToggle: () => void,
+     *   onRetry?:    (text: string, update: (partial: string) => void) => void,
      * }} opts
      */
-    constructor({ onSubmit, onMicToggle }) {
+    constructor({ onSubmit, onMicToggle, onRetry }) {
         this._onSubmit    = onSubmit;
         this._onMicToggle = onMicToggle;
+        this._onRetry     = onRetry;
         this._panel       = document.getElementById('assistantSidebar');
         this._messages    = document.getElementById('asstMessages');
         this._input       = null;
@@ -26,6 +28,7 @@ export class AssistantSidebar {
         this._sendBtn     = null;
         this._isOpen      = false;
         this._streaming   = false;
+        this._lastUserText = '';
         this._setup();
     }
 
@@ -71,9 +74,53 @@ export class AssistantSidebar {
         const bubble = document.createElement('div');
         bubble.className = `asst-bubble asst-bubble-${role}`;
         bubble.textContent = text;
-        this._messages?.appendChild(bubble);
+        if (role === 'user') {
+            this._lastUserText = text;
+            const row = document.createElement('div');
+            row.className = 'asst-user-row';
+            row.appendChild(bubble);
+            this._attachRetry(row, text);
+            this._messages?.appendChild(row);
+        } else {
+            this._messages?.appendChild(bubble);
+        }
         this._scroll();
         return bubble;
+    }
+
+    /**
+     * Add an always-visible retry control below a user question. Retrying drops
+     * every message after this question (its answer and any later turns) and
+     * rebuilds the assistant's memory from what remains, since we're rewinding
+     * the conversation to this point, then regenerates the answer.
+     */
+    _attachRetry(row, userText) {
+        if (!userText || !this._onRetry) return;
+        const btn = document.createElement('button');
+        btn.className = 'asst-retry';
+        btn.title = 'Retry';
+        btn.setAttribute('aria-label', 'Retry this question');
+        btn.textContent = '↻';
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (this._streaming) return;
+
+            // Remove everything after this question (its answer + later turns).
+            let node = row.nextElementSibling;
+            while (node) { const n = node.nextElementSibling; node.remove(); node = n; }
+
+            // Rebuild memory from the surviving transcript (ends at this question).
+            const history = [];
+            this._messages?.querySelectorAll('.asst-bubble').forEach((b) => {
+                const r = b.classList.contains('asst-bubble-user') ? 'user'
+                    : b.classList.contains('asst-bubble-assistant') ? 'assistant' : null;
+                if (r) history.push({ role: r, content: (b.textContent || '').trim() });
+            });
+
+            const update = this.startStreamMessage('assistant');
+            this._onRetry(userText, update, history);
+        });
+        row.appendChild(btn);
     }
 
     /**
@@ -86,10 +133,25 @@ export class AssistantSidebar {
      */
     startStreamMessage(role = 'assistant') {
         const bubble = this.appendMessage(role, '▋');
+        this._timedBubble = bubble; // stamped with its inference runtime on generation-end
         return (text) => {
             bubble.textContent = text || '';
             this._scroll();
         };
+    }
+
+    /** Append a small "took N ms/s" runtime tag under the timed answer bubble. */
+    _stampTiming() {
+        if (this._timedBubble && this._genStart != null) {
+            const ms = performance.now() - this._genStart;
+            const tag = document.createElement('div');
+            tag.className = 'asst-meta';
+            tag.textContent = ms < 1000 ? `${Math.round(ms)} ms` : `${(ms / 1000).toFixed(1)} s`;
+            this._timedBubble.appendChild(tag);
+            this._scroll();
+        }
+        this._timedBubble = null;
+        this._genStart = null;
     }
 
     /**
@@ -233,9 +295,9 @@ export class AssistantSidebar {
             this._input?.focus();
         });
 
-        // Reflect generation lifecycle on the send/stop button.
-        document.addEventListener('andreos:generation-start', () => this._setStreaming(true));
-        document.addEventListener('andreos:generation-end',   () => this._setStreaming(false));
+        // Reflect generation lifecycle on the send/stop button, and time answers.
+        document.addEventListener('andreos:generation-start', () => { this._genStart = performance.now(); this._setStreaming(true); });
+        document.addEventListener('andreos:generation-end',   () => { this._stampTiming(); this._setStreaming(false); });
 
         // Keep _isOpen in sync if an external caller removes the class directly
         new MutationObserver(() => {
@@ -246,6 +308,7 @@ export class AssistantSidebar {
     /** Toggle the send button between ↑ (send) and ■ (stop generating). */
     _setStreaming(on) {
         this._streaming = on;
+        this._messages?.classList.toggle('asst-streaming', on);
         if (!this._sendBtn) return;
         this._sendBtn.classList.toggle('asst-send-stop', on);
         this._sendBtn.textContent = on ? '■' : '↑';

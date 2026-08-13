@@ -5,8 +5,8 @@
  * arrays are also accepted — normaliseActivity() in content.js maps either shape.
  */
 import { activityCardHTML, STRAVA_PROFILE_URL } from './content.js';
+import { ensureLoaded } from './data.js';
 
-const SOURCES = ['/api/strava-feed', '/strava/activities.json'];
 const BATCH_SIZE = 20;
 
 export function setupStravaWindow(winEl) {
@@ -14,24 +14,9 @@ export function setupStravaWindow(winEl) {
     if (feed) loadFeed(feed);
 }
 
-/** Try each source in turn; the first that yields activities wins. */
-async function fetchActivities() {
-    for (const url of SOURCES) {
-        try {
-            const res = await fetch(url, { headers: { accept: 'application/json' } });
-            if (!res.ok) continue;
-            const data = await res.json();
-            // Accept a bare array, or a `{ models|activities: [...] }` wrapper.
-            const list = Array.isArray(data) ? data : (data.models || data.activities || []);
-            if (list.length) return list;
-        } catch { /* try next source */ }
-    }
-    return null;
-}
-
 async function loadFeed(feed) {
-    const list = await fetchActivities();
-    if (!list) { feed.innerHTML = setupHint(); return; }
+    const list = await ensureLoaded();
+    if (!list.length) { feed.innerHTML = setupHint(); return; }
     renderInfinite(feed, list);
 }
 

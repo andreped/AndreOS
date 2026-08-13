@@ -44,6 +44,7 @@ class DesktopPortfolio {
         this.sidebar = new AssistantSidebar({
             onSubmit:    (text) => this.voice.submitText(text),
             onMicToggle: () => this.voice.toggleRecording(),
+            onRetry:     (text, update, history) => this.voice.retryQuery(text, update, history),
         });
 
         this.voice = new VoiceCommandManager({
