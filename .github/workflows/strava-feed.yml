@@ -1,0 +1,47 @@
+name: Update Strava feed
+
+# Refreshes public/strava/activities.json from your own Strava session cookie.
+# No login automation: it reuses a cookie you paste once into the STRAVA_COOKIE
+# repository secret. For a weekly job, include the long-lived "Remember me"
+# cookies so the session survives — set STRAVA_COOKIE to the full cookie string
+# containing `remember_token` and `remember_id` (plus `_strava4_session`).
+# When it eventually expires, just update the secret.
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'   # weekly, Mondays at 06:00 UTC
+  workflow_dispatch: {}    # allow manual runs from the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: strava-feed
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Fetch Strava activities
+        env:
+          STRAVA_COOKIE: ${{ secrets.STRAVA_COOKIE }}
+        run: node scripts/fetch-strava.mjs
+
+      - name: Commit if changed
+        run: |
+          git add public/strava/activities.json
+          if git diff --cached --quiet; then
+            echo "No changes."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: refresh Strava activities feed"
+          git push
