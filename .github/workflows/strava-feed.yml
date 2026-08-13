@@ -9,7 +9,6 @@ on:
         description: 'Full re-fetch (ignore existing feed)'
         type: boolean
         default: false
-  push: {}                 # TEMPORARY: run on push to any branch — remove after first successful run
 
 permissions:
   contents: read
