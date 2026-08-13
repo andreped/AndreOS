@@ -15,7 +15,7 @@
  * Requires Node 18.14+ (global fetch + Headers.getSetCookie). Run locally with:
  *   STRAVA_COOKIE='strava_remember_id=…; strava_remember_token=…' node scripts/fetch-strava.mjs
  */
-import { writeFile, mkdir } from 'node:fs/promises';
+import { writeFile, readFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 
 const COOKIE = process.env.STRAVA_COOKIE;
@@ -86,17 +86,24 @@ async function warmSession(cookies) {
     return cookies;
 }
 
-/** Map one raw dashboard model to the tidy, public-safe shape the app expects. */
+/**
+ * Map one raw dashboard model to the tidy, public-safe shape the app expects.
+ * The training_activities endpoint returns human-formatted strings (e.g. moving
+ * time "52m 56s", distance "4.28 km") plus numeric `*_raw` fields — always use
+ * the raw ones. Sport lives in `sport_type` (there is no plain `type`).
+ */
 function normalise(m) {
     return {
         id: m.id,
         name: m.name,
-        type: m.type,
-        distance: m.distance,                 // metres
-        movingTime: m.moving_time,            // seconds
-        elapsedTime: m.elapsed_time,          // seconds
-        elevationGain: m.elevation_gain,      // metres
-        startDate: m.start_date_local
+        type: m.sport_type ?? m.type,
+        distance: m.distance_raw,              // metres
+        movingTime: m.moving_time_raw,         // seconds
+        elapsedTime: m.elapsed_time_raw,       // seconds
+        elevationGain: m.elevation_gain_raw,   // metres
+        sufferScore: m.suffer_score ?? undefined,
+        private: m.private || undefined,
+        startDate: m.start_date
             ?? (m.start_date_local_raw ? new Date(m.start_date_local_raw * 1000).toISOString() : undefined),
     };
 }
@@ -128,10 +135,24 @@ async function fetchPage(cookies, page) {
     return Array.isArray(data) ? data : (data.models || []);
 }
 
+/** Load the previously-stored feed (for incremental fetches). Empty on miss. */
+async function loadExisting() {
+    const p = process.env.EXISTING_PATH;
+    if (!p || process.env.STRAVA_FULL === '1') return [];
+    try {
+        const data = JSON.parse(await readFile(p, 'utf8'));
+        return Array.isArray(data) ? data : (data.models || data.activities || []);
+    } catch {
+        return [];
+    }
+}
+
 async function main() {
+    const existing = await loadExisting();
+    const existingIds = new Set(existing.map((a) => a.id));
     const cookies = await warmSession(parseCookies(COOKIE));
 
-    const all = [];
+    const collected = [];
     const seen = new Set();
     for (let page = 1; page <= MAX_PAGES; page++) {
         const models = await fetchPage(cookies, page);
@@ -139,19 +160,29 @@ async function main() {
             if (!models.length) throw new Error('No activities returned (cookie may be invalid).');
             console.log('First activity keys:', Object.keys(models[0]).join(', '));
         }
-        // The endpoint may cap page size below PER_PAGE, so page count isn't a
-        // reliable "done" signal. Stop when a page brings nothing new (empty
-        // page, or the `page` param being ignored → repeated results).
+        // Page size may be capped below PER_PAGE, so page count isn't a reliable
+        // "done" signal. Stop when a page brings nothing new (empty, or the page
+        // param being ignored → repeats).
         const fresh = models.filter((m) => !seen.has(m.id));
         if (!fresh.length) break;
         for (const m of fresh) seen.add(m.id);
-        all.push(...fresh);
+        collected.push(...fresh);
+        // Incremental: the feed is newest-first, so once a page reaches an
+        // activity we already have, everything older is known — stop early.
+        if (existingIds.size && fresh.some((m) => existingIds.has(m.id))) break;
     }
 
-    const activities = all.map(normalise);
+    // Merge fetched over existing (fetched wins for edited activities), newest first.
+    const byId = new Map();
+    for (const a of existing) byId.set(a.id, a);
+    for (const m of collected) byId.set(m.id, normalise(m));
+    const activities = [...byId.values()]
+        .sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+
     await mkdir(path.dirname(OUT), { recursive: true });
     await writeFile(OUT, JSON.stringify(activities, null, 2) + '\n');
-    console.log(`✓ Wrote ${activities.length} activities to ${path.relative(process.cwd(), OUT)}`);
+    const added = activities.length - existing.length;
+    console.log(`✓ ${existing.length ? `+${Math.max(0, added)} new, ` : ''}${activities.length} total → ${path.relative(process.cwd(), OUT)}`);
 }
 
 main().catch((err) => {

@@ -6222,7 +6222,7 @@ a.strava-card:hover {
 
 .strava-card-stats {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
     gap: 8px;
     margin-top: 12px;
     padding-top: 12px;

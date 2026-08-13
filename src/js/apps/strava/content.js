@@ -90,8 +90,8 @@ function escapeHtml(str) {
  * (snake_case from /athlete/training_activities or the v3 API).
  */
 export function normaliseActivity(a) {
-    const distance = a.distance;
-    const movingTime = a.movingTime ?? a.moving_time;
+    const distance = a.distance ?? a.distance_raw;
+    const movingTime = a.movingTime ?? a.moving_time_raw ?? a.moving_time;
     const start = a.startDate ?? a.start_date_local ?? a.start_date
         ?? (a.start_date_local_raw ? a.start_date_local_raw * 1000 : undefined);
     return {
@@ -100,13 +100,12 @@ export function normaliseActivity(a) {
         type: a.type ?? a.sport_type,
         distance,
         movingTime,
-        elapsedTime: a.elapsedTime ?? a.elapsed_time,
-        elevationGain: a.elevationGain ?? a.elevation_gain ?? a.total_elevation_gain,
+        elapsedTime: a.elapsedTime ?? a.elapsed_time_raw ?? a.elapsed_time,
+        elevationGain: a.elevationGain ?? a.elevation_gain_raw ?? a.elevation_gain ?? a.total_elevation_gain,
         averageSpeed: a.averageSpeed ?? a.average_speed
             ?? (distance && movingTime ? distance / movingTime : undefined),
+        sufferScore: a.sufferScore ?? a.suffer_score ?? undefined,
         startDate: typeof start === 'number' ? new Date(start).toISOString() : start,
-        kudos: a.kudos ?? a.kudos_count,
-        achievements: a.achievements ?? a.achievement_count,
     };
 }
 
@@ -115,12 +114,17 @@ export function activityCardHTML(raw) {
     const a = normaliseActivity(raw);
     const href = a.id ? `https://www.strava.com/activities/${a.id}` : STRAVA_PROFILE_URL;
     const isFoot = /Run|Walk|Hike/.test(a.type || '');
-    const stats = [
-        { label: 'Distance', value: formatDistance(a.distance) },
-        { label: 'Time', value: formatDuration(a.movingTime) },
-        { label: isFoot ? 'Pace' : 'Speed', value: formatPaceOrSpeed(a.type, a.averageSpeed) },
-        { label: 'Elev', value: formatElevation(a.elevationGain) },
-    ];
+    const hasDistance = a.distance > 0;
+
+    // Only show stats that make sense for this sport (a strength session has no
+    // distance or pace), so the card stays informative instead of full of dashes.
+    const stats = [];
+    if (hasDistance) stats.push({ label: 'Distance', value: formatDistance(a.distance) });
+    stats.push({ label: 'Time', value: formatDuration(a.movingTime) });
+    if (hasDistance) stats.push({ label: isFoot ? 'Pace' : 'Speed', value: formatPaceOrSpeed(a.type, a.averageSpeed) });
+    if (a.elevationGain > 0) stats.push({ label: 'Elev', value: formatElevation(a.elevationGain) });
+    if (a.sufferScore) stats.push({ label: 'Effort', value: String(Math.round(a.sufferScore)) });
+
     return `
         <a class="strava-card" href="${href}" target="_blank" rel="noopener noreferrer">
             <div class="strava-card-head">
@@ -131,17 +135,12 @@ export function activityCardHTML(raw) {
                 </div>
             </div>
             <div class="strava-card-stats">
-                ${stats.map((s) => `
+                ${stats.slice(0, 4).map((s) => `
                     <div class="strava-stat">
                         <span class="strava-stat-value">${s.value}</span>
                         <span class="strava-stat-label">${s.label}</span>
                     </div>`).join('')}
             </div>
-            ${(a.kudos || a.achievements) ? `
-                <div class="strava-card-foot">
-                    ${a.kudos ? `<span>👍 ${a.kudos}</span>` : ''}
-                    ${a.achievements ? `<span>🏆 ${a.achievements}</span>` : ''}
-                </div>` : ''}
         </a>
     `;
 }
