@@ -18,14 +18,17 @@ const TYPE_ICON = {
     Ride: '🚴', VirtualRide: '🚴', MountainBikeRide: '🚵', GravelRide: '🚴', EBikeRide: '🚴',
     Swim: '🏊',
     Hike: '🥾', Walk: '🚶',
-    WeightTraining: '🏋️', Workout: '💪', Crossfit: '🤸',
-    AlpineSki: '⛷️', BackcountrySki: '🎿', NordicSki: '🎿', Snowboard: '🏂',
-    Kayaking: '🛶', Rowing: '🚣', StandUpPaddling: '🏄', Surfing: '🏄',
-    Yoga: '🧘', Golf: '⛳',
+    WeightTraining: '🏋️', Workout: '💪', Crossfit: '🤸', HighIntensityIntervalTraining: '🔥', Pilates: '🧘',
+    RockClimbing: '🧗', Climbing: '🧗', Bouldering: '🧗',
+    StairStepper: '🪜', Elliptical: '🌀', VirtualRow: '🚣', Rowing: '🚣',
+    Soccer: '⚽', Football: '⚽', Tennis: '🎾', TableTennis: '🏓', Badminton: '🏸', Squash: '🎾', Racquetball: '🎾', Basketball: '🏀', Volleyball: '🏐',
+    AlpineSki: '⛷️', BackcountrySki: '🎿', NordicSki: '🎿', RollerSki: '🎿', Snowboard: '🏂', Snowshoe: '🥾', IceSkate: '⛸️',
+    Kayaking: '🛶', Canoeing: '🛶', StandUpPaddling: '🏄', Surfing: '🏄', Windsurf: '🏄', Kitesurf: '🪁', Sail: '⛵', Swimming: '🏊',
+    InlineSkate: '🛼', Skateboard: '🛹', Handcycle: '🚲', Wheelchair: '🦽', Golf: '⛳', Yoga: '🧘',
 };
 
 export function typeIcon(type) {
-    return TYPE_ICON[type] || '🏅';
+    return TYPE_ICON[type] || '💪';
 }
 
 /** Human-friendly sport label, e.g. "MountainBikeRide" → "Mountain Bike Ride". */
@@ -69,13 +72,23 @@ export function formatPaceOrSpeed(type, speedMps) {
 
 export function formatDate(iso) {
     if (!iso) return '';
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return '';
+    const hasTime = typeof iso === 'string' && iso.includes('T');
+    let d = new Date(iso);
+    if (Number.isNaN(d.getTime())) {
+        // Legacy "Wed, M/D/YYYY" strings — drop the weekday prefix and retry.
+        d = new Date(String(iso).replace(/^[A-Za-z]{3,},?\s*/, ''));
+    }
+    if (Number.isNaN(d.getTime())) return String(iso);
+    // startDate encodes the activity's *local* wall-clock time as UTC, so format
+    // in UTC to show the time it actually started, regardless of viewer timezone.
+    const time = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC' });
     const diffDays = Math.floor((Date.now() - d.getTime()) / 86_400_000);
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Yesterday';
-    if (diffDays > 0 && diffDays < 7) return `${diffDays} days ago`;
-    return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+    let day;
+    if (diffDays === 0) day = 'Today';
+    else if (diffDays === 1) day = 'Yesterday';
+    else if (diffDays > 0 && diffDays < 7) day = `${diffDays} days ago`;
+    else day = d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+    return hasTime ? `${day} · ${time}` : day;
 }
 
 function escapeHtml(str) {

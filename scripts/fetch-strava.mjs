@@ -103,8 +103,9 @@ function normalise(m) {
         elevationGain: m.elevation_gain_raw,   // metres
         sufferScore: m.suffer_score ?? undefined,
         private: m.private || undefined,
-        startDate: m.start_date
-            ?? (m.start_date_local_raw ? new Date(m.start_date_local_raw * 1000).toISOString() : undefined),
+        startDate: m.start_date_local_raw
+            ? new Date(m.start_date_local_raw * 1000).toISOString()
+            : m.start_date,
     };
 }
 
