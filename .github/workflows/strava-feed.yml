@@ -1,23 +1,9 @@
 name: Update Strava feed
 
-# Refreshes the Strava activities feed from your own Strava session cookie and
-# pushes it to Cloudflare Workers KV (read live by /api/strava-feed).
-# No login automation: it reuses a cookie you paste once into the STRAVA_COOKIE
-# repository secret. For a weekly job, include the long-lived "Remember me"
-# cookies so the session survives — set STRAVA_COOKIE to the full cookie string
-# containing `strava_remember_token` and `strava_remember_id` (plus
-# `_strava4_session`). When it eventually expires, just update the secret.
-#
-# Also requires these repository secrets for the KV upload:
-#   CF_ACCOUNT_ID        Cloudflare account ID.
-#   CF_KV_NAMESPACE_ID   The KV namespace ID bound to the Pages project as STRAVA_KV.
-#   CF_API_TOKEN         API token with "Workers KV Storage: Edit" permission.
-
 on:
   schedule:
     - cron: '0 6 * * 1'   # weekly, Mondays at 06:00 UTC
   workflow_dispatch: {}    # allow manual runs from the Actions tab
-  push: {}                 # TEMPORARY: run on push to any branch — remove after first successful run
 
 permissions:
   contents: read
