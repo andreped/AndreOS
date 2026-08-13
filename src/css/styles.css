@@ -6091,3 +6091,232 @@ body {
 @media (min-width: 769px) {
     .voice-mic-btn { display: none !important; }
 }
+
+/* ── Strava app ─────────────────────────────────────────────────────────── */
+.strava-app {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--surface-sunken);
+}
+
+.strava-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    background: #fc4c02;
+    color: #fff;
+    flex: 0 0 auto;
+}
+
+.strava-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.strava-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+}
+
+.strava-brand h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #fff;
+}
+
+.strava-tagline {
+    font-size: 12px;
+    opacity: 0.85;
+}
+
+.strava-profile-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.2s ease;
+}
+
+.strava-profile-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.strava-feed {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Strava activity cards */
+.strava-card {
+    display: block;
+    padding: 14px;
+    border-radius: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+a.strava-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.strava-card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.strava-type-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(252, 76, 2, 0.12);
+    font-size: 20px;
+    flex: 0 0 auto;
+}
+
+.strava-card-meta { min-width: 0; }
+
+.strava-card-meta h4 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.strava-card-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.strava-card-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-soft);
+}
+
+.strava-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.strava-stat-value {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.strava-stat-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+}
+
+.strava-card-foot {
+    display: flex;
+    gap: 14px;
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.strava-notice {
+    text-align: center;
+    padding: 32px 20px;
+    color: var(--text-secondary);
+}
+
+.strava-notice-emoji {
+    font-size: 40px;
+    margin: 0 0 8px;
+}
+
+.strava-notice h4 {
+    margin: 0 0 6px;
+    font-size: 16px;
+}
+
+.strava-notice p {
+    margin: 0 auto 14px;
+    max-width: 320px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.strava-notice .strava-profile-btn {
+    background: #fc4c02;
+}
+
+.strava-notice .strava-profile-btn:hover {
+    background: #e34602;
+}
+
+.strava-notice code {
+    background: var(--surface-hover);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+/* Skeleton loading state */
+.strava-skeleton { pointer-events: none; }
+
+.strava-sk-dot,
+.strava-sk-line {
+    display: block;
+    background: linear-gradient(90deg, var(--surface-hover) 25%, var(--surface-sunken) 50%, var(--surface-hover) 75%);
+    background-size: 200% 100%;
+    animation: strava-shimmer 1.3s ease-in-out infinite;
+    border-radius: 6px;
+}
+
+.strava-sk-dot {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+}
+
+.strava-sk-line--title { width: 60%; height: 14px; margin-bottom: 6px; }
+.strava-sk-line--sub { width: 40%; height: 11px; }
+.strava-sk-line--stat { height: 26px; }
+
+@keyframes strava-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}

@@ -1,0 +1,3323 @@
+[
+  {
+    "id": 19714400157,
+    "name": "Chest + shoulders",
+    "distance": "0",
+    "movingTime": "58:32",
+    "elapsedTime": "58:32",
+    "elevationGain": "0",
+    "startDate": "2026-08-12T18:42:37.000Z"
+  },
+  {
+    "id": 19712345131,
+    "name": "Afternoon Walk",
+    "distance": "2.00",
+    "movingTime": "20:31",
+    "elapsedTime": "21:39",
+    "elevationGain": "24",
+    "startDate": "2026-08-12T16:08:08.000Z"
+  },
+  {
+    "id": 19698291270,
+    "name": "Evening Walk",
+    "distance": "1.11",
+    "movingTime": "13:47",
+    "elapsedTime": "15:02",
+    "elevationGain": "21",
+    "startDate": "2026-08-11T18:09:20.000Z"
+  },
+  {
+    "id": 19697383182,
+    "name": "Afternoon Walk",
+    "distance": "1.00",
+    "movingTime": "11:08",
+    "elapsedTime": "11:25",
+    "elevationGain": "0",
+    "startDate": "2026-08-11T17:02:01.000Z"
+  },
+  {
+    "id": 19693844865,
+    "name": "Morning Walk",
+    "distance": "7.36",
+    "movingTime": "1:24:00",
+    "elapsedTime": "2:23:42",
+    "elevationGain": "96",
+    "startDate": "2026-08-11T10:30:26.000Z"
+  },
+  {
+    "id": 19682808472,
+    "name": "Afternoon Walk",
+    "distance": "2.51",
+    "movingTime": "27:57",
+    "elapsedTime": "1:37:39",
+    "elevationGain": "31",
+    "startDate": "2026-08-10T16:01:30.000Z"
+  },
+  {
+    "id": 19669463810,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:43:47",
+    "elapsedTime": "1:43:47",
+    "elevationGain": "0",
+    "startDate": "2026-08-09T14:40:57.000Z"
+  },
+  {
+    "id": 19650409965,
+    "name": "Evening Rock Climb",
+    "distance": "0",
+    "movingTime": "2:01:35",
+    "elapsedTime": "2:01:35",
+    "elevationGain": "0",
+    "startDate": "2026-08-07T19:08:59.000Z"
+  },
+  {
+    "id": 19650410029,
+    "name": "Evening Walk",
+    "distance": "1.82",
+    "movingTime": "22:48",
+    "elapsedTime": "32:17",
+    "elevationGain": "14",
+    "startDate": "2026-08-04T18:16:23.000Z"
+  },
+  {
+    "id": 19650409958,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "2:08:36",
+    "elapsedTime": "2:08:36",
+    "elevationGain": "0",
+    "startDate": "2026-08-04T16:00:06.000Z"
+  },
+  {
+    "id": 19553618638,
+    "name": "Morning workout ☀️",
+    "distance": "0",
+    "movingTime": "31:38",
+    "elapsedTime": "31:38",
+    "elevationGain": "0",
+    "startDate": "2026-08-01T11:59:37.000Z"
+  },
+  {
+    "id": 19543637819,
+    "name": "Styrke @ Moss",
+    "distance": "0",
+    "movingTime": "48:10",
+    "elapsedTime": "48:10",
+    "elevationGain": "0",
+    "startDate": "2026-07-31T16:10:14.000Z"
+  },
+  {
+    "id": 19516910337,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:43:23",
+    "elapsedTime": "1:43:23",
+    "elevationGain": "0",
+    "startDate": "2026-07-29T15:50:10.000Z"
+  },
+  {
+    "id": 19488759368,
+    "name": "Evening workout 🏋️",
+    "distance": "0",
+    "movingTime": "58:50",
+    "elapsedTime": "58:50",
+    "elevationGain": "0",
+    "startDate": "2026-07-27T18:50:08.000Z"
+  },
+  {
+    "id": 19461379765,
+    "name": "Kajakktur",
+    "distance": "0",
+    "movingTime": "40:00",
+    "elapsedTime": "40:00",
+    "elevationGain": "0",
+    "startDate": "2026-07-25T17:23:47.000Z"
+  },
+  {
+    "id": 19446232258,
+    "name": "Afternoon workout 💪",
+    "distance": "0",
+    "movingTime": "1:02:55",
+    "elapsedTime": "1:02:55",
+    "elevationGain": "0",
+    "startDate": "2026-07-24T15:17:49.000Z"
+  },
+  {
+    "id": 19434826534,
+    "name": "Evening workout 🏋️",
+    "distance": "0",
+    "movingTime": "54:40",
+    "elapsedTime": "54:40",
+    "elevationGain": "0",
+    "startDate": "2026-07-23T18:21:26.000Z"
+  },
+  {
+    "id": 19421222126,
+    "name": "Evening workout 🏋️",
+    "distance": "0",
+    "movingTime": "45:36",
+    "elapsedTime": "45:36",
+    "elevationGain": "0",
+    "startDate": "2026-07-22T19:04:28.000Z"
+  },
+  {
+    "id": 19407453922,
+    "name": "Evening workout 🏋️",
+    "distance": "0",
+    "movingTime": "41:47",
+    "elapsedTime": "41:47",
+    "elevationGain": "0",
+    "startDate": "2026-07-21T19:58:01.000Z"
+  },
+  {
+    "id": 19377967330,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "2:25:15",
+    "elapsedTime": "2:25:15",
+    "elevationGain": "0",
+    "startDate": "2026-07-19T14:25:19.000Z"
+  },
+  {
+    "id": 19360828384,
+    "name": "Chest+Rygg",
+    "distance": "0",
+    "movingTime": "1:08:42",
+    "elapsedTime": "1:08:42",
+    "elevationGain": "0",
+    "startDate": "2026-07-18T11:28:00.000Z"
+  },
+  {
+    "id": 19351061969,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:55:17",
+    "elapsedTime": "1:55:17",
+    "elevationGain": "0",
+    "startDate": "2026-07-17T15:13:43.000Z"
+  },
+  {
+    "id": 19347669079,
+    "name": "Lunch Walk",
+    "distance": "3.38",
+    "movingTime": "35:18",
+    "elapsedTime": "57:02",
+    "elevationGain": "19",
+    "startDate": "2026-07-17T11:21:16.000Z"
+  },
+  {
+    "id": 19328183746,
+    "name": "Late night workout 🌙",
+    "distance": "0",
+    "movingTime": "1:24:19",
+    "elapsedTime": "1:24:19",
+    "elevationGain": "0",
+    "startDate": "2026-07-15T20:37:40.000Z"
+  },
+  {
+    "id": 19312793608,
+    "name": "Evening workout 🏋️",
+    "distance": "0",
+    "movingTime": "1:11:32",
+    "elapsedTime": "1:11:32",
+    "elevationGain": "0",
+    "startDate": "2026-07-14T18:50:55.000Z"
+  },
+  {
+    "id": 19326668491,
+    "name": "Afternoon Walk",
+    "distance": "2.00",
+    "movingTime": "23:04",
+    "elapsedTime": "36:08",
+    "elevationGain": "19",
+    "startDate": "2026-07-13T17:09:05.000Z"
+  },
+  {
+    "id": 19326668460,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "2:01:19",
+    "elapsedTime": "2:01:19",
+    "elevationGain": "0",
+    "startDate": "2026-07-13T15:06:19.000Z"
+  },
+  {
+    "id": 19269448288,
+    "name": "Afternoon Stair-Stepper",
+    "distance": "0",
+    "movingTime": "21:12",
+    "elapsedTime": "21:12",
+    "elevationGain": "0",
+    "startDate": "2026-07-11T15:29:11.000Z"
+  },
+  {
+    "id": 19269147721,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "1:03:37",
+    "elapsedTime": "1:03:37",
+    "elevationGain": "0",
+    "startDate": "2026-07-11T14:24:43.000Z"
+  },
+  {
+    "id": 19257720017,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "2:07:12",
+    "elapsedTime": "2:07:12",
+    "elevationGain": "0",
+    "startDate": "2026-07-10T15:55:24.000Z"
+  },
+  {
+    "id": 19188089179,
+    "name": "Afternoon Walk",
+    "distance": "2.55",
+    "movingTime": "29:23",
+    "elapsedTime": "29:23",
+    "elevationGain": "4",
+    "startDate": "2026-07-05T13:07:14.000Z"
+  },
+  {
+    "id": 19187642128,
+    "name": "Lunch Rock Climb",
+    "distance": "0",
+    "movingTime": "1:49:02",
+    "elapsedTime": "1:49:02",
+    "elevationGain": "0",
+    "startDate": "2026-07-05T11:17:10.000Z"
+  },
+  {
+    "id": 19185945600,
+    "name": "Morning Walk",
+    "distance": "2.67",
+    "movingTime": "29:49",
+    "elapsedTime": "30:08",
+    "elevationGain": "80",
+    "startDate": "2026-07-05T10:44:38.000Z"
+  },
+  {
+    "id": 19165968860,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "2:37:42",
+    "elapsedTime": "2:37:42",
+    "elevationGain": "0",
+    "startDate": "2026-07-03T16:34:39.000Z"
+  },
+  {
+    "id": 19138869985,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:21:09",
+    "elapsedTime": "1:21:09",
+    "elevationGain": "0",
+    "startDate": "2026-07-01T16:09:28.000Z"
+  },
+  {
+    "id": 19097721567,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "1:02:44",
+    "elapsedTime": "1:02:44",
+    "elevationGain": "0",
+    "startDate": "2026-06-28T13:04:33.000Z"
+  },
+  {
+    "id": 19087561415,
+    "name": "Morning Rock Climb",
+    "distance": "0",
+    "movingTime": "2:33:02",
+    "elapsedTime": "2:33:02",
+    "elevationGain": "0",
+    "startDate": "2026-06-27T10:51:33.000Z"
+  },
+  {
+    "id": 19050688398,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "1:05:24",
+    "elapsedTime": "1:05:24",
+    "elevationGain": "0",
+    "startDate": "2026-06-24T16:37:50.000Z"
+  },
+  {
+    "id": 19033818511,
+    "name": "Lunch Hike",
+    "distance": "3.48",
+    "movingTime": "43:02",
+    "elapsedTime": "45:11",
+    "elevationGain": "22",
+    "startDate": "2026-06-23T12:07:14.000Z"
+  },
+  {
+    "id": 19025156115,
+    "name": "Tur til Kvilarhytta @Manndalen",
+    "distance": "3.52",
+    "movingTime": "51:30",
+    "elapsedTime": "1:18:46",
+    "elevationGain": "434",
+    "startDate": "2026-06-22T17:38:23.000Z"
+  },
+  {
+    "id": 19025148648,
+    "name": "Evening Weight Training",
+    "distance": "0",
+    "movingTime": "45:53",
+    "elapsedTime": "45:53",
+    "elevationGain": "0",
+    "startDate": "2026-06-21T18:18:53.000Z"
+  },
+  {
+    "id": 19025148717,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:52:27",
+    "elapsedTime": "1:52:27",
+    "elevationGain": "0",
+    "startDate": "2026-06-16T15:49:54.000Z"
+  },
+  {
+    "id": 18934075367,
+    "name": "Night Weight Training",
+    "distance": "0",
+    "movingTime": "37:00",
+    "elapsedTime": "37:00",
+    "elevationGain": "0",
+    "startDate": "2026-06-15T21:15:17.000Z"
+  },
+  {
+    "id": 18901508953,
+    "name": "Lunch Rock Climb",
+    "distance": "0",
+    "movingTime": "1:45:04",
+    "elapsedTime": "1:45:04",
+    "elevationGain": "0",
+    "startDate": "2026-06-13T11:04:02.000Z"
+  },
+  {
+    "id": 18865764038,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:35:39",
+    "elapsedTime": "1:35:39",
+    "elevationGain": "0",
+    "startDate": "2026-06-10T15:17:47.000Z"
+  },
+  {
+    "id": 18810157904,
+    "name": "Afternoon Walk",
+    "distance": "2.30",
+    "movingTime": "27:57",
+    "elapsedTime": "59:45",
+    "elevationGain": "30",
+    "startDate": "2026-06-06T14:29:21.000Z"
+  },
+  {
+    "id": 18806607032,
+    "name": "Morning Rock Climb",
+    "distance": "0",
+    "movingTime": "1:53:57",
+    "elapsedTime": "1:53:57",
+    "elevationGain": "0",
+    "startDate": "2026-06-06T09:19:25.000Z"
+  },
+  {
+    "id": 18779732849,
+    "name": "Morning Walk",
+    "distance": "1.78",
+    "movingTime": "18:47",
+    "elapsedTime": "20:22",
+    "elevationGain": "13",
+    "startDate": "2026-06-04T08:27:27.000Z"
+  },
+  {
+    "id": 18758869477,
+    "name": "Footy med Alexandros",
+    "distance": "8.00",
+    "movingTime": "2:30:00",
+    "elapsedTime": "2:30:00",
+    "elevationGain": "0",
+    "startDate": "2026-06-02T17:03:36.000Z"
+  },
+  {
+    "id": 18746232898,
+    "name": "Evening Weight Training",
+    "distance": "0",
+    "movingTime": "44:13",
+    "elapsedTime": "44:13",
+    "elevationGain": "0",
+    "startDate": "2026-06-01T20:27:07.000Z"
+  },
+  {
+    "id": 18730815479,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "47:15",
+    "elapsedTime": "47:15",
+    "elevationGain": "0",
+    "startDate": "2026-05-31T16:21:55.000Z"
+  },
+  {
+    "id": 18730815540,
+    "name": "Afternoon Walk",
+    "distance": "2.03",
+    "movingTime": "26:42",
+    "elapsedTime": "45:22",
+    "elevationGain": "12",
+    "startDate": "2026-05-30T15:00:30.000Z"
+  },
+  {
+    "id": 18730815446,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:32:36",
+    "elapsedTime": "1:32:36",
+    "elevationGain": "0",
+    "startDate": "2026-05-30T13:27:35.000Z"
+  },
+  {
+    "id": 18644693274,
+    "name": "Lunch Walk",
+    "distance": "6.40",
+    "movingTime": "1:58:55",
+    "elapsedTime": "2:32:33",
+    "elevationGain": "257",
+    "startDate": "2026-05-24T12:07:26.000Z"
+  },
+  {
+    "id": 18605067000,
+    "name": "Morning Run @ Firenze",
+    "distance": "6.95",
+    "movingTime": "49:05",
+    "elapsedTime": "1:00:55",
+    "elevationGain": "14",
+    "startDate": "2026-05-22T08:52:26.000Z"
+  },
+  {
+    "id": 18569237964,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:32:05",
+    "elapsedTime": "1:32:05",
+    "elevationGain": "0",
+    "startDate": "2026-05-19T15:44:19.000Z"
+  },
+  {
+    "id": 18543202783,
+    "name": "17. mai tur",
+    "distance": "5.01",
+    "movingTime": "1:12:38",
+    "elapsedTime": "3:42:31",
+    "elevationGain": "79",
+    "startDate": "2026-05-17T11:46:44.000Z"
+  },
+  {
+    "id": 18505645403,
+    "name": "Tempo Intervals med Taheera",
+    "distance": "7.44",
+    "movingTime": "47:33",
+    "elapsedTime": "48:10",
+    "elevationGain": "63",
+    "startDate": "2026-05-14T16:41:57.000Z"
+  },
+  {
+    "id": 18473131865,
+    "name": "Morning Walk",
+    "distance": "1.87",
+    "movingTime": "18:41",
+    "elapsedTime": "20:18",
+    "elevationGain": "12",
+    "startDate": "2026-05-12T08:33:15.000Z"
+  },
+  {
+    "id": 18466738119,
+    "name": "Evening Walk",
+    "distance": "2.96",
+    "movingTime": "30:09",
+    "elapsedTime": "48:01",
+    "elevationGain": "44",
+    "startDate": "2026-05-11T18:55:42.000Z"
+  },
+  {
+    "id": 18466008909,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "2:16:34",
+    "elapsedTime": "2:16:34",
+    "elevationGain": "0",
+    "startDate": "2026-05-11T16:35:54.000Z"
+  },
+  {
+    "id": 18442882745,
+    "name": "5k trial run",
+    "distance": "5.00",
+    "movingTime": "27:04",
+    "elapsedTime": "27:04",
+    "elevationGain": "6",
+    "startDate": "2026-05-09T21:00:36.000Z"
+  },
+  {
+    "id": 18426773598,
+    "name": "Recovery run med Julie",
+    "distance": "4.27",
+    "movingTime": "32:25",
+    "elapsedTime": "32:25",
+    "elevationGain": "13",
+    "startDate": "2026-05-08T17:56:34.000Z"
+  },
+  {
+    "id": 18414655740,
+    "name": "Evening Run",
+    "distance": "10.01",
+    "movingTime": "59:19",
+    "elapsedTime": "59:35",
+    "elevationGain": "23",
+    "startDate": "2026-05-07T18:09:39.000Z"
+  },
+  {
+    "id": 18386819398,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "39:16",
+    "elapsedTime": "39:16",
+    "elevationGain": "0",
+    "startDate": "2026-05-05T17:57:08.000Z"
+  },
+  {
+    "id": 18373333516,
+    "name": "Failed long run - for varmt…",
+    "distance": "4.02",
+    "movingTime": "23:31",
+    "elapsedTime": "23:35",
+    "elevationGain": "4",
+    "startDate": "2026-05-04T18:11:17.000Z"
+  },
+  {
+    "id": 18359792863,
+    "name": "Recovery run med Julie",
+    "distance": "5.00",
+    "movingTime": "37:04",
+    "elapsedTime": "37:19",
+    "elevationGain": "13",
+    "startDate": "2026-05-03T15:44:19.000Z"
+  },
+  {
+    "id": 18348203221,
+    "name": "5k tempo trial",
+    "distance": "5.00",
+    "movingTime": "28:25",
+    "elapsedTime": "28:25",
+    "elevationGain": "11",
+    "startDate": "2026-05-02T18:08:07.000Z"
+  },
+  {
+    "id": 18334524572,
+    "name": "Ez run med Julie",
+    "distance": "8.34",
+    "movingTime": "58:34",
+    "elapsedTime": "1:00:28",
+    "elevationGain": "11",
+    "startDate": "2026-05-01T17:25:13.000Z"
+  },
+  {
+    "id": 18319397583,
+    "name": "Fat Camp dag 2",
+    "distance": "4.01",
+    "movingTime": "24:35",
+    "elapsedTime": "24:35",
+    "elevationGain": "12",
+    "startDate": "2026-04-30T16:02:27.000Z"
+  },
+  {
+    "id": 18302736771,
+    "name": "Første rehabiliteringsøkt for gutt 32",
+    "distance": "3.01",
+    "movingTime": "18:06",
+    "elapsedTime": "20:58",
+    "elevationGain": "0",
+    "startDate": "2026-04-29T10:57:15.000Z"
+  },
+  {
+    "id": 18266338648,
+    "name": "Lunch Rock Climb",
+    "distance": "0",
+    "movingTime": "2:37:22",
+    "elapsedTime": "2:37:22",
+    "elevationGain": "0",
+    "startDate": "2026-04-26T12:55:09.000Z"
+  },
+  {
+    "id": 18242679161,
+    "name": "Evening Walk",
+    "distance": "2.06",
+    "movingTime": "18:17",
+    "elapsedTime": "29:24",
+    "elevationGain": "18",
+    "startDate": "2026-04-24T20:29:49.000Z"
+  },
+  {
+    "id": 18242401224,
+    "name": "Evening Rock Climb",
+    "distance": "0",
+    "movingTime": "1:44:54",
+    "elapsedTime": "1:44:54",
+    "elevationGain": "0",
+    "startDate": "2026-04-24T18:44:36.000Z"
+  },
+  {
+    "id": 18199702303,
+    "name": "Buldring i Bodø",
+    "distance": "0",
+    "movingTime": "1:36:06",
+    "elapsedTime": "1:36:06",
+    "elevationGain": "0",
+    "startDate": "2026-04-21T16:35:29.000Z"
+  },
+  {
+    "id": 18159720747,
+    "name": "Lunch Rock Climb",
+    "distance": "0",
+    "movingTime": "1:45:35",
+    "elapsedTime": "1:45:35",
+    "elevationGain": "0",
+    "startDate": "2026-04-18T12:08:32.000Z"
+  },
+  {
+    "id": 18134305234,
+    "name": "Afternoon Walk",
+    "distance": "2.58",
+    "movingTime": "27:12",
+    "elapsedTime": "53:35",
+    "elevationGain": "23",
+    "startDate": "2026-04-16T17:57:35.000Z"
+  },
+  {
+    "id": 18120035385,
+    "name": "Første 3 gule tatt på buldring!!!",
+    "distance": "0",
+    "movingTime": "2:08:16",
+    "elapsedTime": "2:08:16",
+    "elevationGain": "0",
+    "startDate": "2026-04-15T15:42:32.000Z"
+  },
+  {
+    "id": 18114630370,
+    "name": "Morning Walk",
+    "distance": "1.93",
+    "movingTime": "19:43",
+    "elapsedTime": "19:43",
+    "elevationGain": "8",
+    "startDate": "2026-04-15T08:42:28.000Z"
+  },
+  {
+    "id": 18110392904,
+    "name": "Night Walk",
+    "distance": "8.16",
+    "movingTime": "1:35:24",
+    "elapsedTime": "1:37:03",
+    "elevationGain": "131",
+    "startDate": "2026-04-14T21:34:51.000Z"
+  },
+  {
+    "id": 18105794483,
+    "name": "Afternoon Walk",
+    "distance": "1.90",
+    "movingTime": "18:16",
+    "elapsedTime": "18:16",
+    "elevationGain": "31",
+    "startDate": "2026-04-14T16:57:11.000Z"
+  },
+  {
+    "id": 18100614811,
+    "name": "Morning Walk",
+    "distance": "1.86",
+    "movingTime": "17:45",
+    "elapsedTime": "17:45",
+    "elevationGain": "10",
+    "startDate": "2026-04-14T08:36:46.000Z"
+  },
+  {
+    "id": 18093823978,
+    "name": "Evening Walk",
+    "distance": "2.00",
+    "movingTime": "26:39",
+    "elapsedTime": "29:46",
+    "elevationGain": "21",
+    "startDate": "2026-04-13T18:13:52.000Z"
+  },
+  {
+    "id": 18087793391,
+    "name": "Morning Walk",
+    "distance": "1.80",
+    "movingTime": "18:03",
+    "elapsedTime": "18:20",
+    "elevationGain": "11",
+    "startDate": "2026-04-13T08:37:10.000Z"
+  },
+  {
+    "id": 18069740345,
+    "name": "Evening Walk",
+    "distance": "3.25",
+    "movingTime": "42:30",
+    "elapsedTime": "48:01",
+    "elevationGain": "59",
+    "startDate": "2026-04-11T18:39:27.000Z"
+  },
+  {
+    "id": 18068602275,
+    "name": "Afternoon Walk",
+    "distance": "4.91",
+    "movingTime": "1:07:52",
+    "elapsedTime": "1:43:01",
+    "elevationGain": "48",
+    "startDate": "2026-04-11T16:13:51.000Z"
+  },
+  {
+    "id": 18065280743,
+    "name": "Lunch Rock Climb",
+    "distance": "0",
+    "movingTime": "1:31:45",
+    "elapsedTime": "1:31:45",
+    "elevationGain": "0",
+    "startDate": "2026-04-11T12:33:39.000Z"
+  },
+  {
+    "id": 18063931007,
+    "name": "Lunch Walk",
+    "distance": "1.62",
+    "movingTime": "20:14",
+    "elapsedTime": "43:36",
+    "elevationGain": "28",
+    "startDate": "2026-04-11T11:46:08.000Z"
+  },
+  {
+    "id": 18055150762,
+    "name": "Afternoon Walk",
+    "distance": "1.89",
+    "movingTime": "18:53",
+    "elapsedTime": "18:53",
+    "elevationGain": "36",
+    "startDate": "2026-04-10T17:29:29.000Z"
+  },
+  {
+    "id": 18050290012,
+    "name": "Morning Walk",
+    "distance": "2.00",
+    "movingTime": "22:40",
+    "elapsedTime": "39:28",
+    "elevationGain": "55",
+    "startDate": "2026-04-10T08:44:34.000Z"
+  },
+  {
+    "id": 18043491688,
+    "name": "Evening Walk",
+    "distance": "1.27",
+    "movingTime": "14:17",
+    "elapsedTime": "15:09",
+    "elevationGain": "13",
+    "startDate": "2026-04-09T18:49:40.000Z"
+  },
+  {
+    "id": 18043231087,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "51:56",
+    "elapsedTime": "51:56",
+    "elevationGain": "0",
+    "startDate": "2026-04-09T17:55:27.000Z"
+  },
+  {
+    "id": 18043231131,
+    "name": "Afternoon Walk",
+    "distance": "1.44",
+    "movingTime": "16:11",
+    "elapsedTime": "17:51",
+    "elevationGain": "28",
+    "startDate": "2026-04-09T16:50:58.000Z"
+  },
+  {
+    "id": 18041647122,
+    "name": "Afternoon Walk",
+    "distance": "1.85",
+    "movingTime": "19:17",
+    "elapsedTime": "19:17",
+    "elevationGain": "34",
+    "startDate": "2026-04-09T16:21:10.000Z"
+  },
+  {
+    "id": 18037082187,
+    "name": "Morning Walk",
+    "distance": "1.85",
+    "movingTime": "19:54",
+    "elapsedTime": "20:41",
+    "elevationGain": "10",
+    "startDate": "2026-04-09T08:42:57.000Z"
+  },
+  {
+    "id": 18023016559,
+    "name": "Morning Walk",
+    "distance": "2.00",
+    "movingTime": "23:58",
+    "elapsedTime": "27:30",
+    "elevationGain": "53",
+    "startDate": "2026-04-08T08:34:50.000Z"
+  },
+  {
+    "id": 18016320520,
+    "name": "Årets første mil 🚀🚀",
+    "distance": "10.00",
+    "movingTime": "1:01:26",
+    "elapsedTime": "1:06:58",
+    "elevationGain": "53",
+    "startDate": "2026-04-07T18:26:26.000Z"
+  },
+  {
+    "id": 17999187012,
+    "name": "Afternoon Walk",
+    "distance": "1.86",
+    "movingTime": "19:20",
+    "elapsedTime": "20:10",
+    "elevationGain": "9",
+    "startDate": "2026-04-06T14:14:25.000Z"
+  },
+  {
+    "id": 17998907068,
+    "name": "Første Autobelay økta på to år 😅",
+    "distance": "0",
+    "movingTime": "1:06:05",
+    "elapsedTime": "1:06:05",
+    "elevationGain": "0",
+    "startDate": "2026-04-06T13:07:57.000Z"
+  },
+  {
+    "id": 17997749600,
+    "name": "Lunch Walk",
+    "distance": "1.83",
+    "movingTime": "20:34",
+    "elapsedTime": "20:58",
+    "elevationGain": "50",
+    "startDate": "2026-04-06T12:37:52.000Z"
+  },
+  {
+    "id": 17972629174,
+    "name": "Første Skullerud Buldreøkt",
+    "distance": "0",
+    "movingTime": "1:44:36",
+    "elapsedTime": "1:44:36",
+    "elevationGain": "0",
+    "startDate": "2026-04-04T10:48:41.000Z"
+  },
+  {
+    "id": 17929668539,
+    "name": "Night Walk",
+    "distance": "1.40",
+    "movingTime": "17:17",
+    "elapsedTime": "17:17",
+    "elevationGain": "18",
+    "startDate": "2026-03-31T21:36:30.000Z"
+  },
+  {
+    "id": 17929500409,
+    "name": "Evening Rock Climb",
+    "distance": "0",
+    "movingTime": "1:27:32",
+    "elapsedTime": "1:27:32",
+    "elevationGain": "0",
+    "startDate": "2026-03-31T20:07:45.000Z"
+  },
+  {
+    "id": 17928411629,
+    "name": "Evening Walk",
+    "distance": "2.27",
+    "movingTime": "29:30",
+    "elapsedTime": "1:05:08",
+    "elevationGain": "41",
+    "startDate": "2026-03-31T18:53:06.000Z"
+  },
+  {
+    "id": 17913960782,
+    "name": "Årets 2. Løpeøkt 🚀🚀",
+    "distance": "4.01",
+    "movingTime": "23:39",
+    "elapsedTime": "24:01",
+    "elevationGain": "30",
+    "startDate": "2026-03-30T17:52:39.000Z"
+  },
+  {
+    "id": 17889135627,
+    "name": "Første løpetur på 6 måneder..",
+    "distance": "4.03",
+    "movingTime": "25:43",
+    "elapsedTime": "26:05",
+    "elevationGain": "38",
+    "startDate": "2026-03-28T14:42:52.000Z"
+  },
+  {
+    "id": 17867158580,
+    "name": "Lunch Rock Climb",
+    "distance": "0",
+    "movingTime": "1:58:09",
+    "elapsedTime": "1:58:09",
+    "elevationGain": "0",
+    "startDate": "2026-03-26T11:15:47.000Z"
+  },
+  {
+    "id": 17781314078,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:57:43",
+    "elapsedTime": "1:57:43",
+    "elevationGain": "0",
+    "startDate": "2026-03-19T16:06:15.000Z"
+  },
+  {
+    "id": 17771795576,
+    "name": "Evening Walk",
+    "distance": "3.23",
+    "movingTime": "43:46",
+    "elapsedTime": "1:26:50",
+    "elevationGain": "52",
+    "startDate": "2026-03-18T20:24:49.000Z"
+  },
+  {
+    "id": 17767643218,
+    "name": "Afternoon Walk",
+    "distance": "1.89",
+    "movingTime": "22:59",
+    "elapsedTime": "28:24",
+    "elevationGain": "33",
+    "startDate": "2026-03-18T15:47:58.000Z"
+  },
+  {
+    "id": 17735956903,
+    "name": "Evening Rock Climb",
+    "distance": "0",
+    "movingTime": "1:38:19",
+    "elapsedTime": "1:38:19",
+    "elevationGain": "0",
+    "startDate": "2026-03-15T19:08:57.000Z"
+  },
+  {
+    "id": 17735109650,
+    "name": "Evening Walk",
+    "distance": "1.71",
+    "movingTime": "18:04",
+    "elapsedTime": "20:12",
+    "elevationGain": "36",
+    "startDate": "2026-03-15T18:48:15.000Z"
+  },
+  {
+    "id": 17701215719,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:30:27",
+    "elapsedTime": "1:30:27",
+    "elevationGain": "0",
+    "startDate": "2026-03-12T16:16:17.000Z"
+  },
+  {
+    "id": 17648918148,
+    "name": "Afternoon Walk",
+    "distance": "2.01",
+    "movingTime": "22:29",
+    "elapsedTime": "28:46",
+    "elevationGain": "28",
+    "startDate": "2026-03-08T13:42:57.000Z"
+  },
+  {
+    "id": 17648236237,
+    "name": "Lunch Rock Climb",
+    "distance": "0",
+    "movingTime": "1:34:27",
+    "elapsedTime": "1:34:27",
+    "elevationGain": "0",
+    "startDate": "2026-03-08T12:04:53.000Z"
+  },
+  {
+    "id": 17631761867,
+    "name": "Evening Rock Climb",
+    "distance": "0",
+    "movingTime": "1:22:00",
+    "elapsedTime": "1:22:00",
+    "elevationGain": "0",
+    "startDate": "2026-03-06T19:02:18.000Z"
+  },
+  {
+    "id": 17577315349,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:43:18",
+    "elapsedTime": "1:43:18",
+    "elevationGain": "0",
+    "startDate": "2026-03-02T15:39:21.000Z"
+  },
+  {
+    "id": 17558372850,
+    "name": "Afternoon Workout",
+    "distance": "0",
+    "movingTime": "2:34:24",
+    "elapsedTime": "2:34:24",
+    "elevationGain": "0",
+    "startDate": "2026-02-28T16:04:15.000Z"
+  },
+  {
+    "id": 17544154011,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "2:04:32",
+    "elapsedTime": "2:04:32",
+    "elevationGain": "0",
+    "startDate": "2026-02-27T16:20:26.000Z"
+  },
+  {
+    "id": 17544148213,
+    "name": "Evening Rock Climb",
+    "distance": "0",
+    "movingTime": "1:40:28",
+    "elapsedTime": "1:40:28",
+    "elevationGain": "0",
+    "startDate": "2026-02-25T19:07:02.000Z"
+  },
+  {
+    "id": 17544148203,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "59:54",
+    "elapsedTime": "59:54",
+    "elevationGain": "0",
+    "startDate": "2026-02-19T16:56:10.000Z"
+  },
+  {
+    "id": 17544143064,
+    "name": "Evening Walk",
+    "distance": "1.51",
+    "movingTime": "17:33",
+    "elapsedTime": "1:08:24",
+    "elevationGain": "7",
+    "startDate": "2026-02-17T19:37:43.000Z"
+  },
+  {
+    "id": 17418175600,
+    "name": "Evening Walk",
+    "distance": "1.57",
+    "movingTime": "19:07",
+    "elapsedTime": "19:31",
+    "elevationGain": "17",
+    "startDate": "2026-02-16T18:18:20.000Z"
+  },
+  {
+    "id": 17417952587,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:32:38",
+    "elapsedTime": "1:32:38",
+    "elevationGain": "0",
+    "startDate": "2026-02-16T16:45:28.000Z"
+  },
+  {
+    "id": 17407570025,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "50:06",
+    "elapsedTime": "50:06",
+    "elevationGain": "0",
+    "startDate": "2026-02-15T16:03:37.000Z"
+  },
+  {
+    "id": 17376438823,
+    "name": "Evening Walk",
+    "distance": "1.76",
+    "movingTime": "21:58",
+    "elapsedTime": "23:17",
+    "elevationGain": "23",
+    "startDate": "2026-02-12T18:05:00.000Z"
+  },
+  {
+    "id": 17376438625,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:21:16",
+    "elapsedTime": "1:21:16",
+    "elevationGain": "0",
+    "startDate": "2026-02-12T16:40:35.000Z"
+  },
+  {
+    "id": 17376438855,
+    "name": "Afternoon Walk",
+    "distance": "1.36",
+    "movingTime": "15:14",
+    "elapsedTime": "16:22",
+    "elevationGain": "24",
+    "startDate": "2026-02-12T16:18:52.000Z"
+  },
+  {
+    "id": 17376438638,
+    "name": "Evening Walk",
+    "distance": "1.35",
+    "movingTime": "14:12",
+    "elapsedTime": "23:00",
+    "elevationGain": "20",
+    "startDate": "2026-02-11T18:06:27.000Z"
+  },
+  {
+    "id": 17376438669,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:33:29",
+    "elapsedTime": "1:33:29",
+    "elevationGain": "0",
+    "startDate": "2026-02-11T16:32:15.000Z"
+  },
+  {
+    "id": 17317084547,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:16:57",
+    "elapsedTime": "1:16:57",
+    "elevationGain": "0",
+    "startDate": "2026-02-07T13:08:39.000Z"
+  },
+  {
+    "id": 17305359912,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:41:05",
+    "elapsedTime": "1:41:05",
+    "elevationGain": "0",
+    "startDate": "2026-02-05T16:29:56.000Z"
+  },
+  {
+    "id": 17305359943,
+    "name": "Afternoon Walk",
+    "distance": "1.24",
+    "movingTime": "12:56",
+    "elapsedTime": "13:20",
+    "elevationGain": "15",
+    "startDate": "2026-02-01T16:34:15.000Z"
+  },
+  {
+    "id": 17305359902,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:27:32",
+    "elapsedTime": "1:27:32",
+    "elevationGain": "0",
+    "startDate": "2026-02-01T15:06:08.000Z"
+  },
+  {
+    "id": 17305359903,
+    "name": "Afternoon Walk",
+    "distance": "1.31",
+    "movingTime": "13:52",
+    "elapsedTime": "13:52",
+    "elevationGain": "25",
+    "startDate": "2026-02-01T14:38:22.000Z"
+  },
+  {
+    "id": 17187885186,
+    "name": "Evening Rock Climb",
+    "distance": "0",
+    "movingTime": "2:34:00",
+    "elapsedTime": "2:34:00",
+    "elevationGain": "0",
+    "startDate": "2026-01-26T18:36:51.000Z"
+  },
+  {
+    "id": 17187884958,
+    "name": "Evening Weight Training",
+    "distance": "0",
+    "movingTime": "30:20",
+    "elapsedTime": "30:20",
+    "elevationGain": "0",
+    "startDate": "2026-01-25T18:46:30.000Z"
+  },
+  {
+    "id": 17160113561,
+    "name": "Lunch Rock Climb",
+    "distance": "0",
+    "movingTime": "1:28:51",
+    "elapsedTime": "1:28:51",
+    "elevationGain": "0",
+    "startDate": "2026-01-24T12:05:28.000Z"
+  },
+  {
+    "id": 17158875362,
+    "name": "Lunch Walk",
+    "distance": "1.37",
+    "movingTime": "15:02",
+    "elapsedTime": "15:02",
+    "elevationGain": "26",
+    "startDate": "2026-01-24T11:45:11.000Z"
+  },
+  {
+    "id": 17152866345,
+    "name": "Morning Walk",
+    "distance": "1.16",
+    "movingTime": "13:13",
+    "elapsedTime": "13:13",
+    "elevationGain": "44",
+    "startDate": "2026-01-22T09:34:09.000Z"
+  },
+  {
+    "id": 17152866183,
+    "name": "Evening Walk",
+    "distance": "1.08",
+    "movingTime": "10:43",
+    "elapsedTime": "13:57",
+    "elevationGain": "16",
+    "startDate": "2026-01-21T18:13:07.000Z"
+  },
+  {
+    "id": 17118654923,
+    "name": "Evening Walk",
+    "distance": "2.10",
+    "movingTime": "25:19",
+    "elapsedTime": "40:29",
+    "elevationGain": "33",
+    "startDate": "2026-01-20T19:01:44.000Z"
+  },
+  {
+    "id": 17118073658,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:51:56",
+    "elapsedTime": "1:51:56",
+    "elevationGain": "0",
+    "startDate": "2026-01-20T17:04:26.000Z"
+  },
+  {
+    "id": 17092423540,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "30:38",
+    "elapsedTime": "30:38",
+    "elevationGain": "0",
+    "startDate": "2026-01-18T13:14:02.000Z"
+  },
+  {
+    "id": 17035719170,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "15:29",
+    "elapsedTime": "15:29",
+    "elevationGain": "0",
+    "startDate": "2026-01-13T16:27:30.000Z"
+  },
+  {
+    "id": 17031355793,
+    "name": "Morning Walk",
+    "distance": "1.87",
+    "movingTime": "19:53",
+    "elapsedTime": "23:30",
+    "elevationGain": "15",
+    "startDate": "2026-01-13T08:21:53.000Z"
+  },
+  {
+    "id": 17019708565,
+    "name": "Morning Walk",
+    "distance": "1.79",
+    "movingTime": "18:23",
+    "elapsedTime": "18:44",
+    "elevationGain": "9",
+    "startDate": "2026-01-12T08:07:51.000Z"
+  },
+  {
+    "id": 17010450159,
+    "name": "Lunch Walk",
+    "distance": "4.11",
+    "movingTime": "35:27",
+    "elapsedTime": "48:11",
+    "elevationGain": "23",
+    "startDate": "2026-01-11T11:36:35.000Z"
+  },
+  {
+    "id": 17007838028,
+    "name": "Night Walk",
+    "distance": "1.72",
+    "movingTime": "19:44",
+    "elapsedTime": "19:44",
+    "elevationGain": "24",
+    "startDate": "2026-01-11T00:37:12.000Z"
+  },
+  {
+    "id": 17007838105,
+    "name": "Morning Walk",
+    "distance": "2.21",
+    "movingTime": "24:20",
+    "elapsedTime": "26:42",
+    "elevationGain": "45",
+    "startDate": "2026-01-09T08:34:38.000Z"
+  },
+  {
+    "id": 17007838094,
+    "name": "Evening Walk",
+    "distance": "1.81",
+    "movingTime": "21:20",
+    "elapsedTime": "22:08",
+    "elevationGain": "44",
+    "startDate": "2026-01-08T20:03:13.000Z"
+  },
+  {
+    "id": 17007838098,
+    "name": "Morning Walk",
+    "distance": "1.99",
+    "movingTime": "20:42",
+    "elapsedTime": "20:42",
+    "elevationGain": "14",
+    "startDate": "2026-01-08T08:34:12.000Z"
+  },
+  {
+    "id": 17007838097,
+    "name": "Night Walk",
+    "distance": "2.00",
+    "movingTime": "23:04",
+    "elapsedTime": "23:04",
+    "elevationGain": "38",
+    "startDate": "2026-01-08T00:06:19.000Z"
+  },
+  {
+    "id": 16952934706,
+    "name": "Morning Walk",
+    "distance": "1.93",
+    "movingTime": "20:11",
+    "elapsedTime": "20:11",
+    "elevationGain": "12",
+    "startDate": "2026-01-06T08:00:47.000Z"
+  },
+  {
+    "id": 16948753973,
+    "name": "Evening Walk",
+    "distance": "1.98",
+    "movingTime": "20:39",
+    "elapsedTime": "26:07",
+    "elevationGain": "40",
+    "startDate": "2026-01-05T20:46:33.000Z"
+  },
+  {
+    "id": 16941971871,
+    "name": "Morning Walk",
+    "distance": "1.85",
+    "movingTime": "19:29",
+    "elapsedTime": "19:29",
+    "elevationGain": "16",
+    "startDate": "2026-01-05T08:06:05.000Z"
+  },
+  {
+    "id": 16936062820,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "1:05:38",
+    "elapsedTime": "1:05:38",
+    "elevationGain": "0",
+    "startDate": "2026-01-04T15:20:13.000Z"
+  },
+  {
+    "id": 16915878122,
+    "name": "Afternoon Walk",
+    "distance": "3.47",
+    "movingTime": "39:21",
+    "elapsedTime": "59:35",
+    "elevationGain": "76",
+    "startDate": "2026-01-02T16:41:52.000Z"
+  },
+  {
+    "id": 16905826417,
+    "name": "Evening Stair-Stepper",
+    "distance": "0",
+    "movingTime": "44:44",
+    "elapsedTime": "44:44",
+    "elevationGain": "0",
+    "startDate": "2026-01-01T19:17:05.000Z"
+  },
+  {
+    "id": 16883542576,
+    "name": "Lunch Rock Climb",
+    "distance": "0",
+    "movingTime": "1:17:01",
+    "elapsedTime": "1:17:01",
+    "elevationGain": "0",
+    "startDate": "2025-12-30T12:48:52.000Z"
+  },
+  {
+    "id": 16876985121,
+    "name": "Evening Weight Training",
+    "distance": "0",
+    "movingTime": "1:23:18",
+    "elapsedTime": "1:23:18",
+    "elevationGain": "0",
+    "startDate": "2025-12-29T18:18:06.000Z"
+  },
+  {
+    "id": 16846155489,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "1:22:58",
+    "elapsedTime": "1:22:58",
+    "elevationGain": "0",
+    "startDate": "2025-12-26T15:29:19.000Z"
+  },
+  {
+    "id": 16838877312,
+    "name": "Evening Weight Training",
+    "distance": "0",
+    "movingTime": "1:04:31",
+    "elapsedTime": "1:04:31",
+    "elevationGain": "0",
+    "startDate": "2025-12-25T18:34:07.000Z"
+  },
+  {
+    "id": 16838876962,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:29:09",
+    "elapsedTime": "1:29:09",
+    "elevationGain": "0",
+    "startDate": "2025-12-22T14:14:11.000Z"
+  },
+  {
+    "id": 16795302859,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "59:10",
+    "elapsedTime": "59:10",
+    "elevationGain": "0",
+    "startDate": "2025-12-20T16:54:01.000Z"
+  },
+  {
+    "id": 16795298819,
+    "name": "Evening Weight Training",
+    "distance": "0",
+    "movingTime": "58:59",
+    "elapsedTime": "58:59",
+    "elevationGain": "0",
+    "startDate": "2025-12-19T19:59:23.000Z"
+  },
+  {
+    "id": 16769337286,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "1:04:26",
+    "elapsedTime": "1:04:26",
+    "elevationGain": "0",
+    "startDate": "2025-12-17T17:08:03.000Z"
+  },
+  {
+    "id": 16760799824,
+    "name": "Evening Weight Training",
+    "distance": "0",
+    "movingTime": "37:47",
+    "elapsedTime": "37:47",
+    "elevationGain": "0",
+    "startDate": "2025-12-16T19:38:45.000Z"
+  },
+  {
+    "id": 16755081493,
+    "name": "Night Weight Training",
+    "distance": "0",
+    "movingTime": "44:47",
+    "elapsedTime": "44:47",
+    "elevationGain": "0",
+    "startDate": "2025-12-15T21:20:39.000Z"
+  },
+  {
+    "id": 16741595037,
+    "name": "Afternoon Walk",
+    "distance": "1.44",
+    "movingTime": "17:24",
+    "elapsedTime": "20:59",
+    "elevationGain": "26",
+    "startDate": "2025-12-14T15:52:12.000Z"
+  },
+  {
+    "id": 16741383549,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:18:01",
+    "elapsedTime": "1:18:01",
+    "elevationGain": "0",
+    "startDate": "2025-12-14T14:33:44.000Z"
+  },
+  {
+    "id": 16740590813,
+    "name": "Afternoon Walk",
+    "distance": "1.37",
+    "movingTime": "16:35",
+    "elapsedTime": "23:10",
+    "elevationGain": "24",
+    "startDate": "2025-12-14T14:05:42.000Z"
+  },
+  {
+    "id": 16740371294,
+    "name": "Morning Weight Training",
+    "distance": "0",
+    "movingTime": "42:31",
+    "elapsedTime": "42:31",
+    "elevationGain": "0",
+    "startDate": "2025-12-13T09:42:39.000Z"
+  },
+  {
+    "id": 16740371128,
+    "name": "Night Weight Training",
+    "distance": "0",
+    "movingTime": "37:02",
+    "elapsedTime": "37:02",
+    "elevationGain": "0",
+    "startDate": "2025-12-09T22:17:50.000Z"
+  },
+  {
+    "id": 16677373964,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "35:52",
+    "elapsedTime": "35:52",
+    "elevationGain": "0",
+    "startDate": "2025-12-07T16:51:00.000Z"
+  },
+  {
+    "id": 16668941429,
+    "name": "Evening Weight Training",
+    "distance": "0",
+    "movingTime": "48:52",
+    "elapsedTime": "48:52",
+    "elevationGain": "0",
+    "startDate": "2025-12-06T19:45:59.000Z"
+  },
+  {
+    "id": 16621354596,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "2:26:40",
+    "elapsedTime": "2:26:40",
+    "elevationGain": "0",
+    "startDate": "2025-12-01T17:38:24.000Z"
+  },
+  {
+    "id": 16610422584,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "1:02:46",
+    "elapsedTime": "1:02:46",
+    "elevationGain": "0",
+    "startDate": "2025-11-30T13:42:53.000Z"
+  },
+  {
+    "id": 16597976510,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:33:22",
+    "elapsedTime": "1:33:22",
+    "elevationGain": "0",
+    "startDate": "2025-11-28T15:44:16.000Z"
+  },
+  {
+    "id": 16574359640,
+    "name": "Evening Run",
+    "distance": "1.47",
+    "movingTime": "10:02",
+    "elapsedTime": "11:18",
+    "elevationGain": "17",
+    "startDate": "2025-11-26T18:40:28.000Z"
+  },
+  {
+    "id": 16574226566,
+    "name": "Evening Run",
+    "distance": "2.43",
+    "movingTime": "12:14",
+    "elapsedTime": "19:26",
+    "elevationGain": "6",
+    "startDate": "2025-11-26T18:19:19.000Z"
+  },
+  {
+    "id": 16574017833,
+    "name": "Evening Run",
+    "distance": "1.56",
+    "movingTime": "10:08",
+    "elapsedTime": "10:23",
+    "elevationGain": "0",
+    "startDate": "2025-11-26T18:07:11.000Z"
+  },
+  {
+    "id": 16573918322,
+    "name": "Afternoon Run",
+    "distance": "1.14",
+    "movingTime": "6:49",
+    "elapsedTime": "7:31",
+    "elevationGain": "0",
+    "startDate": "2025-11-26T17:58:06.000Z"
+  },
+  {
+    "id": 16565085156,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "30:08",
+    "elapsedTime": "30:08",
+    "elevationGain": "0",
+    "startDate": "2025-11-25T16:02:34.000Z"
+  },
+  {
+    "id": 16546608562,
+    "name": "Evening Rock Climb",
+    "distance": "0",
+    "movingTime": "1:38:27",
+    "elapsedTime": "1:38:27",
+    "elevationGain": "0",
+    "startDate": "2025-11-23T18:09:02.000Z"
+  },
+  {
+    "id": 16545802016,
+    "name": "Afternoon Walk",
+    "distance": "1.28",
+    "movingTime": "16:30",
+    "elapsedTime": "18:24",
+    "elevationGain": "42",
+    "startDate": "2025-11-23T17:46:12.000Z"
+  },
+  {
+    "id": 16530032679,
+    "name": "Evening Walk",
+    "distance": "4.69",
+    "movingTime": "1:02:54",
+    "elapsedTime": "1:25:50",
+    "elevationGain": "52",
+    "startDate": "2025-11-21T19:25:43.000Z"
+  },
+  {
+    "id": 16530032658,
+    "name": "Afternoon Walk",
+    "distance": "1.60",
+    "movingTime": "21:00",
+    "elapsedTime": "24:06",
+    "elevationGain": "10",
+    "startDate": "2025-11-21T17:09:16.000Z"
+  },
+  {
+    "id": 16530032576,
+    "name": "Afternoon Walk",
+    "distance": "2.59",
+    "movingTime": "28:49",
+    "elapsedTime": "30:17",
+    "elevationGain": "11",
+    "startDate": "2025-11-21T15:09:28.000Z"
+  },
+  {
+    "id": 16530032591,
+    "name": "Afternoon Walk",
+    "distance": "2.23",
+    "movingTime": "28:06",
+    "elapsedTime": "28:43",
+    "elevationGain": "24",
+    "startDate": "2025-11-20T16:56:02.000Z"
+  },
+  {
+    "id": 16530031237,
+    "name": "Night Run",
+    "distance": "3.72",
+    "movingTime": "31:11",
+    "elapsedTime": "31:53",
+    "elevationGain": "0",
+    "startDate": "2025-11-19T21:57:12.000Z"
+  },
+  {
+    "id": 16498321974,
+    "name": "Liten sen løpeøkt",
+    "distance": "0",
+    "movingTime": "20:52",
+    "elapsedTime": "20:52",
+    "elevationGain": "0",
+    "startDate": "2025-11-18T21:43:50.000Z"
+  },
+  {
+    "id": 16485632465,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:41:24",
+    "elapsedTime": "1:41:24",
+    "elevationGain": "0",
+    "startDate": "2025-11-17T15:10:05.000Z"
+  },
+  {
+    "id": 16484809858,
+    "name": "Afternoon Run",
+    "distance": "1.26",
+    "movingTime": "10:48",
+    "elapsedTime": "11:03",
+    "elevationGain": "29",
+    "startDate": "2025-11-17T14:52:40.000Z"
+  },
+  {
+    "id": 16478785755,
+    "name": "Evening Walk",
+    "distance": "3.98",
+    "movingTime": "48:21",
+    "elapsedTime": "58:22",
+    "elevationGain": "74",
+    "startDate": "2025-11-16T18:42:22.000Z"
+  },
+  {
+    "id": 16477595064,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "40:10",
+    "elapsedTime": "40:10",
+    "elevationGain": "0",
+    "startDate": "2025-11-16T16:27:23.000Z"
+  },
+  {
+    "id": 16477593870,
+    "name": "Evening Rock Climb",
+    "distance": "0",
+    "movingTime": "1:49:52",
+    "elapsedTime": "1:49:52",
+    "elevationGain": "0",
+    "startDate": "2025-11-13T18:55:08.000Z"
+  },
+  {
+    "id": 16477587800,
+    "name": "Evening Rock Climb",
+    "distance": "0",
+    "movingTime": "1:39:50",
+    "elapsedTime": "1:39:50",
+    "elevationGain": "0",
+    "startDate": "2025-11-10T20:10:15.000Z"
+  },
+  {
+    "id": 16477587894,
+    "name": "Evening Walk",
+    "distance": "1.20",
+    "movingTime": "13:29",
+    "elapsedTime": "13:29",
+    "elevationGain": "35",
+    "startDate": "2025-11-10T19:50:30.000Z"
+  },
+  {
+    "id": 16381112088,
+    "name": "Evening Rock Climb",
+    "distance": "0",
+    "movingTime": "24:35",
+    "elapsedTime": "24:35",
+    "elevationGain": "0",
+    "startDate": "2025-11-06T20:15:26.000Z"
+  },
+  {
+    "id": 16376869987,
+    "name": "Evening Walk",
+    "distance": "1.35",
+    "movingTime": "15:02",
+    "elapsedTime": "20:26",
+    "elevationGain": "13",
+    "startDate": "2025-11-06T19:49:56.000Z"
+  },
+  {
+    "id": 16375890426,
+    "name": "Afternoon Walk",
+    "distance": "3.02",
+    "movingTime": "39:53",
+    "elapsedTime": "1:44:41",
+    "elevationGain": "20",
+    "startDate": "2025-11-06T16:49:23.000Z"
+  },
+  {
+    "id": 16364927138,
+    "name": "Afternoon Walk",
+    "distance": "1.15",
+    "movingTime": "13:55",
+    "elapsedTime": "14:42",
+    "elevationGain": "0",
+    "startDate": "2025-11-05T17:25:24.000Z"
+  },
+  {
+    "id": 16364404025,
+    "name": "Afternoon Walk",
+    "distance": "1.39",
+    "movingTime": "15:36",
+    "elapsedTime": "15:36",
+    "elevationGain": "39",
+    "startDate": "2025-11-05T16:32:39.000Z"
+  },
+  {
+    "id": 16364249309,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "37:32",
+    "elapsedTime": "37:32",
+    "elevationGain": "0",
+    "startDate": "2025-11-05T15:54:32.000Z"
+  },
+  {
+    "id": 16335877469,
+    "name": "Lunch Rock Climb",
+    "distance": "0",
+    "movingTime": "51:09",
+    "elapsedTime": "51:09",
+    "elevationGain": "0",
+    "startDate": "2025-11-02T12:43:00.000Z"
+  },
+  {
+    "id": 16320435444,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "2:18:14",
+    "elapsedTime": "2:18:14",
+    "elevationGain": "0",
+    "startDate": "2025-10-31T17:23:07.000Z"
+  },
+  {
+    "id": 16320435292,
+    "name": "Afternoon Walk",
+    "distance": "1.30",
+    "movingTime": "13:59",
+    "elapsedTime": "13:59",
+    "elevationGain": "23",
+    "startDate": "2025-10-28T17:14:05.000Z"
+  },
+  {
+    "id": 16320435273,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:43:53",
+    "elapsedTime": "1:43:53",
+    "elevationGain": "0",
+    "startDate": "2025-10-28T15:26:07.000Z"
+  },
+  {
+    "id": 16320435275,
+    "name": "Afternoon Walk",
+    "distance": "1.32",
+    "movingTime": "15:07",
+    "elapsedTime": "17:12",
+    "elevationGain": "32",
+    "startDate": "2025-10-28T14:59:36.000Z"
+  },
+  {
+    "id": 16268643794,
+    "name": "Morning Walk",
+    "distance": "1.90",
+    "movingTime": "17:33",
+    "elapsedTime": "18:20",
+    "elevationGain": "8",
+    "startDate": "2025-10-27T08:14:02.000Z"
+  },
+  {
+    "id": 16252272762,
+    "name": "Afternoon Walk",
+    "distance": "2.30",
+    "movingTime": "23:05",
+    "elapsedTime": "35:38",
+    "elevationGain": "26",
+    "startDate": "2025-10-25T15:56:26.000Z"
+  },
+  {
+    "id": 16251755866,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:38:39",
+    "elapsedTime": "1:38:39",
+    "elevationGain": "0",
+    "startDate": "2025-10-25T14:07:22.000Z"
+  },
+  {
+    "id": 16250690661,
+    "name": "Afternoon Walk",
+    "distance": "1.35",
+    "movingTime": "15:59",
+    "elapsedTime": "16:24",
+    "elevationGain": "27",
+    "startDate": "2025-10-25T13:44:06.000Z"
+  },
+  {
+    "id": 16250545394,
+    "name": "Afternoon Walk",
+    "distance": "1.40",
+    "movingTime": "16:05",
+    "elapsedTime": "26:06",
+    "elevationGain": "21",
+    "startDate": "2025-10-23T17:09:18.000Z"
+  },
+  {
+    "id": 16250545372,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:41:04",
+    "elapsedTime": "1:41:04",
+    "elevationGain": "0",
+    "startDate": "2025-10-23T15:27:20.000Z"
+  },
+  {
+    "id": 16250539837,
+    "name": "Afternoon Walk",
+    "distance": "1.23",
+    "movingTime": "15:12",
+    "elapsedTime": "16:23",
+    "elevationGain": "24",
+    "startDate": "2025-10-23T15:05:12.000Z"
+  },
+  {
+    "id": 16250539582,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "47:28",
+    "elapsedTime": "47:28",
+    "elevationGain": "0",
+    "startDate": "2025-10-19T13:54:41.000Z"
+  },
+  {
+    "id": 16154517568,
+    "name": "Evening Rock Climb",
+    "distance": "0",
+    "movingTime": "1:22:42",
+    "elapsedTime": "1:22:42",
+    "elevationGain": "0",
+    "startDate": "2025-10-15T18:40:52.000Z"
+  },
+  {
+    "id": 16154517591,
+    "name": "Evening Walk",
+    "distance": "1.18",
+    "movingTime": "13:11",
+    "elapsedTime": "19:12",
+    "elevationGain": "18",
+    "startDate": "2025-10-15T18:10:07.000Z"
+  },
+  {
+    "id": 16154517409,
+    "name": "Morning Walk",
+    "distance": "1.77",
+    "movingTime": "17:01",
+    "elapsedTime": "17:01",
+    "elevationGain": "9",
+    "startDate": "2025-10-15T07:58:39.000Z"
+  },
+  {
+    "id": 16154517586,
+    "name": "Evening Walk",
+    "distance": "2.60",
+    "movingTime": "31:35",
+    "elapsedTime": "32:25",
+    "elevationGain": "44",
+    "startDate": "2025-10-14T18:36:26.000Z"
+  },
+  {
+    "id": 16138399406,
+    "name": "Afternoon Walk",
+    "distance": "2.14",
+    "movingTime": "21:58",
+    "elapsedTime": "23:08",
+    "elevationGain": "28",
+    "startDate": "2025-10-14T16:25:39.000Z"
+  },
+  {
+    "id": 16134250785,
+    "name": "Morning Walk",
+    "distance": "1.79",
+    "movingTime": "18:23",
+    "elapsedTime": "18:23",
+    "elevationGain": "8",
+    "startDate": "2025-10-14T08:04:20.000Z"
+  },
+  {
+    "id": 16117865954,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "31:01",
+    "elapsedTime": "31:01",
+    "elevationGain": "0",
+    "startDate": "2025-10-12T15:35:37.000Z"
+  },
+  {
+    "id": 16110225856,
+    "name": "Night Walk",
+    "distance": "3.52",
+    "movingTime": "50:39",
+    "elapsedTime": "1:50:58",
+    "elevationGain": "17",
+    "startDate": "2025-10-11T21:33:16.000Z"
+  },
+  {
+    "id": 16107644362,
+    "name": "Morning Walk",
+    "distance": "2.47",
+    "movingTime": "30:24",
+    "elapsedTime": "35:53",
+    "elevationGain": "24",
+    "startDate": "2025-10-11T08:48:29.000Z"
+  },
+  {
+    "id": 16102005251,
+    "name": "Evening Workout",
+    "distance": "0",
+    "movingTime": "4:17:22",
+    "elapsedTime": "4:17:22",
+    "elevationGain": "0",
+    "startDate": "2025-10-10T20:39:37.000Z"
+  },
+  {
+    "id": 16097827422,
+    "name": "Evening Run",
+    "distance": "8.52",
+    "movingTime": "1:02:27",
+    "elapsedTime": "1:02:31",
+    "elevationGain": "28",
+    "startDate": "2025-10-10T18:27:20.000Z"
+  },
+  {
+    "id": 16087323600,
+    "name": "Afternoon Ride",
+    "distance": "12.87",
+    "movingTime": "53:52",
+    "elapsedTime": "2:23:40",
+    "elevationGain": "64",
+    "startDate": "2025-10-09T16:28:21.000Z"
+  },
+  {
+    "id": 16085547363,
+    "name": "Afternoon Ride",
+    "distance": "10.35",
+    "movingTime": "48:20",
+    "elapsedTime": "1:07:02",
+    "elevationGain": "25",
+    "startDate": "2025-10-09T13:10:05.000Z"
+  },
+  {
+    "id": 16085547368,
+    "name": "Evening Walk",
+    "distance": "5.26",
+    "movingTime": "1:13:07",
+    "elapsedTime": "2:03:02",
+    "elevationGain": "28",
+    "startDate": "2025-10-08T18:31:33.000Z"
+  },
+  {
+    "id": 16085547313,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "38:38",
+    "elapsedTime": "38:38",
+    "elevationGain": "0",
+    "startDate": "2025-10-08T16:05:57.000Z"
+  },
+  {
+    "id": 16085542891,
+    "name": "Afternoon Walk",
+    "distance": "1.37",
+    "movingTime": "19:19",
+    "elapsedTime": "1:13:40",
+    "elevationGain": "8",
+    "startDate": "2025-10-07T17:42:33.000Z"
+  },
+  {
+    "id": 16085543011,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "34:53",
+    "elapsedTime": "34:53",
+    "elevationGain": "0",
+    "startDate": "2025-10-07T16:00:26.000Z"
+  },
+  {
+    "id": 16045587478,
+    "name": "Evening Walk",
+    "distance": "1.26",
+    "movingTime": "15:58",
+    "elapsedTime": "16:48",
+    "elevationGain": "15",
+    "startDate": "2025-10-05T20:57:58.000Z"
+  },
+  {
+    "id": 16045422968,
+    "name": "Evening Rock Climb",
+    "distance": "0",
+    "movingTime": "1:13:30",
+    "elapsedTime": "1:13:30",
+    "elevationGain": "0",
+    "startDate": "2025-10-05T19:37:40.000Z"
+  },
+  {
+    "id": 16045422997,
+    "name": "Evening Walk",
+    "distance": "1.52",
+    "movingTime": "16:19",
+    "elapsedTime": "18:30",
+    "elevationGain": "25",
+    "startDate": "2025-10-05T19:17:02.000Z"
+  },
+  {
+    "id": 16041561785,
+    "name": "Afternoon Walk",
+    "distance": "2.00",
+    "movingTime": "24:24",
+    "elapsedTime": "24:24",
+    "elevationGain": "6",
+    "startDate": "2025-10-05T14:39:00.000Z"
+  },
+  {
+    "id": 16040067975,
+    "name": "Lunch Walk",
+    "distance": "1.95",
+    "movingTime": "22:40",
+    "elapsedTime": "22:40",
+    "elevationGain": "46",
+    "startDate": "2025-10-05T12:40:53.000Z"
+  },
+  {
+    "id": 16031188500,
+    "name": "Afternoon Walk",
+    "distance": "3.98",
+    "movingTime": "58:34",
+    "elapsedTime": "1:55:00",
+    "elevationGain": "58",
+    "startDate": "2025-10-04T14:34:29.000Z"
+  },
+  {
+    "id": 16017073903,
+    "name": "Morning Walk",
+    "distance": "1.81",
+    "movingTime": "20:04",
+    "elapsedTime": "20:04",
+    "elevationGain": "12",
+    "startDate": "2025-10-03T08:18:06.000Z"
+  },
+  {
+    "id": 15988459790,
+    "name": "Evening Walk",
+    "distance": "1.77",
+    "movingTime": "20:23",
+    "elapsedTime": "20:23",
+    "elevationGain": "25",
+    "startDate": "2025-09-30T18:07:07.000Z"
+  },
+  {
+    "id": 15983108640,
+    "name": "Morning Walk",
+    "distance": "1.81",
+    "movingTime": "18:17",
+    "elapsedTime": "18:59",
+    "elevationGain": "12",
+    "startDate": "2025-09-30T07:58:39.000Z"
+  },
+  {
+    "id": 15976474693,
+    "name": "Afternoon Walk",
+    "distance": "2.63",
+    "movingTime": "35:06",
+    "elapsedTime": "50:49",
+    "elevationGain": "35",
+    "startDate": "2025-09-29T16:43:57.000Z"
+  },
+  {
+    "id": 15956607310,
+    "name": "Lunch Walk",
+    "distance": "5.16",
+    "movingTime": "1:10:20",
+    "elapsedTime": "2:40:48",
+    "elevationGain": "47",
+    "startDate": "2025-09-27T12:50:28.000Z"
+  },
+  {
+    "id": 15928988600,
+    "name": "Morning Walk",
+    "distance": "2.48",
+    "movingTime": "28:38",
+    "elapsedTime": "30:11",
+    "elevationGain": "66",
+    "startDate": "2025-09-25T08:32:51.000Z"
+  },
+  {
+    "id": 15925571803,
+    "name": "Night Walk",
+    "distance": "1.23",
+    "movingTime": "16:30",
+    "elapsedTime": "24:56",
+    "elevationGain": "12",
+    "startDate": "2025-09-24T22:32:01.000Z"
+  },
+  {
+    "id": 15925362970,
+    "name": "Evening Rock Climb",
+    "distance": "0",
+    "movingTime": "1:35:58",
+    "elapsedTime": "1:35:58",
+    "elevationGain": "0",
+    "startDate": "2025-09-24T20:49:37.000Z"
+  },
+  {
+    "id": 15924545119,
+    "name": "Evening Walk",
+    "distance": "1.26",
+    "movingTime": "15:09",
+    "elapsedTime": "15:09",
+    "elevationGain": "21",
+    "startDate": "2025-09-24T20:29:10.000Z"
+  },
+  {
+    "id": 15917730683,
+    "name": "Morning Walk",
+    "distance": "1.76",
+    "movingTime": "15:27",
+    "elapsedTime": "15:27",
+    "elevationGain": "10",
+    "startDate": "2025-09-24T08:11:52.000Z"
+  },
+  {
+    "id": 15910937368,
+    "name": "Afternoon Walk",
+    "distance": "1.96",
+    "movingTime": "20:57",
+    "elapsedTime": "23:00",
+    "elevationGain": "20",
+    "startDate": "2025-09-23T17:25:13.000Z"
+  },
+  {
+    "id": 15905875597,
+    "name": "Morning Walk",
+    "distance": "1.75",
+    "movingTime": "16:24",
+    "elapsedTime": "16:24",
+    "elevationGain": "11",
+    "startDate": "2025-09-23T07:43:24.000Z"
+  },
+  {
+    "id": 15898910237,
+    "name": "Afternoon Walk",
+    "distance": "1.77",
+    "movingTime": "18:01",
+    "elapsedTime": "18:01",
+    "elevationGain": "29",
+    "startDate": "2025-09-22T16:17:09.000Z"
+  },
+  {
+    "id": 15895333095,
+    "name": "Morning Walk",
+    "distance": "1.69",
+    "movingTime": "17:16",
+    "elapsedTime": "17:16",
+    "elevationGain": "11",
+    "startDate": "2025-09-22T08:00:50.000Z"
+  },
+  {
+    "id": 15877312632,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:01:26",
+    "elapsedTime": "1:01:26",
+    "elevationGain": "0",
+    "startDate": "2025-09-20T14:11:02.000Z"
+  },
+  {
+    "id": 15877312491,
+    "name": "Afternoon Walk",
+    "distance": "1.72",
+    "movingTime": "17:18",
+    "elapsedTime": "20:10",
+    "elevationGain": "29",
+    "startDate": "2025-09-20T13:47:59.000Z"
+  },
+  {
+    "id": 15877312480,
+    "name": "Afternoon Walk",
+    "distance": "1.43",
+    "movingTime": "13:09",
+    "elapsedTime": "19:02",
+    "elevationGain": "22",
+    "startDate": "2025-09-19T17:35:19.000Z"
+  },
+  {
+    "id": 15866153670,
+    "name": "Afternoon Walk",
+    "distance": "1.82",
+    "movingTime": "16:32",
+    "elapsedTime": "17:01",
+    "elevationGain": "26",
+    "startDate": "2025-09-19T17:10:40.000Z"
+  },
+  {
+    "id": 15861651375,
+    "name": "Morning Walk",
+    "distance": "1.77",
+    "movingTime": "18:11",
+    "elapsedTime": "18:28",
+    "elevationGain": "13",
+    "startDate": "2025-09-19T08:03:41.000Z"
+  },
+  {
+    "id": 15851176930,
+    "name": "Morning Walk",
+    "distance": "2.66",
+    "movingTime": "35:57",
+    "elapsedTime": "2:46:40",
+    "elevationGain": "74",
+    "startDate": "2025-09-18T07:47:23.000Z"
+  },
+  {
+    "id": 15843098738,
+    "name": "Afternoon Walk",
+    "distance": "2.00",
+    "movingTime": "23:29",
+    "elapsedTime": "33:11",
+    "elevationGain": "35",
+    "startDate": "2025-09-17T16:04:18.000Z"
+  },
+  {
+    "id": 15838969744,
+    "name": "Morning Walk",
+    "distance": "1.80",
+    "movingTime": "17:39",
+    "elapsedTime": "17:57",
+    "elevationGain": "11",
+    "startDate": "2025-09-17T07:53:41.000Z"
+  },
+  {
+    "id": 15832270975,
+    "name": "Afternoon Walk",
+    "distance": "1.96",
+    "movingTime": "23:49",
+    "elapsedTime": "34:50",
+    "elevationGain": "21",
+    "startDate": "2025-09-16T17:33:50.000Z"
+  },
+  {
+    "id": 15831754708,
+    "name": "Afternoon Run",
+    "distance": "6.04",
+    "movingTime": "39:13",
+    "elapsedTime": "39:27",
+    "elevationGain": "9",
+    "startDate": "2025-09-16T16:40:38.000Z"
+  },
+  {
+    "id": 15827119179,
+    "name": "Morning Walk",
+    "distance": "1.88",
+    "movingTime": "18:10",
+    "elapsedTime": "18:10",
+    "elevationGain": "9",
+    "startDate": "2025-09-16T08:05:13.000Z"
+  },
+  {
+    "id": 15820468901,
+    "name": "Afternoon Walk",
+    "distance": "2.46",
+    "movingTime": "24:51",
+    "elapsedTime": "59:09",
+    "elevationGain": "28",
+    "startDate": "2025-09-15T16:50:14.000Z"
+  },
+  {
+    "id": 15816086892,
+    "name": "Morning Walk",
+    "distance": "2.00",
+    "movingTime": "24:13",
+    "elapsedTime": "27:16",
+    "elevationGain": "57",
+    "startDate": "2025-09-15T08:19:53.000Z"
+  },
+  {
+    "id": 15801286907,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:44:01",
+    "elapsedTime": "1:44:01",
+    "elevationGain": "0",
+    "startDate": "2025-09-13T14:10:17.000Z"
+  },
+  {
+    "id": 15801286931,
+    "name": "Afternoon Walk",
+    "distance": "2.06",
+    "movingTime": "28:32",
+    "elapsedTime": "29:07",
+    "elevationGain": "25",
+    "startDate": "2025-08-31T13:37:34.000Z"
+  },
+  {
+    "id": 15801284476,
+    "name": "Morning Walk",
+    "distance": "1.56",
+    "movingTime": "19:27",
+    "elapsedTime": "20:18",
+    "elevationGain": "27",
+    "startDate": "2025-08-31T10:38:48.000Z"
+  },
+  {
+    "id": 15635596942,
+    "name": "Lunch Weight Training",
+    "distance": "0",
+    "movingTime": "46:00",
+    "elapsedTime": "46:00",
+    "elevationGain": "0",
+    "startDate": "2025-08-30T12:07:48.000Z"
+  },
+  {
+    "id": 15635596924,
+    "name": "Evening Weight Training",
+    "distance": "0",
+    "movingTime": "53:34",
+    "elapsedTime": "53:34",
+    "elevationGain": "0",
+    "startDate": "2025-08-29T19:25:05.000Z"
+  },
+  {
+    "id": 15635597109,
+    "name": "Morning Walk",
+    "distance": "1.79",
+    "movingTime": "17:54",
+    "elapsedTime": "17:54",
+    "elevationGain": "10",
+    "startDate": "2025-08-29T07:54:02.000Z"
+  },
+  {
+    "id": 15635589814,
+    "name": "Afternoon Walk",
+    "distance": "1.20",
+    "movingTime": "16:45",
+    "elapsedTime": "48:11",
+    "elevationGain": "8",
+    "startDate": "2025-08-24T17:56:25.000Z"
+  },
+  {
+    "id": 15635589914,
+    "name": "Night Walk",
+    "distance": "4.44",
+    "movingTime": "42:16",
+    "elapsedTime": "7:46:44",
+    "elevationGain": "34",
+    "startDate": "2025-08-23T03:05:39.000Z"
+  },
+  {
+    "id": 15635589821,
+    "name": "Night Run",
+    "distance": "0.61",
+    "movingTime": "5:53",
+    "elapsedTime": "10:32",
+    "elevationGain": "7",
+    "startDate": "2025-08-23T02:50:34.000Z"
+  },
+  {
+    "id": 15635589832,
+    "name": "Evening Walk",
+    "distance": "2.58",
+    "movingTime": "25:28",
+    "elapsedTime": "27:17",
+    "elevationGain": "13",
+    "startDate": "2025-08-22T20:39:14.000Z"
+  },
+  {
+    "id": 15635584403,
+    "name": "Afternoon Walk",
+    "distance": "1.98",
+    "movingTime": "21:25",
+    "elapsedTime": "21:45",
+    "elevationGain": "26",
+    "startDate": "2025-08-22T16:17:14.000Z"
+  },
+  {
+    "id": 15635583939,
+    "name": "Morning Walk",
+    "distance": "1.81",
+    "movingTime": "16:56",
+    "elapsedTime": "16:56",
+    "elevationGain": "10",
+    "startDate": "2025-08-22T08:36:31.000Z"
+  },
+  {
+    "id": 15635584279,
+    "name": "Evening Walk",
+    "distance": "4.09",
+    "movingTime": "52:13",
+    "elapsedTime": "1:10:55",
+    "elevationGain": "96",
+    "startDate": "2025-08-21T20:20:03.000Z"
+  },
+  {
+    "id": 15537408393,
+    "name": "Afternoon Walk",
+    "distance": "2.02",
+    "movingTime": "20:53",
+    "elapsedTime": "20:53",
+    "elevationGain": "28",
+    "startDate": "2025-08-21T17:36:11.000Z"
+  },
+  {
+    "id": 15532367509,
+    "name": "Morning Walk",
+    "distance": "1.91",
+    "movingTime": "19:06",
+    "elapsedTime": "19:06",
+    "elevationGain": "9",
+    "startDate": "2025-08-21T08:12:56.000Z"
+  },
+  {
+    "id": 15525725476,
+    "name": "Afternoon Walk",
+    "distance": "2.34",
+    "movingTime": "21:07",
+    "elapsedTime": "55:40",
+    "elevationGain": "32",
+    "startDate": "2025-08-20T16:34:14.000Z"
+  },
+  {
+    "id": 15520952454,
+    "name": "Morning Walk",
+    "distance": "1.86",
+    "movingTime": "18:38",
+    "elapsedTime": "18:38",
+    "elevationGain": "9",
+    "startDate": "2025-08-20T08:25:18.000Z"
+  },
+  {
+    "id": 15513324829,
+    "name": "Afternoon Walk",
+    "distance": "1.77",
+    "movingTime": "18:15",
+    "elapsedTime": "18:52",
+    "elevationGain": "31",
+    "startDate": "2025-08-19T16:32:58.000Z"
+  },
+  {
+    "id": 15508483140,
+    "name": "Morning Walk",
+    "distance": "2.00",
+    "movingTime": "21:36",
+    "elapsedTime": "21:36",
+    "elevationGain": "10",
+    "startDate": "2025-08-19T07:53:05.000Z"
+  },
+  {
+    "id": 15508340992,
+    "name": "Evening Weight Training",
+    "distance": "0",
+    "movingTime": "49:55",
+    "elapsedTime": "49:55",
+    "elevationGain": "0",
+    "startDate": "2025-08-18T20:01:01.000Z"
+  },
+  {
+    "id": 15508340862,
+    "name": "Evening Walk",
+    "distance": "1.89",
+    "movingTime": "19:51",
+    "elapsedTime": "41:45",
+    "elevationGain": "13",
+    "startDate": "2025-08-18T18:10:35.000Z"
+  },
+  {
+    "id": 15508337277,
+    "name": "Lunch Walk",
+    "distance": "0.14",
+    "movingTime": "3:18",
+    "elapsedTime": "3:18",
+    "elevationGain": "0",
+    "startDate": "2025-08-18T12:06:30.000Z"
+  },
+  {
+    "id": 15508337284,
+    "name": "Morning Walk",
+    "distance": "1.89",
+    "movingTime": "18:40",
+    "elapsedTime": "18:40",
+    "elevationGain": "10",
+    "startDate": "2025-08-18T08:21:01.000Z"
+  },
+  {
+    "id": 15508337449,
+    "name": "Night Walk",
+    "distance": "2.40",
+    "movingTime": "30:59",
+    "elapsedTime": "32:14",
+    "elevationGain": "31",
+    "startDate": "2025-08-17T21:52:09.000Z"
+  },
+  {
+    "id": 15508337294,
+    "name": "Evening Walk",
+    "distance": "2.25",
+    "movingTime": "30:22",
+    "elapsedTime": "1:33:51",
+    "elevationGain": "17",
+    "startDate": "2025-08-17T18:36:30.000Z"
+  },
+  {
+    "id": 15476837522,
+    "name": "Morning Walk",
+    "distance": "1.57",
+    "movingTime": "15:52",
+    "elapsedTime": "16:14",
+    "elevationGain": "22",
+    "startDate": "2025-08-16T10:05:24.000Z"
+  },
+  {
+    "id": 15469852446,
+    "name": "Evening Walk",
+    "distance": "2.20",
+    "movingTime": "23:08",
+    "elapsedTime": "50:20",
+    "elevationGain": "32",
+    "startDate": "2025-08-15T18:42:00.000Z"
+  },
+  {
+    "id": 15463781651,
+    "name": "Morning Walk",
+    "distance": "1.89",
+    "movingTime": "19:42",
+    "elapsedTime": "19:58",
+    "elevationGain": "9",
+    "startDate": "2025-08-15T08:21:23.000Z"
+  },
+  {
+    "id": 15452643255,
+    "name": "Morning Walk",
+    "distance": "1.86",
+    "movingTime": "19:07",
+    "elapsedTime": "19:23",
+    "elevationGain": "9",
+    "startDate": "2025-08-14T08:11:08.000Z"
+  },
+  {
+    "id": 15447553656,
+    "name": "Evening Walk",
+    "distance": "2.33",
+    "movingTime": "24:32",
+    "elapsedTime": "24:32",
+    "elevationGain": "26",
+    "startDate": "2025-08-13T19:25:44.000Z"
+  },
+  {
+    "id": 15447219686,
+    "name": "Evening Weight Training",
+    "distance": "0",
+    "movingTime": "32:09",
+    "elapsedTime": "32:09",
+    "elevationGain": "0",
+    "startDate": "2025-08-13T18:48:48.000Z"
+  },
+  {
+    "id": 15441227670,
+    "name": "Morning Walk",
+    "distance": "1.78",
+    "movingTime": "19:08",
+    "elapsedTime": "19:08",
+    "elevationGain": "13",
+    "startDate": "2025-08-13T08:31:02.000Z"
+  },
+  {
+    "id": 15425450062,
+    "name": "Afternoon Walk",
+    "distance": "2.58",
+    "movingTime": "31:26",
+    "elapsedTime": "1:44:03",
+    "elevationGain": "22",
+    "startDate": "2025-08-11T17:38:05.000Z"
+  },
+  {
+    "id": 15425450023,
+    "name": "Afternoon Walk",
+    "distance": "1.68",
+    "movingTime": "18:33",
+    "elapsedTime": "18:33",
+    "elevationGain": "24",
+    "startDate": "2025-08-11T16:09:42.000Z"
+  },
+  {
+    "id": 15425450831,
+    "name": "Morning Walk",
+    "distance": "1.94",
+    "movingTime": "20:25",
+    "elapsedTime": "20:25",
+    "elevationGain": "11",
+    "startDate": "2025-08-11T08:10:37.000Z"
+  },
+  {
+    "id": 15425450705,
+    "name": "Evening Walk",
+    "distance": "2.53",
+    "movingTime": "27:55",
+    "elapsedTime": "1:07:04",
+    "elevationGain": "26",
+    "startDate": "2025-08-08T19:41:26.000Z"
+  },
+  {
+    "id": 15425447110,
+    "name": "Afternoon Workout",
+    "distance": "0",
+    "movingTime": "3:11:21",
+    "elapsedTime": "3:11:21",
+    "elevationGain": "0",
+    "startDate": "2025-08-08T13:02:18.000Z"
+  },
+  {
+    "id": 15425446581,
+    "name": "Afternoon Walk",
+    "distance": "1.85",
+    "movingTime": "18:48",
+    "elapsedTime": "19:19",
+    "elevationGain": "23",
+    "startDate": "2025-08-07T16:37:45.000Z"
+  },
+  {
+    "id": 15425446646,
+    "name": "Morning Walk",
+    "distance": "1.81",
+    "movingTime": "20:20",
+    "elapsedTime": "21:28",
+    "elevationGain": "11",
+    "startDate": "2025-08-07T07:40:20.000Z"
+  },
+  {
+    "id": 15425446672,
+    "name": "Night Walk",
+    "distance": "4.76",
+    "movingTime": "56:28",
+    "elapsedTime": "1:38:10",
+    "elevationGain": "48",
+    "startDate": "2025-08-06T21:07:23.000Z"
+  },
+  {
+    "id": 15425443007,
+    "name": "Evening Walk",
+    "distance": "1.62",
+    "movingTime": "18:07",
+    "elapsedTime": "22:32",
+    "elevationGain": "14",
+    "startDate": "2025-08-06T20:35:31.000Z"
+  },
+  {
+    "id": 15425443004,
+    "name": "Afternoon Run",
+    "distance": "1.83",
+    "movingTime": "18:45",
+    "elapsedTime": "20:11",
+    "elevationGain": "22",
+    "startDate": "2025-08-06T16:36:34.000Z"
+  },
+  {
+    "id": 15425439655,
+    "name": "Morning Walk",
+    "distance": "1.81",
+    "movingTime": "19:43",
+    "elapsedTime": "20:44",
+    "elevationGain": "14",
+    "startDate": "2025-08-06T08:23:24.000Z"
+  },
+  {
+    "id": 15353644831,
+    "name": "Afternoon Workout",
+    "distance": "0",
+    "movingTime": "13:49",
+    "elapsedTime": "13:49",
+    "elevationGain": "0",
+    "startDate": "2025-08-05T16:50:13.000Z"
+  },
+  {
+    "id": 15342861021,
+    "name": "Cool down etter intervalløkt",
+    "distance": "1.50",
+    "movingTime": "11:50",
+    "elapsedTime": "11:50",
+    "elevationGain": "3",
+    "startDate": "2025-08-04T18:34:45.000Z"
+  },
+  {
+    "id": 15342670203,
+    "name": "Pyramid intervals",
+    "distance": "7.40",
+    "movingTime": "46:10",
+    "elapsedTime": "48:14",
+    "elevationGain": "6",
+    "startDate": "2025-08-04T17:40:07.000Z"
+  },
+  {
+    "id": 15301195408,
+    "name": "Evening Walk",
+    "distance": "1.61",
+    "movingTime": "20:46",
+    "elapsedTime": "20:46",
+    "elevationGain": "17",
+    "startDate": "2025-07-31T20:45:46.000Z"
+  },
+  {
+    "id": 15300938481,
+    "name": "Evening Swim",
+    "distance": "550",
+    "movingTime": "2:01:24",
+    "elapsedTime": "2:01:37",
+    "elevationGain": "0",
+    "startDate": "2025-07-31T18:39:55.000Z"
+  },
+  {
+    "id": 15301984341,
+    "name": "5K trial run m/spa",
+    "distance": "4.96",
+    "movingTime": "27:10",
+    "elapsedTime": "27:10",
+    "elevationGain": "0",
+    "startDate": "2025-07-31T17:01:15.000Z"
+  },
+  {
+    "id": 15298522977,
+    "name": "Afternoon Run",
+    "distance": "1.06",
+    "movingTime": "8:05",
+    "elapsedTime": "8:08",
+    "elevationGain": "2",
+    "startDate": "2025-07-31T16:46:07.000Z"
+  },
+  {
+    "id": 15290156044,
+    "name": "Evening Walk",
+    "distance": "2.52",
+    "movingTime": "33:40",
+    "elapsedTime": "42:14",
+    "elevationGain": "4",
+    "startDate": "2025-07-30T20:09:51.000Z"
+  },
+  {
+    "id": 15275335688,
+    "name": "Afternoon Walk",
+    "distance": "1.77",
+    "movingTime": "21:06",
+    "elapsedTime": "26:16",
+    "elevationGain": "2",
+    "startDate": "2025-07-29T16:09:38.000Z"
+  },
+  {
+    "id": 15256132834,
+    "name": "Jævla temporun",
+    "distance": "7.01",
+    "movingTime": "39:11",
+    "elapsedTime": "39:11",
+    "elevationGain": "21",
+    "startDate": "2025-07-27T19:05:05.000Z"
+  },
+  {
+    "id": 15242099777,
+    "name": "Lunch Walk",
+    "distance": "4.65",
+    "movingTime": "1:00:01",
+    "elapsedTime": "2:46:43",
+    "elevationGain": "15",
+    "startDate": "2025-07-26T12:43:36.000Z"
+  },
+  {
+    "id": 15233987507,
+    "name": "Jævlig intervalløkt i varmen",
+    "distance": "4.22",
+    "movingTime": "27:38",
+    "elapsedTime": "30:44",
+    "elevationGain": "0",
+    "startDate": "2025-07-25T19:20:02.000Z"
+  },
+  {
+    "id": 15233637425,
+    "name": "Evening Run",
+    "distance": "2.56",
+    "movingTime": "19:40",
+    "elapsedTime": "19:40",
+    "elevationGain": "4",
+    "startDate": "2025-07-25T18:53:20.000Z"
+  },
+  {
+    "id": 15188514812,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "1:06:43",
+    "elapsedTime": "1:06:43",
+    "elevationGain": "0",
+    "startDate": "2025-07-21T17:40:24.000Z"
+  },
+  {
+    "id": 15178888264,
+    "name": "Kort førmiddagsøkt",
+    "distance": "0",
+    "movingTime": "24:38",
+    "elapsedTime": "24:38",
+    "elevationGain": "0",
+    "startDate": "2025-07-20T19:11:24.000Z"
+  },
+  {
+    "id": 15137193025,
+    "name": "Evening Workout",
+    "distance": "6.44",
+    "movingTime": "1:11:31",
+    "elapsedTime": "1:16:25",
+    "elevationGain": "2",
+    "startDate": "2025-07-16T20:21:49.000Z"
+  },
+  {
+    "id": 15121066446,
+    "name": "Afternoon Walk",
+    "distance": "1.83",
+    "movingTime": "24:52",
+    "elapsedTime": "49:03",
+    "elevationGain": "2",
+    "startDate": "2025-07-15T13:24:41.000Z"
+  },
+  {
+    "id": 15112338052,
+    "name": "Afternoon Run",
+    "distance": "16.74",
+    "movingTime": "2:01:04",
+    "elapsedTime": "2:03:10",
+    "elevationGain": "40",
+    "startDate": "2025-07-14T16:28:44.000Z"
+  },
+  {
+    "id": 15100393284,
+    "name": "Afternoon Walk",
+    "distance": "2.26",
+    "movingTime": "25:44",
+    "elapsedTime": "30:50",
+    "elevationGain": "2",
+    "startDate": "2025-07-13T14:37:10.000Z"
+  },
+  {
+    "id": 15077704584,
+    "name": "Lunch Walk",
+    "distance": "1.79",
+    "movingTime": "20:00",
+    "elapsedTime": "25:14",
+    "elevationGain": "5",
+    "startDate": "2025-07-11T12:41:44.000Z"
+  },
+  {
+    "id": 15059478506,
+    "name": "Evening Walk",
+    "distance": "2.85",
+    "movingTime": "29:33",
+    "elapsedTime": "29:33",
+    "elevationGain": "34",
+    "startDate": "2025-07-09T18:48:09.000Z"
+  },
+  {
+    "id": 15057245309,
+    "name": "Afternoon Run",
+    "distance": "5.01",
+    "movingTime": "28:33",
+    "elapsedTime": "28:44",
+    "elevationGain": "41",
+    "startDate": "2025-07-09T15:10:55.000Z"
+  },
+  {
+    "id": 15050355105,
+    "name": "Night Weight Training",
+    "distance": "0",
+    "movingTime": "33:14",
+    "elapsedTime": "33:14",
+    "elevationGain": "0",
+    "startDate": "2025-07-08T22:14:58.000Z"
+  },
+  {
+    "id": 15022116194,
+    "name": "Morning Run",
+    "distance": "6.01",
+    "movingTime": "34:34",
+    "elapsedTime": "34:37",
+    "elevationGain": "16",
+    "startDate": "2025-07-06T09:46:43.000Z"
+  },
+  {
+    "id": 15007601851,
+    "name": "Evening Run",
+    "distance": "9.18",
+    "movingTime": "1:07:38",
+    "elapsedTime": "1:07:54",
+    "elevationGain": "35",
+    "startDate": "2025-07-04T19:39:52.000Z"
+  },
+  {
+    "id": 14969298816,
+    "name": "Evening Walk",
+    "distance": "1.19",
+    "movingTime": "14:03",
+    "elapsedTime": "22:45",
+    "elevationGain": "18",
+    "startDate": "2025-06-30T19:37:40.000Z"
+  },
+  {
+    "id": 14969298662,
+    "name": "Evening Walk",
+    "distance": "1.52",
+    "movingTime": "19:08",
+    "elapsedTime": "19:23",
+    "elevationGain": "4",
+    "startDate": "2025-06-30T18:37:45.000Z"
+  },
+  {
+    "id": 14969295600,
+    "name": "Afternoon Run",
+    "distance": "12.35",
+    "movingTime": "1:41:07",
+    "elapsedTime": "1:51:02",
+    "elevationGain": "53",
+    "startDate": "2025-06-30T16:33:41.000Z"
+  },
+  {
+    "id": 14969295414,
+    "name": "Afternoon Workout",
+    "distance": "7.69",
+    "movingTime": "1:57:23",
+    "elapsedTime": "2:09:09",
+    "elevationGain": "12",
+    "startDate": "2025-06-20T16:03:21.000Z"
+  },
+  {
+    "id": 14811834334,
+    "name": "Night Run",
+    "distance": "13.91",
+    "movingTime": "1:40:30",
+    "elapsedTime": "1:45:32",
+    "elevationGain": "30",
+    "startDate": "2025-06-15T21:56:19.000Z"
+  },
+  {
+    "id": 14790294335,
+    "name": "Night Walk",
+    "distance": "4.98",
+    "movingTime": "1:16:26",
+    "elapsedTime": "2:22:10",
+    "elevationGain": "35",
+    "startDate": "2025-06-13T21:06:55.000Z"
+  },
+  {
+    "id": 14787916753,
+    "name": "Siste Fredagsfotball før sommeren",
+    "distance": "6.58",
+    "movingTime": "1:36:05",
+    "elapsedTime": "1:45:16",
+    "elevationGain": "2",
+    "startDate": "2025-06-13T16:00:53.000Z"
+  },
+  {
+    "id": 14769364598,
+    "name": "5K record!! 🚀🚀🚀",
+    "distance": "5.01",
+    "movingTime": "25:13",
+    "elapsedTime": "25:20",
+    "elevationGain": "0",
+    "startDate": "2025-06-11T20:31:13.000Z"
+  },
+  {
+    "id": 14769364409,
+    "name": "Evening Walk",
+    "distance": "5.37",
+    "movingTime": "1:11:51",
+    "elapsedTime": "1:45:18",
+    "elevationGain": "40",
+    "startDate": "2025-06-09T18:14:27.000Z"
+  },
+  {
+    "id": 14738348380,
+    "name": "Night Run",
+    "distance": "8.07",
+    "movingTime": "54:51",
+    "elapsedTime": "55:05",
+    "elevationGain": "28",
+    "startDate": "2025-06-08T21:16:21.000Z"
+  },
+  {
+    "id": 14725851845,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "44:25",
+    "elapsedTime": "44:25",
+    "elevationGain": "0",
+    "startDate": "2025-06-07T17:51:25.000Z"
+  },
+  {
+    "id": 14663985709,
+    "name": "Accidental long run 🏃‍♂️",
+    "distance": "15.05",
+    "movingTime": "1:29:17",
+    "elapsedTime": "1:29:39",
+    "elevationGain": "102",
+    "startDate": "2025-06-01T15:54:54.000Z"
+  },
+  {
+    "id": 14642977332,
+    "name": "Friday Football",
+    "distance": "10.28",
+    "movingTime": "2:21:24",
+    "elapsedTime": "2:27:29",
+    "elevationGain": "2",
+    "startDate": "2025-05-30T16:00:49.000Z"
+  },
+  {
+    "id": 14601961842,
+    "name": "Easy long run",
+    "distance": "13.64",
+    "movingTime": "1:39:57",
+    "elapsedTime": "1:40:20",
+    "elevationGain": "47",
+    "startDate": "2025-05-26T17:10:19.000Z"
+  },
+  {
+    "id": 14571883725,
+    "name": "Friday Football",
+    "distance": "6.58",
+    "movingTime": "1:34:04",
+    "elapsedTime": "1:44:11",
+    "elevationGain": "4",
+    "startDate": "2025-05-23T16:02:08.000Z"
+  },
+  {
+    "id": 14529999266,
+    "name": "Afternoon Weight Training",
+    "distance": "0",
+    "movingTime": "42:19",
+    "elapsedTime": "42:19",
+    "elevationGain": "0",
+    "startDate": "2025-05-19T17:21:42.000Z"
+  },
+  {
+    "id": 14445368850,
+    "name": "Rolig 13k run!",
+    "distance": "13.34",
+    "movingTime": "1:34:48",
+    "elapsedTime": "1:35:01",
+    "elevationGain": "26",
+    "startDate": "2025-05-11T11:53:37.000Z"
+  },
+  {
+    "id": 14426783001,
+    "name": "Afternoon Workout",
+    "distance": "7.05",
+    "movingTime": "1:47:26",
+    "elapsedTime": "1:58:21",
+    "elevationGain": "4",
+    "startDate": "2025-05-09T15:55:19.000Z"
+  },
+  {
+    "id": 14356062228,
+    "name": "Fredagsfotball i drittvær",
+    "distance": "7.37",
+    "movingTime": "1:43:40",
+    "elapsedTime": "1:56:45",
+    "elevationGain": "40",
+    "startDate": "2025-05-02T15:57:27.000Z"
+  },
+  {
+    "id": 14343983508,
+    "name": "Chest + litt core",
+    "distance": "0",
+    "movingTime": "42:04",
+    "elapsedTime": "42:04",
+    "elevationGain": "0",
+    "startDate": "2025-05-01T14:39:03.000Z"
+  },
+  {
+    "id": 14283078331,
+    "name": "Fredagsfotball",
+    "distance": "7.14",
+    "movingTime": "1:36:56",
+    "elapsedTime": "1:47:00",
+    "elevationGain": "3",
+    "startDate": "2025-04-25T16:01:05.000Z"
+  },
+  {
+    "id": 14254248900,
+    "name": "Pull day",
+    "distance": "0",
+    "movingTime": "44:28",
+    "elapsedTime": "44:28",
+    "elevationGain": "0",
+    "startDate": "2025-04-22T18:39:40.000Z"
+  },
+  {
+    "id": 14242792910,
+    "name": "Rolig shoulders-økt",
+    "distance": "0",
+    "movingTime": "54:46",
+    "elapsedTime": "54:46",
+    "elevationGain": "0",
+    "startDate": "2025-04-21T15:22:24.000Z"
+  },
+  {
+    "id": 14222252403,
+    "name": "Push day",
+    "distance": "0",
+    "movingTime": "35:47",
+    "elapsedTime": "35:47",
+    "elevationGain": "0",
+    "startDate": "2025-04-19T13:51:02.000Z"
+  },
+  {
+    "id": 14202608691,
+    "name": "Litt Pull + Legs",
+    "distance": "0",
+    "movingTime": "57:49",
+    "elapsedTime": "57:49",
+    "elevationGain": "0",
+    "startDate": "2025-04-17T12:46:21.000Z"
+  },
+  {
+    "id": 14187958978,
+    "name": "First 10k",
+    "distance": "10.00",
+    "movingTime": "1:13:34",
+    "elapsedTime": "1:16:55",
+    "elevationGain": "38",
+    "startDate": "2025-04-15T20:49:24.000Z"
+  },
+  {
+    "id": 14167976511,
+    "name": "Recovery run resulterte i ny 5k PR",
+    "distance": "5.01",
+    "movingTime": "27:39",
+    "elapsedTime": "27:51",
+    "elevationGain": "2",
+    "startDate": "2025-04-13T18:34:55.000Z"
+  },
+  {
+    "id": 14155778286,
+    "name": "Post-syden run med nye NB sko",
+    "distance": "5.01",
+    "movingTime": "28:31",
+    "elapsedTime": "29:03",
+    "elevationGain": "18",
+    "startDate": "2025-04-12T15:26:33.000Z"
+  },
+  {
+    "id": 14114291551,
+    "name": "Morning Run in Puerto Rico",
+    "distance": "5.77",
+    "movingTime": "38:11",
+    "elapsedTime": "39:32",
+    "elevationGain": "53",
+    "startDate": "2025-04-08T09:52:30.000Z"
+  },
+  {
+    "id": 14059858790,
+    "name": "Afternoon Run",
+    "distance": "8.15",
+    "movingTime": "53:23",
+    "elapsedTime": "53:26",
+    "elevationGain": "2",
+    "startDate": "2025-04-02T17:20:38.000Z"
+  },
+  {
+    "id": 14039164733,
+    "name": "Afternoon Run",
+    "distance": "3.29",
+    "movingTime": "26:00",
+    "elapsedTime": "26:00",
+    "elevationGain": "0",
+    "startDate": "2025-03-31T16:30:25.000Z"
+  },
+  {
+    "id": 14018399319,
+    "name": "Liten springetest - helt kake fra gårsdagen",
+    "distance": "2.63",
+    "movingTime": "16:40",
+    "elapsedTime": "16:56",
+    "elevationGain": "25",
+    "startDate": "2025-03-29T11:39:33.000Z"
+  },
+  {
+    "id": 14012890265,
+    "name": "Skamrolig fotballøkt på halv bane 🫠",
+    "distance": "6.59",
+    "movingTime": "1:50:57",
+    "elapsedTime": "2:14:21",
+    "elevationGain": "2",
+    "startDate": "2025-03-28T15:52:54.000Z"
+  }
+]
