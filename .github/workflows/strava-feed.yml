@@ -11,6 +11,7 @@ on:
   schedule:
     - cron: '0 6 * * 1'   # weekly, Mondays at 06:00 UTC
   workflow_dispatch: {}    # allow manual runs from the Actions tab
+  push: {}                 # TEMPORARY: run on push to any branch — remove after first successful run
 
 permissions:
   contents: write
