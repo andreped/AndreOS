@@ -1,0 +1,182 @@
+[
+  {
+    "id": 19714400157,
+    "name": "Chest + shoulders",
+    "distance": "0",
+    "movingTime": "58:32",
+    "elapsedTime": "58:32",
+    "elevationGain": "0",
+    "startDate": "2026-08-12T18:42:37.000Z"
+  },
+  {
+    "id": 19712345131,
+    "name": "Afternoon Walk",
+    "distance": "2.00",
+    "movingTime": "20:31",
+    "elapsedTime": "21:39",
+    "elevationGain": "24",
+    "startDate": "2026-08-12T16:08:08.000Z"
+  },
+  {
+    "id": 19698291270,
+    "name": "Evening Walk",
+    "distance": "1.11",
+    "movingTime": "13:47",
+    "elapsedTime": "15:02",
+    "elevationGain": "21",
+    "startDate": "2026-08-11T18:09:20.000Z"
+  },
+  {
+    "id": 19697383182,
+    "name": "Afternoon Walk",
+    "distance": "1.00",
+    "movingTime": "11:08",
+    "elapsedTime": "11:25",
+    "elevationGain": "0",
+    "startDate": "2026-08-11T17:02:01.000Z"
+  },
+  {
+    "id": 19693844865,
+    "name": "Morning Walk",
+    "distance": "7.36",
+    "movingTime": "1:24:00",
+    "elapsedTime": "2:23:42",
+    "elevationGain": "96",
+    "startDate": "2026-08-11T10:30:26.000Z"
+  },
+  {
+    "id": 19682808472,
+    "name": "Afternoon Walk",
+    "distance": "2.51",
+    "movingTime": "27:57",
+    "elapsedTime": "1:37:39",
+    "elevationGain": "31",
+    "startDate": "2026-08-10T16:01:30.000Z"
+  },
+  {
+    "id": 19669463810,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:43:47",
+    "elapsedTime": "1:43:47",
+    "elevationGain": "0",
+    "startDate": "2026-08-09T14:40:57.000Z"
+  },
+  {
+    "id": 19650409965,
+    "name": "Evening Rock Climb",
+    "distance": "0",
+    "movingTime": "2:01:35",
+    "elapsedTime": "2:01:35",
+    "elevationGain": "0",
+    "startDate": "2026-08-07T19:08:59.000Z"
+  },
+  {
+    "id": 19650410029,
+    "name": "Evening Walk",
+    "distance": "1.82",
+    "movingTime": "22:48",
+    "elapsedTime": "32:17",
+    "elevationGain": "14",
+    "startDate": "2026-08-04T18:16:23.000Z"
+  },
+  {
+    "id": 19650409958,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "2:08:36",
+    "elapsedTime": "2:08:36",
+    "elevationGain": "0",
+    "startDate": "2026-08-04T16:00:06.000Z"
+  },
+  {
+    "id": 19553618638,
+    "name": "Morning workout ☀️",
+    "distance": "0",
+    "movingTime": "31:38",
+    "elapsedTime": "31:38",
+    "elevationGain": "0",
+    "startDate": "2026-08-01T11:59:37.000Z"
+  },
+  {
+    "id": 19543637819,
+    "name": "Styrke @ Moss",
+    "distance": "0",
+    "movingTime": "48:10",
+    "elapsedTime": "48:10",
+    "elevationGain": "0",
+    "startDate": "2026-07-31T16:10:14.000Z"
+  },
+  {
+    "id": 19516910337,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "1:43:23",
+    "elapsedTime": "1:43:23",
+    "elevationGain": "0",
+    "startDate": "2026-07-29T15:50:10.000Z"
+  },
+  {
+    "id": 19488759368,
+    "name": "Evening workout 🏋️",
+    "distance": "0",
+    "movingTime": "58:50",
+    "elapsedTime": "58:50",
+    "elevationGain": "0",
+    "startDate": "2026-07-27T18:50:08.000Z"
+  },
+  {
+    "id": 19461379765,
+    "name": "Kajakktur",
+    "distance": "0",
+    "movingTime": "40:00",
+    "elapsedTime": "40:00",
+    "elevationGain": "0",
+    "startDate": "2026-07-25T17:23:47.000Z"
+  },
+  {
+    "id": 19446232258,
+    "name": "Afternoon workout 💪",
+    "distance": "0",
+    "movingTime": "1:02:55",
+    "elapsedTime": "1:02:55",
+    "elevationGain": "0",
+    "startDate": "2026-07-24T15:17:49.000Z"
+  },
+  {
+    "id": 19434826534,
+    "name": "Evening workout 🏋️",
+    "distance": "0",
+    "movingTime": "54:40",
+    "elapsedTime": "54:40",
+    "elevationGain": "0",
+    "startDate": "2026-07-23T18:21:26.000Z"
+  },
+  {
+    "id": 19421222126,
+    "name": "Evening workout 🏋️",
+    "distance": "0",
+    "movingTime": "45:36",
+    "elapsedTime": "45:36",
+    "elevationGain": "0",
+    "startDate": "2026-07-22T19:04:28.000Z"
+  },
+  {
+    "id": 19407453922,
+    "name": "Evening workout 🏋️",
+    "distance": "0",
+    "movingTime": "41:47",
+    "elapsedTime": "41:47",
+    "elevationGain": "0",
+    "startDate": "2026-07-21T19:58:01.000Z"
+  },
+  {
+    "id": 19377967330,
+    "name": "Afternoon Rock Climb",
+    "distance": "0",
+    "movingTime": "2:25:15",
+    "elapsedTime": "2:25:15",
+    "elevationGain": "0",
+    "startDate": "2026-07-19T14:25:19.000Z"
+  }
+]
