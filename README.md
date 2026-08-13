@@ -25,8 +25,10 @@ Runs entirely on WebGPU. Configurable model (Settings → AI Engine):
 |---|---|---|
 | SmolLM2 135M | ~265 MB | Fastest, English only |
 | **Qwen2.5 1.5B** *(default)* | ~1 GB | Multilingual · Norwegian ✓ |
-| Llama 3.2 1B | ~800 MB | Multilingual · Compact |
 | Llama 3.2 3B | ~2 GB | Best quality |
+| Qwen3.5 2B | ~1.4 GB | Newest · 201 languages · **reasoning** |
+
+**Reasoning models:** Qwen3.5 can think step-by-step before answering. A **Reasoning effort** selector (Settings → AI Engine) offers `None / Low / Medium / High` — higher means deeper reasoning and a larger token budget, `None` skips thinking for the fastest reply. When it reasons, the thinking is shown in a collapsible block in the OS Assistant, and repetition penalties + a loop-breaker keep the small model from getting stuck. Qwen3.5 isn't in web-llm's bundled list yet, so it's registered as a custom MLC model (see `CUSTOM_MODELS` in [Settings.js](src/js/platform/services/Settings.js)).
 
 </details>
 
@@ -107,7 +109,7 @@ The 🔍 search uses a pure-JS BM25 engine with prefix matching. It searches app
 
 All preferences persist in `localStorage`. Configure via the ⚙️ Settings app or the **EN / NO** taskbar button (updates both transcription and LLM language at once).
 
-- **AI Engine:** LLM model selector · response language (Auto / EN / NO)
+- **AI Engine:** LLM model selector · reasoning effort (None / Low / Medium / High) · response language (Auto / EN / NO)
 - **Speech:** Whisper Tiny / Base / Small · transcription language · AI command parsing toggle
 
 </details>
