@@ -417,7 +417,12 @@ export class VoiceCommandManager {
             // ── Open the Nth paper ──────────────────────────────────────────
             const ORDINALS = { first:1,second:2,third:3,fourth:4,fifth:5,
                                sixth:6,seventh:7,eighth:8,ninth:9,tenth:10 };
-            const nthMatch = t.match(/(?:open|show|select|expand|read)\s+(?:the\s+)?(\w+)\s+(?:paper|article|publication|item|result|one)/i);
+            // Match an ordinal reference to a paper. Accept a broad set of verbs
+            // ("see"/"view"/"pull up"…) and also a bare "the second one" — while
+            // Research is focused these unambiguously mean "open that paper".
+            const nthMatch =
+                t.match(/(?:open|show|see|view|read|select|expand|check|pull\s+up|bring\s+up|load|go\s+to|jump\s+to)\s+(?:the\s+)?(\w+)\s+(?:paper|article|publication|item|result|one)/i)
+                || t.match(/^(?:the\s+)?(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|\d+)(?:st|nd|rd|th)?\s+(?:paper|article|publication|item|result|one)\b/i);
             if (nthMatch) {
                 const raw = nthMatch[1].toLowerCase();
                 const n   = ORDINALS[raw] ?? (parseInt(raw) || null);
