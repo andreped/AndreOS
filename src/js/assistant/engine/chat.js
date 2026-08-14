@@ -18,7 +18,7 @@ ragEngine.init({
         localStorage.setItem('andreos:rag-notified', '1');
         window.__AndreOSApp?.pushNotification(
             'Research Index Ready',
-            `Ask André can now answer questions about André's ${count} publications.`,
+            `The AI assistant can now answer questions about André's ${count} publications.`,
             '📚', 'success'
         );
     }),
@@ -391,8 +391,8 @@ async function loadEngine() {
         sessionStorage.setItem('andreos:model-loaded', '1');
         console.log('[AndreChat] Model ready ✓');
         if (!silentLoad) whenReady(() => window.__AndreOSApp?.completeLiveNotification(
-            'ai-model', 'AI Model ready', 'Ask André is ready to chat!', '✅', 'success',
-            () => window.__AndreOSApp?.openFile('chat')
+            'ai-model', 'AI Model ready', 'The AI assistant is ready to chat!', '✅', 'success',
+            () => window.__AndreOSApp?.openAssistant()
         ));
 
         registeredWindows.forEach(winEl => transitionToChat(winEl));
@@ -496,37 +496,6 @@ window.AndreChat = {
             if (!document.contains(winEl)) { registeredWindows.delete(winEl); observer.disconnect(); }
         });
         observer.observe(document.body, { childList: true, subtree: true });
-    },
-
-    /**
-     * Programmatically send a message to the chat — used by voice commands.
-     * Opens the chat window if it is not already open, then either sends
-     * the message immediately (engine ready) or pre-fills the input and
-     * focuses it so the user can press Enter once the model finishes loading.
-     * @param {string} text
-     */
-    injectMessage(text) {
-        if (!text?.trim()) return;
-
-        // Ensure the chat window is open
-        window.__AndreOSApp?.openFile('chat');
-
-        // Give the window a tick to mount before querying it
-        setTimeout(() => {
-            const winEl = [...registeredWindows][0];
-            if (!winEl) return;
-
-            if (engineState === 'ready') {
-                sendMessage(winEl, text);
-            } else {
-                // Pre-fill the input so it is ready to send once the model loads
-                const input = winEl.querySelector('.chat-input');
-                if (input) {
-                    input.value = text;
-                    input.focus();
-                }
-            }
-        }, 100);
     },
 
     /** Currently loaded model ID (null if not yet loaded). */

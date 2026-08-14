@@ -97,7 +97,6 @@ export class WindowManager {
         `;
 
         if (windowData.isBrowser)  el.classList.add('browser-window');
-        if (windowData.isChat)     el.classList.add('chat-window-wrap');
         if (windowData.isGame)     el.classList.add('game-window-wrap');
         if (windowData.isIronFlow) el.classList.add('game-window-wrap');
 

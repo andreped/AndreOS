@@ -66,7 +66,7 @@ export function render() {
 
                 <div class="settings-section active" data-section="ai">
                     <h2 class="settings-section-title">AI Engine</h2>
-                    <p class="settings-section-desc">Powers Ask André chat and the AI voice command parser. The model is downloaded once and cached in your browser.</p>
+                    <p class="settings-section-desc">Powers the AI assistant chat and the AI voice command parser. The model is downloaded once and cached in your browser.</p>
                     <div class="model-cards">${modelCards}</div>
 
                     <h3 class="settings-subsection-title">Reasoning effort</h3>

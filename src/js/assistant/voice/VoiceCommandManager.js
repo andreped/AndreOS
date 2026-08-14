@@ -85,9 +85,10 @@ export class VoiceCommandManager {
      *   onStreamMessage?: (role: 'assistant') => (text: string) => void,
      *   onPlan?:          (steps: string[]) => object,
      *   isSidebarOpen?:   () => boolean,
+ *   openSidebar?:     () => void,
      * }} opts
      */
-    constructor({ windowManager, notifications, onStateChange, onMessage, onStreamMessage, onPlan, isSidebarOpen }) {
+    constructor({ windowManager, notifications, onStateChange, onMessage, onStreamMessage, onPlan, isSidebarOpen, openSidebar }) {
         this._windowManager   = windowManager;
         this._notifications   = notifications;
         this._onStateChange   = onStateChange   ?? (() => {});
@@ -95,8 +96,7 @@ export class VoiceCommandManager {
         this._onStreamMessage = onStreamMessage ?? null;
         this._onPlan          = onPlan          ?? null;
         this._isSidebarOpen   = isSidebarOpen   ?? (() => false);
-
-        this._state       = 'idle';
+        this._openSidebar     = openSidebar     ?? (() => {});
         this._loadStarted = false;
         this._liveCardId  = 'voice-model-load';
         this._history     = [];   // { role: 'user'|'assistant', content: string }[]
@@ -250,6 +250,17 @@ export class VoiceCommandManager {
             return;
         }
 
+        // 0b. Explicit "ask <assistant> <question>" → always a direct chat.
+        //     Runs before the LLM router so this phrasing can never be
+        //     misrouted into an "open app" command by the tiny model.
+        const askShortcut = this._parseChatShortcut(text);
+        if (askShortcut) {
+            this._feedback(`🎤 Heard: "${heard}"`, 'info');
+            await this._streamToSidebar(askShortcut);
+            if (fromVoice) this._setState('ready');
+            return;
+        }
+
         // 1. Two-step LLM path (when model is loaded) ─────────────────────────
         //    Call 1: route — decide "command" vs "direct response"
         //    Call 2: if command, parse into an action sequence using history
@@ -361,7 +372,7 @@ export class VoiceCommandManager {
     async retryQuery(text, update, history) {
         if (Array.isArray(history)) this._history = history.slice(-20);
         if (!window.AndreChat?.querySidebar) {
-            update('The AI model isn\'t loaded yet — open Ask André to load it first.');
+            update('The AI model is still loading — please try again in a moment.');
             return;
         }
         await window.AndreChat.querySidebar(text, update, (full) => {
@@ -377,18 +388,13 @@ export class VoiceCommandManager {
     }
 
     /**
-     * Answer a conversational query. When the assistant sidebar is open the
-     * reply streams inline there; otherwise (e.g. voice command with the
-     * sidebar closed) it opens the “Ask André” window instead.
+     * Answer a conversational query. Streams the reply into the assistant
+     * sidebar, opening it first if it isn't already visible.
      * @param {string} text
      */
     async _streamToSidebar(text) {
-        // Sidebar not visible → use the Ask André window so the reply is seen
-        if (!this._isSidebarOpen()) {
-            if (window.AndreChat) window.AndreChat.injectMessage(text);
-            else this._windowManager.openFile('chat');
-            return;
-        }
+        // Make sure the sidebar is visible so the streamed reply is seen.
+        if (!this._isSidebarOpen()) this._openSidebar();
 
         if (window.AndreChat?.querySidebar) {
             if (this._onStreamMessage) {
@@ -402,7 +408,7 @@ export class VoiceCommandManager {
                 );
             }
         } else {
-            this._onMessage('assistant', 'The AI model isn\'t loaded yet — open Ask André to load it first.');
+            this._onMessage('assistant', 'The AI model is still loading — please try again in a moment.');
         }
     }
 
@@ -659,26 +665,35 @@ export class VoiceCommandManager {
     // ── Private: command parsing ───────────────────────────────────────────────
 
     /**
+     * Detect an explicit "ask <assistant> <question>" phrasing and return the
+     * bare question, or null. Recognises André plus the assistant's brand
+     * names (chat, assistant, os assistant, bot), in English and Norwegian.
+     * No ^ anchor — Whisper sometimes prepends whitespace; [\s,]+ tolerates the
+     * comma Whisper often inserts ("Ask chat, …"); andr[^\s,]+ matches any
+     * Whisper rendering (André, Andrea, Andrés…) including accents \w misses.
+     * @param {string} rawText
+     * @returns {string|null}
+     */
+    _parseChatShortcut(rawText) {
+        const m = rawText.match(
+            /(?:ask|tell|message|spør)\s+(?:andr[^\s,]+|chat|(?:os\s+)?assistant|bot)[\s,]+(.+)/i
+        );
+        const message = m?.[1].trim();
+        return message && message.length > 2 ? message : null;
+    }
+
+    /**
      * Map a raw transcript to the first matching COMMAND_REGISTRY entry.
      * @param {string} rawText
      * @returns {{ intent: string, args: object, label: string } | null}
      */
     _parse(rawText) {
-        // ── Chat message shortcut: "ask André <question>" ──────────────────────
+        // ── Chat message shortcut: "ask <assistant> <question>" ────────────────
         // Checked before the keyword registry so the full question is preserved.
-        // No ^ anchor — Whisper sometimes prepends whitespace.
-        // [\s,]+ after the name — Whisper often inserts a comma: "Ask André, ..."
-        // andr[^\s,]+ matches any Whisper rendering: André, Andrea, Andrei, Andrew, Andrés…
-        // including accented characters that \w misses.
-        const chatMatch = rawText.match(
-            /(?:ask\s+andr[^\s,]+|tell\s+andr[^\s,]+|message\s+andr[^\s,]+|spør\s+andr[^\s,]+)[\s,]+(.+)/i
-        );
-        if (chatMatch) {
-            const message = chatMatch[1].trim();
-            if (message.length > 2) {
-                const preview = message.length > 40 ? message.slice(0, 40) + '…' : message;
-                return { intent: 'chat_message', args: { text: message }, label: `Ask André: "${preview}"` };
-            }
+        const shortcut = this._parseChatShortcut(rawText);
+        if (shortcut) {
+            const preview = shortcut.length > 40 ? shortcut.slice(0, 40) + '…' : shortcut;
+            return { intent: 'chat_message', args: { text: shortcut }, label: `Ask: "${preview}"` };
         }
 
         // Normalise: lowercase, collapse punctuation to spaces
@@ -701,7 +716,7 @@ export class VoiceCommandManager {
         const APP_LABELS = {
             about: 'About Me', resume: 'Resume', projects: 'Projects',
             skills: 'Skills', contact: 'Contact', social: 'Social Links',
-            browser: 'Browser', chat: 'Ask André', game: 'Cast Arena', research: 'Research',
+            browser: 'Browser', game: 'Cast Arena', research: 'Research',
             settings: 'Settings',
         };
 
@@ -737,8 +752,7 @@ export class VoiceCommandManager {
                 break;
 
             case 'chat_message':
-                if (window.AndreChat) window.AndreChat.injectMessage(args.text);
-                else                  this._actions.openApp('chat');
+                this._streamToSidebar(args.text);
                 break;
 
             case 'desktop':

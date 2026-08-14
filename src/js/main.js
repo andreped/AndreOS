@@ -58,6 +58,7 @@ class DesktopPortfolio {
             onStreamMessage: (role)       => this.sidebar.startStreamMessage(role),
             onPlan:          (steps)      => this.sidebar.startPlan(steps),
             isSidebarOpen:   ()           => this.sidebar.isOpen,
+            openSidebar:     ()           => this.sidebar.open(),
         });
 
         this.startMenuOpen = false;
@@ -67,6 +68,7 @@ class DesktopPortfolio {
 
     // ── Compat shims for window.__AndreOSApp (used by chat.js) ────────────────
     openFile(fileType)             { return this.windowManager.openFile(fileType); }
+    openAssistant()                { return this.sidebar.open(); }
     createLiveNotification(...a)   { return this.notifications.createLive(...a); }
     updateLiveNotification(...a)   { return this.notifications.updateLive(...a); }
     completeLiveNotification(...a) { return this.notifications.completeLive(...a); }

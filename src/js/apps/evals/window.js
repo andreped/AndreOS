@@ -522,7 +522,7 @@ async function runLive(reporter) {
         const rn = runners[idx];
         reporter.onSuiteStart(idx);
         if (rn.needsModel && !engineReady) {
-            const reason = 'Open “Ask André” to load the AI model first';
+            const reason = 'Open the AI assistant and ask a question to load the model first';
             suites[rn.key] = { suite: rn.key, skipped: true, reason };
             reporter.onSuiteSkip(idx, reason);
             await raf();
