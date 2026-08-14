@@ -52,6 +52,13 @@ export class AssistantSidebar {
 
     get isOpen() { return this._isOpen; }
 
+    /** Remove the current streaming bubble if it was never filled (e.g. a
+     *  "thinking" placeholder that's being replaced by a plan). */
+    discardStream() {
+        this._activeStreamBubble?.remove();
+        this._activeStreamBubble = null;
+    }
+
     /** Clear all messages and restore the welcome placeholder. */
     clear() {
         if (!this._messages) return;
@@ -135,6 +142,7 @@ export class AssistantSidebar {
     startStreamMessage(role = 'assistant') {
         const bubble = this.appendMessage(role, '');
         this._timedBubble = bubble; // stamped with its inference runtime on generation-end
+        this._activeStreamBubble = bubble; // tracked so an unused "thinking" bubble can be discarded
 
         const think = document.createElement('details');
         think.className = 'asst-think';
@@ -172,15 +180,24 @@ export class AssistantSidebar {
         return { reasoning, answer };
     }
 
-    /** Append a small "took N ms/s" runtime tag under the timed answer bubble. */
+    /** Append a small "took N ms/s" runtime tag under the timed reply. */
     _stampTiming() {
-        if (this._timedBubble && this._genStart != null) {
-            const ms = performance.now() - this._genStart;
-            const tag = document.createElement('div');
-            tag.className = 'asst-meta';
-            tag.textContent = ms < 1000 ? `${Math.round(ms)} ms` : `${(ms / 1000).toFixed(1)} s`;
-            this._timedBubble.appendChild(tag);
-            this._scroll();
+        if (this._genStart != null) {
+            // Command/plan runs discard the streaming bubble, so fall back to the
+            // last assistant reply (e.g. the "✓ Done" bubble) — a command still took time.
+            let target = this._timedBubble;
+            if (!target || !target.isConnected) {
+                const bubbles = this._messages?.querySelectorAll('.asst-bubble-assistant');
+                target = bubbles?.length ? bubbles[bubbles.length - 1] : null;
+            }
+            if (target) {
+                const ms = performance.now() - this._genStart;
+                const tag = document.createElement('div');
+                tag.className = 'asst-meta';
+                tag.textContent = ms < 1000 ? `${Math.round(ms)} ms` : `${(ms / 1000).toFixed(1)} s`;
+                target.appendChild(tag);
+                this._scroll();
+            }
         }
         this._timedBubble = null;
         this._genStart = null;
