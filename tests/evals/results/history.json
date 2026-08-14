@@ -183,5 +183,116 @@
       "plan": 0.8888888888888888,
       "answers": 0.6216106339717955
     }
+  },
+  {
+    "generatedAt": "2026-08-14T12:36:28.912Z",
+    "source": "browser",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "routing": 0.8214285714285714,
+      "commands": 0,
+      "plan": 0,
+      "answers": 0
+    }
+  },
+  {
+    "generatedAt": "2026-08-14T12:54:25.974Z",
+    "source": "browser",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "routing": 0.7857142857142857,
+      "commands": 0,
+      "plan": 0,
+      "answers": 0
+    }
+  },
+  {
+    "generatedAt": "2026-08-14T12:55:38.115Z",
+    "source": "browser",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "routing": 0.4642857142857143,
+      "commands": 0,
+      "plan": 0,
+      "answers": 0
+    }
+  },
+  {
+    "generatedAt": "2026-08-14T13:02:23.579Z",
+    "source": "browser",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "routing": 0.7857142857142857,
+      "commands": 0.07142857142857142,
+      "plan": 0.5555555555555556,
+      "answers": 0.5937756353323952
+    }
+  },
+  {
+    "generatedAt": "2026-08-14T13:49:34.909Z",
+    "source": "node",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "scorers": 1
+    }
+  },
+  {
+    "generatedAt": "2026-08-14T14:40:48.472Z",
+    "source": "browser",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "routing": null,
+      "commands": null,
+      "plan": null,
+      "answers": null
+    }
+  },
+  {
+    "generatedAt": "2026-08-14T14:40:55.672Z",
+    "source": "node",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "scorers": 1
+    }
+  },
+  {
+    "generatedAt": "2026-08-14T14:40:59.481Z",
+    "source": "browser",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "routing": null,
+      "commands": null,
+      "plan": null,
+      "answers": null
+    }
+  },
+  {
+    "generatedAt": "2026-08-14T14:46:34.446Z",
+    "source": "browser",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "routing": 0.8928571428571429,
+      "commands": 1,
+      "plan": 0.8888888888888888,
+      "answers": 0.6412456024661047
+    }
   }
 ]
