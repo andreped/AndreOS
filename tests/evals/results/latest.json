@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-14T08:42:59.256Z",
+  "generatedAt": "2026-08-14T15:49:44.325Z",
   "source": "browser",
   "suites": {
     "retrieval": {
@@ -20,7 +20,7 @@
     },
     "integrity": {
       "suite": "integrity",
-      "total": 14,
+      "total": 13,
       "pass": 1,
       "problems": []
     },
@@ -158,21 +158,21 @@
       "suite": "plan",
       "total": 9,
       "turns": 22,
-      "planExactMatch": 0.8888888888888888,
-      "turnExactMatch": 0.9545454545454546,
-      "turnF1": 0.9545454545454546,
+      "planExactMatch": 1,
+      "turnExactMatch": 1,
+      "turnF1": 1,
       "byTag": {
         "multishot": {
           "total": 9,
-          "planExactMatch": 0.8888888888888888
+          "planExactMatch": 1
         },
         "research": {
           "total": 3,
-          "planExactMatch": 0.6666666666666666
+          "planExactMatch": 1
         },
         "context-carryover": {
           "total": 5,
-          "planExactMatch": 0.8
+          "planExactMatch": 1
         },
         "open": {
           "total": 4,
@@ -196,95 +196,62 @@
         },
         "paraphrase": {
           "total": 4,
-          "planExactMatch": 0.75
+          "planExactMatch": 1
         }
       },
-      "failures": [
-        {
-          "id": "research-drilldown-casual",
-          "turns": [
-            {
-              "expected": [
-                "open:research"
-              ],
-              "predicted": [
-                "open:research"
-              ],
-              "exact": true
-            },
-            {
-              "expected": [
-                "open_paper:2"
-              ],
-              "predicted": [
-                "open:research"
-              ],
-              "exact": false
-            },
-            {
-              "expected": [
-                "chat"
-              ],
-              "predicted": [
-                "chat"
-              ],
-              "exact": true
-            }
-          ]
-        }
-      ],
+      "failures": [],
       "stability": 1,
-      "passAtK": 0.8888888888888888,
+      "passAtK": 1,
       "repeats": 3
     },
     "answers": {
       "suite": "answers",
       "total": 8,
-      "ragas": 0.6216106339717955,
-      "faithfulness": 0.672646966219605,
-      "correctness": 0.6237615056372342,
-      "relevancy": 0.5684234300585475,
+      "ragas": 0.5887195233245791,
+      "faithfulness": 0.6771674234325443,
+      "correctness": 0.559362703501417,
+      "relevancy": 0.5296284430397759,
       "hallucinationRate": 0,
       "byTag": {
         "bio": {
           "total": 3,
-          "ragas": 0.631111067877593,
-          "faithfulness": 0.6324784364688045
+          "ragas": 0.6659846803681965,
+          "faithfulness": 0.7344034944034944
         },
         "career": {
           "total": 1,
-          "ragas": 0.6953547849878071,
-          "faithfulness": 0.7058823529411765
+          "ragas": 0.7042289348171701,
+          "faithfulness": 0.72
         },
         "education": {
           "total": 1,
-          "ragas": 0.5564937047987896,
-          "faithfulness": 0.711864406779661
+          "ragas": 0.4658972085833788,
+          "faithfulness": 0.71875
         },
         "research-question": {
           "total": 3,
-          "ragas": 0.6305453725606278,
-          "faithfulness": 0.6478862056441055
+          "ragas": 0.6173250433204404,
+          "faithfulness": 0.663896038896039
         },
         "projects": {
           "total": 1,
-          "ragas": 0.6287623896023757,
-          "faithfulness": 0.6417910447761194
+          "ragas": 0.620100912612077,
+          "faithfulness": 0.6031746031746031
         },
         "skills": {
           "total": 1,
-          "ragas": 0.5903774587985114,
-          "faithfulness": 0.7272727272727273
+          "ragas": 0.45301321956670004,
+          "faithfulness": 0.4838709677419355
         },
         "contact": {
           "total": 1,
-          "ragas": 0.5827566381298949,
-          "faithfulness": 0.5641025641025641
+          "ragas": 0.41654475792406825,
+          "faithfulness": 0.5333333333333333
         },
         "abstain": {
           "total": 1,
-          "ragas": 0.5827566381298949,
-          "faithfulness": 0.5641025641025641
+          "ragas": 0.41654475792406825,
+          "faithfulness": 0.5333333333333333
         }
       },
       "failures": [],

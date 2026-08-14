@@ -19,6 +19,7 @@ import { isVoiceAIEnabled, getWhisperModel, getTranscribeLang } from '../../plat
 import { appRegistry }       from '../../apps/registry/AppRegistry.js';
 import { assistantRegistry } from '../registry/AssistantRegistry.js';
 import { ActionDispatcher }  from '../registry/ActionDispatcher.js';
+import { resolveResearchIntent } from '../researchContext.js';
 
 /**
  * OS-level voice commands (window management + help).
@@ -88,12 +89,13 @@ export class VoiceCommandManager {
  *   openSidebar?:     () => void,
      * }} opts
      */
-    constructor({ windowManager, notifications, onStateChange, onMessage, onStreamMessage, onPlan, isSidebarOpen, openSidebar }) {
+    constructor({ windowManager, notifications, onStateChange, onMessage, onStreamMessage, onPlan, isSidebarOpen, openSidebar, onDiscardStream }) {
         this._windowManager   = windowManager;
         this._notifications   = notifications;
         this._onStateChange   = onStateChange   ?? (() => {});
         this._onMessage       = onMessage       ?? (() => {});
         this._onStreamMessage = onStreamMessage ?? null;
+        this._onDiscardStream = onDiscardStream ?? (() => {});
         this._onPlan          = onPlan          ?? null;
         this._isSidebarOpen   = isSidebarOpen   ?? (() => false);
         this._openSidebar     = openSidebar     ?? (() => {});
@@ -264,40 +266,56 @@ export class VoiceCommandManager {
         // 1. Two-step LLM path (when model is loaded) ─────────────────────────
         //    Call 1: route — decide "command" vs "direct response"
         //    Call 2: if command, parse into an action sequence using history
-        //    Gate: routeIntent returns null when engine isn’t ready —
-        //    fall through to the keyword fallback in that case.
-        if (window.AndreChat?.routeIntent) {
-            const route = await window.AndreChat.routeIntent(text, this._history);
+        //    A "thinking" bubble + Stop button show immediately (before routing),
+        //    so slow CPU classification isn't an invisible dead wait.
+        if (window.AndreChat?.currentModelId && window.AndreChat?.routeIntent) {
+            this._beginThinking();
+            try {
+                // On the CPU backend the router + parser passes each add a full
+                // prefill AND evict the KV cache, so the next turn re-prefills the
+                // whole system prompt. For plainly conversational text, skip them and
+                // answer directly — keeping the cached prefix warm across turns (so
+                // only the first message is slow). GPU routing is cheap, so it's
+                // gated to CPU only. Eval suites call routeIntent/parseCommand
+                // directly, so their scores are unaffected.
+                const skipRouting = window.AndreChat.isCpuBackend && !_looksLikeOSCommand(text);
+                const route = skipRouting ? 'direct' : await window.AndreChat.routeIntent(text, this._history);
+                if (this._aborted) { if (fromVoice) this._setState('ready'); return; }
 
-            if (route !== null) {
-                if (route === 'command') {
-                    const actions = await window.AndreChat.parseCommand(text, this._history);
-                    if (actions?.length) {
-                        // Record the plan in history (for LLM context) but render
-                        // it as a live checklist block instead of a chat bubble.
-                        const planText = actions
-                            .map((a, i) => `${i + 1}. ${this._describeSingleAction(a)}`)
-                            .join('\n');
-                        this._addHistory('assistant', `📋 Plan:\n${planText}`);
+                if (route !== null) {
+                    if (route === 'command') {
+                        const actions = await window.AndreChat.parseCommand(text, this._history);
+                        if (this._aborted) { if (fromVoice) this._setState('ready'); return; }
+                        if (actions?.length) {
+                            this._discardThinking(); // a plan replaces the thinking bubble
+                            // Record the plan in history (for LLM context) but render
+                            // it as a live checklist block instead of a chat bubble.
+                            const planText = actions
+                                .map((a, i) => `${i + 1}. ${this._describeSingleAction(a)}`)
+                                .join('\n');
+                            this._addHistory('assistant', `📋 Plan:\n${planText}`);
 
-                        await this._executeSequence(actions, { showPlan: true });
-                        if (!actions.some(a => a.a === 'chat')) {
-                            const reply = `✓ Done`;
-                            this._onMessage('assistant', reply);
-                            this._addHistory('assistant', reply);
+                            await this._executeSequence(actions, { showPlan: true });
+                            if (!actions.some(a => a.a === 'chat')) {
+                                const reply = `✓ Done`;
+                                this._onMessage('assistant', reply);
+                                this._addHistory('assistant', reply);
+                            }
+                            if (fromVoice) this._setState('ready');
+                            return;
                         }
-                        if (fromVoice) this._setState('ready');
-                        return;
+                        // parseCommand returned null — treat as direct response
                     }
-                    // parseCommand returned null — treat as direct response
-                }
 
-                // "direct" or command parse failed → stream conversational response
-                await this._streamToSidebar(text);
-                if (fromVoice) this._setState('ready');
-                return;
+                    // "direct" or command parse failed → stream conversational response
+                    await this._streamToSidebar(text);
+                    if (fromVoice) this._setState('ready');
+                    return;
+                }
+                // route === null → engine not ready, fall through to keyword fallback
+            } finally {
+                this._endThinking();
             }
-            // route === null → engine not ready, fall through to keyword fallback
         }
 
         // 2. Fallback: LLM not loaded — keyword/regex pipeline ─────────────────
@@ -397,8 +415,16 @@ export class VoiceCommandManager {
         if (!this._isSidebarOpen()) this._openSidebar();
 
         if (window.AndreChat?.querySidebar) {
-            if (this._onStreamMessage) {
-                const update = this._onStreamMessage('assistant');
+            // Reuse the pipeline's "thinking" bubble if it's still unclaimed,
+            // otherwise start a fresh streaming bubble.
+            let update = null;
+            if (this._thinkingUpdate && !this._thinkingClaimed) {
+                update = this._thinkingUpdate;
+                this._thinkingClaimed = true;
+            } else if (this._onStreamMessage) {
+                update = this._onStreamMessage('assistant');
+            }
+            if (update) {
                 await window.AndreChat.querySidebar(text, update, update);
             } else {
                 await window.AndreChat.querySidebar(
@@ -412,76 +438,37 @@ export class VoiceCommandManager {
         }
     }
 
+    // ── Sidebar "thinking" lifecycle ─────────────────────────────────────────
+    // Shows an immediate placeholder + Stop button for the whole router→parser→
+    // answer pipeline, so slow CPU classification isn't an invisible wait.
+
+    _beginThinking() {
+        if (!this._isSidebarOpen()) this._openSidebar();
+        window.AndreChat?.markBusy?.(true);
+        this._thinkingUpdate  = this._onStreamMessage ? this._onStreamMessage('assistant') : null;
+        this._thinkingClaimed = false;
+    }
+
+    /** Drop the thinking bubble (e.g. a plan is about to replace it). */
+    _discardThinking() {
+        if (this._thinkingUpdate && !this._thinkingClaimed) this._onDiscardStream();
+        this._thinkingUpdate = null;
+    }
+
+    _endThinking() {
+        // Unclaimed and not explicitly discarded → remove the stray placeholder.
+        if (this._thinkingUpdate && !this._thinkingClaimed) this._onDiscardStream();
+        this._thinkingUpdate  = null;
+        this._thinkingClaimed = false;
+        window.AndreChat?.markBusy?.(false);
+    }
+
     // ── Private: context-aware commands (active window) ──────────────────────
 
     _parseContextual(rawText) {
         const activeWin   = this._windowManager.windows.find(w => w.id === this._windowManager.activeWindowId);
         const activeTitle = activeWin?.title ?? '';
-        const t = rawText.toLowerCase().replace(/[.,!?]/g, ' ');
-
-        if (activeTitle === 'Research') {
-            // ── Open the Nth paper ──────────────────────────────────────────
-            const ORDINALS = { first:1,second:2,third:3,fourth:4,fifth:5,
-                               sixth:6,seventh:7,eighth:8,ninth:9,tenth:10 };
-            // Match an ordinal reference to a paper. Accept a broad set of verbs
-            // ("see"/"view"/"pull up"…) and also a bare "the second one" — while
-            // Research is focused these unambiguously mean "open that paper".
-            const nthMatch =
-                t.match(/(?:open|show|see|view|read|select|expand|check|pull\s+up|bring\s+up|load|go\s+to|jump\s+to)\s+(?:the\s+)?(\w+)\s+(?:paper|article|publication|item|result|one)/i)
-                || t.match(/^(?:the\s+)?(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|\d+)(?:st|nd|rd|th)?\s+(?:paper|article|publication|item|result|one)\b/i);
-            if (nthMatch) {
-                const raw = nthMatch[1].toLowerCase();
-                const n   = ORDINALS[raw] ?? (parseInt(raw) || null);
-                if (n) return { intent: 'research_open_nth', args: { n }, label: `Open paper #${n}` };
-            }
-            // "open number 5" / "select 3"
-            const numMatch = t.match(/(?:open|show|select|expand)\s+(?:number|item|paper|article|publication)?\s*(\d+)/i);
-            if (numMatch) {
-                const n = parseInt(numMatch[1]);
-                if (n > 0) return { intent: 'research_open_nth', args: { n }, label: `Open paper #${n}` };
-            }
-
-            // ── Sort ────────────────────────────────────────────────────────
-            if (/sort\s+by\s+cit|most\s+cited|by\s+citation/.test(t))
-                return { intent: 'research_sort', args: { sort: 'cited' }, label: 'Sort by citations' };
-            if (/sort\s+by\s+(?:date|newest|latest|recent)|newest|latest|most\s+recent/.test(t))
-                return { intent: 'research_sort', args: { sort: 'date' }, label: 'Sort by newest' };
-            if (/sort\s+by\s+(?:oldest|earliest|year)|oldest|earliest/.test(t))
-                return { intent: 'research_sort', args: { sort: 'asc' }, label: 'Sort by oldest' };
-
-            // ── Filter by type ──────────────────────────────────────────────
-            if (/show\s+all|reset\s+filter|clear\s+filter|all\s+types/.test(t))
-                return { intent: 'research_filter', args: { type: 'all' }, label: 'Show all types' };
-            if (/journal/.test(t) && /show|filter|only/.test(t))
-                return { intent: 'research_filter', args: { type: 'journal-article' }, label: 'Filter: journals' };
-            if (/conference|proceedings/.test(t) && /show|filter|only/.test(t))
-                return { intent: 'research_filter', args: { type: 'proceedings-article' }, label: 'Filter: conferences' };
-            if (/preprint/.test(t) && /show|filter|only/.test(t))
-                return { intent: 'research_filter', args: { type: 'preprint' }, label: 'Filter: preprints' };
-            if (/book\s+chapter/.test(t) && /show|filter|only/.test(t))
-                return { intent: 'research_filter', args: { type: 'book-chapter' }, label: 'Filter: book chapters' };
-
-            // ── List categories ─────────────────────────────────────────────
-            if (/(?:what|list|show|which)\s+(?:categor|filter|type|option)/.test(t))
-                return { intent: 'research_categories', args: {}, label: 'List categories' };
-
-            // ── Search within research ──────────────────────────────────────
-            const searchMatch = rawText.match(/(?:search|find|look)\s+(?:for\s+)?(.+)/i);
-            if (searchMatch) {
-                const query = searchMatch[1].trim();
-                if (query.length > 2)
-                    return { intent: 'research_search', args: { query }, label: `Search: "${query.slice(0,30)}"` };
-            }
-
-            // ── Research question (conversational) — route to sidebar ────────
-            // Catch BEFORE the LLM action parser so it can't hallucinate OS
-            // commands from natural language research questions.
-            if (/summarize|explain|describe|analys[ei]|tell\s+me\s+about|what\s+is|what\s+does|how\s+does|why\s+is|compare|discuss|abstract|conclusion/.test(t) ||
-                /(?:next|previous|prev|last|this|the\s+selected)\s+paper/.test(t)) {
-                return { intent: 'research_question', args: { query: rawText }, label: 'Ask about paper' };
-            }
-        }
-
+        if (activeTitle === 'Research') return resolveResearchIntent(rawText);
         return null;
     }
 

@@ -65,10 +65,13 @@ export default defineConfig({
         watch: {
             ignored: ['**/tests/evals/results/**'],
         },
-        // No COEP needed on localhost — Chrome/Edge allow SharedArrayBuffer there
-        // without cross-origin isolation. Removing it restores iframe compatibility.
+        // COEP credentialless enables SharedArrayBuffer → wllama runs multi-threaded
+        // (single-thread CPU inference of a 2B is unusably slow). Matches prod
+        // (_headers) and preview. credentialless is the least-breaking COEP variant,
+        // but the Browser app's cross-origin iframes may be affected in dev.
         headers: {
-            'Cross-Origin-Opener-Policy': 'same-origin',
+            'Cross-Origin-Opener-Policy':   'same-origin',
+            'Cross-Origin-Embedder-Policy': 'credentialless',
         },
     },
     preview: {
