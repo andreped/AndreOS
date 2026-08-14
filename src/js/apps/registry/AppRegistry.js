@@ -8,7 +8,7 @@
  * The assistant layer (`../assistant/`) depends on this catalog — never the
  * other way around.
  *
- * @typedef {'content'|'browser'|'chat'|'game'|'ironflow'|'research'|'settings'} AppKind
+ * @typedef {'content'|'browser'|'game'|'ironflow'|'research'|'settings'} AppKind
  *
  * @typedef {Object} WindowSpec
  * @property {number}   width
@@ -94,7 +94,6 @@ export class AppRegistry {
         };
         switch (m.kind) {
             case 'browser':  return { ...base, isBrowser: true, startUrl: m.window.startUrl };
-            case 'chat':     return { ...base, isChat: true };
             case 'game':     return { ...base, isGame: true };
             case 'ironflow': return { ...base, isIronFlow: true };
             case 'research': return { ...base, isResearch: true };

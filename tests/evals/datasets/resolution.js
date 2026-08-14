@@ -21,9 +21,9 @@ export const RESOLUTION_DATASET = [
     { input: 'preferences', expected: 'settings', tags: ['alias'] },
     { input: 'innstillinger', expected: 'settings', tags: ['norwegian'] },
     { input: 'about', expected: 'about' },
-    { input: 'ask andre', expected: 'chat' },
     { input: 'browser', expected: 'browser' },
     // Negative cases — must not resolve to an app.
+    { input: 'ask andre', expected: null, tags: ['negative'] },
     { input: 'the weather in Oslo', expected: null, tags: ['negative'] },
     { input: 'banana', expected: null, tags: ['negative'] },
 ];
