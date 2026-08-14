@@ -8,7 +8,7 @@ Demo is available at https://andreped.dev.
 
 - **Frontend:** Vanilla HTML · CSS · JavaScript
 - **Build tool:** [Vite](https://vitejs.dev/)
-- **AI chat:** [@mlc-ai/web-llm](https://github.com/mlc-ai/web-llm) — user-selectable LLM running on WebGPU (default: Qwen2.5-1.5B)
+- **AI chat:** [@mlc-ai/web-llm](https://github.com/mlc-ai/web-llm) — user-selectable LLM running on WebGPU (default: Qwen3.5-2B)
 - **Voice commands:** [@xenova/transformers](https://github.com/xenova/transformers.js) + ONNX Runtime Web — Whisper in a Web Worker; model and language configurable
 - **Browser requirement:** Chrome 113+, Edge 113+, or Safari 18+ (macOS Sequoia / iOS 18) for AI chat (WebGPU); voice works in any browser with `MediaRecorder` + WASM support
 
@@ -24,9 +24,9 @@ Runs entirely on WebGPU. Configurable model (Settings → AI Engine):
 | Model | Size | Notes |
 |---|---|---|
 | SmolLM2 135M | ~265 MB | Fastest, English only |
-| **Qwen2.5 1.5B** *(default)* | ~1 GB | Multilingual · Norwegian ✓ |
-| Llama 3.2 3B | ~2 GB | Best quality |
-| Qwen3.5 2B | ~1.4 GB | Newest · 201 languages · **reasoning** |
+| Qwen2.5 1.5B | ~1 GB | Multilingual · Norwegian ✓ |
+| Llama 3.2 3B | ~2 GB | Multilingual · Meta |
+| **Qwen3.5 2B** *(default)* | ~1.4 GB | Newest · 201 languages · optional **reasoning** |
 
 **Reasoning models:** Qwen3.5 can think step-by-step before answering. A **Reasoning effort** selector (Settings → AI Engine) offers `None / Low / Medium / High` — higher means deeper reasoning and a larger token budget, `None` skips thinking for the fastest reply. When it reasons, the thinking is shown in a collapsible block in the OS Assistant, and repetition penalties + a loop-breaker keep the small model from getting stuck. Qwen3.5 isn't in web-llm's bundled list yet, so it's registered as a custom MLC model (see `CUSTOM_MODELS` in [Settings.js](src/js/platform/services/Settings.js)).
 

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-11T11:14:19.680Z",
+  "generatedAt": "2026-08-13T17:46:38.512Z",
   "source": "browser",
   "suites": {
     "retrieval": {
@@ -20,22 +20,22 @@
     },
     "integrity": {
       "suite": "integrity",
-      "total": 12,
+      "total": 14,
       "pass": 1,
       "problems": []
     },
     "routing": {
       "suite": "routing",
       "total": 28,
-      "accuracy": 0.8214285714285714,
-      "precision": 0.75,
+      "accuracy": 0.8928571428571429,
+      "precision": 0.8333333333333334,
       "recall": 1,
-      "f1": 0.8571428571428571,
+      "f1": 0.9090909090909091,
       "confusion": {
         "tp": 15,
-        "fp": 5,
+        "fp": 3,
         "fn": 0,
-        "tn": 8
+        "tn": 10
       },
       "byTag": {
         "open": {
@@ -60,11 +60,11 @@
         },
         "bio": {
           "total": 7,
-          "accuracy": 0.7142857142857143
+          "accuracy": 0.8571428571428571
         },
         "research-question": {
           "total": 3,
-          "accuracy": 0
+          "accuracy": 0.3333333333333333
         },
         "skills": {
           "total": 1,
@@ -76,7 +76,7 @@
         },
         "tricky": {
           "total": 5,
-          "accuracy": 0.6
+          "accuracy": 0.8
         },
         "meta": {
           "total": 1,
@@ -95,23 +95,13 @@
           "predicted": "command"
         },
         {
-          "input": "explain what FastPathology is",
-          "expected": "direct",
-          "predicted": "command"
-        },
-        {
-          "input": "can you tell me about his projects",
-          "expected": "direct",
-          "predicted": "command"
-        },
-        {
           "input": "show me what he worked on at SINTEF",
           "expected": "direct",
           "predicted": "command"
         }
       ],
       "stability": 1,
-      "passAtK": 0.8214285714285714,
+      "passAtK": 0.8928571428571429,
       "repeats": 3
     },
     "commands": {
@@ -168,13 +158,13 @@
       "suite": "plan",
       "total": 9,
       "turns": 22,
-      "planExactMatch": 0.6666666666666666,
-      "turnExactMatch": 0.8181818181818182,
-      "turnF1": 0.8484848484848484,
+      "planExactMatch": 0.8888888888888888,
+      "turnExactMatch": 0.9090909090909091,
+      "turnF1": 0.9090909090909091,
       "byTag": {
         "multishot": {
           "total": 9,
-          "planExactMatch": 0.6666666666666666
+          "planExactMatch": 0.8888888888888888
         },
         "research": {
           "total": 3,
@@ -182,15 +172,15 @@
         },
         "context-carryover": {
           "total": 5,
-          "planExactMatch": 0.6
+          "planExactMatch": 0.8
         },
         "open": {
           "total": 4,
-          "planExactMatch": 0.5
+          "planExactMatch": 1
         },
         "switch": {
           "total": 2,
-          "planExactMatch": 0.5
+          "planExactMatch": 1
         },
         "browse": {
           "total": 2,
@@ -202,7 +192,7 @@
         },
         "open_paper": {
           "total": 1,
-          "planExactMatch": 0
+          "planExactMatch": 1
         },
         "paraphrase": {
           "total": 4,
@@ -211,68 +201,23 @@
       },
       "failures": [
         {
-          "id": "projects-to-skills",
+          "id": "research-drilldown-casual",
           "turns": [
             {
               "expected": [
-                "open:projects"
+                "open:research"
               ],
               "predicted": [
-                "open:projects"
+                "browse:github.com/andreped"
               ],
-              "exact": true
-            },
-            {
-              "expected": [
-                "open:skills"
-              ],
-              "predicted": [],
               "exact": false
             },
             {
               "expected": [
-                "close"
+                "open_paper:2"
               ],
               "predicted": [
-                "close"
-              ],
-              "exact": true
-            }
-          ]
-        },
-        {
-          "id": "paper-pronoun",
-          "turns": [
-            {
-              "expected": [
-                "open:research",
-                "open_paper:5"
-              ],
-              "predicted": [
-                "open:research",
-                "open_paper:5"
-              ],
-              "exact": true
-            },
-            {
-              "expected": [
-                "chat"
-              ],
-              "predicted": [],
-              "exact": false
-            }
-          ]
-        },
-        {
-          "id": "resume-then-ask-casual",
-          "turns": [
-            {
-              "expected": [
-                "open:resume"
-              ],
-              "predicted": [
-                "open:resume",
-                "chat"
+                "open:research"
               ],
               "exact": false
             },
@@ -280,86 +225,104 @@
               "expected": [
                 "chat"
               ],
-              "predicted": [],
-              "exact": false
+              "predicted": [
+                "chat"
+              ],
+              "exact": true
             }
           ]
         }
       ],
       "stability": 1,
-      "passAtK": 0.6666666666666666,
+      "passAtK": 0.8888888888888888,
       "repeats": 3
     },
     "answers": {
       "suite": "answers",
       "total": 8,
-      "ragas": 0.514634570975102,
-      "faithfulness": 0.43851622233975174,
-      "correctness": 0.5747852340639222,
-      "relevancy": 0.530602256521632,
+      "ragas": 0.4467876244887062,
+      "faithfulness": 0.3465145041171584,
+      "correctness": 0.5304835197210083,
+      "relevancy": 0.46336484962795177,
       "hallucinationRate": 0,
       "byTag": {
         "bio": {
           "total": 3,
-          "ragas": 0.6899841147569509,
-          "faithfulness": 0.5955840455840457
+          "ragas": 0.4153611270412076,
+          "faithfulness": 0.2804615705931495
         },
         "career": {
           "total": 1,
-          "ragas": 0.7989417989417991,
-          "faithfulness": 0.7777777777777778
+          "ragas": 0.5745411916888997,
+          "faithfulness": 0.3157894736842105
         },
         "education": {
           "total": 1,
-          "ragas": 0.31934087417958384,
-          "faithfulness": 0.23636363636363636
+          "ragas": 0.7128825475599668,
+          "faithfulness": 0.625
         },
         "research-question": {
           "total": 3,
-          "ragas": 0.5804260912181651,
-          "faithfulness": 0.46960784313725495
+          "ragas": 0.41505859372608883,
+          "faithfulness": 0.4162019162019162
         },
         "projects": {
           "total": 1,
-          "ragas": 0.6569244049821187,
-          "faithfulness": 0.5588235294117647
+          "ragas": 0.6697733447733447,
+          "faithfulness": 0.6216216216216216
         },
         "skills": {
           "total": 1,
-          "ragas": 0.4196859903381642,
-          "faithfulness": 0.25
+          "ragas": 0.3620258189223707,
+          "faithfulness": 0.1724137931034483
         },
         "contact": {
           "total": 1,
-          "ragas": 0.08390022675736962,
-          "faithfulness": 0.14285714285714285
+          "ragas": 0.25660468659912694,
+          "faithfulness": 0.12280701754385964
         },
         "abstain": {
           "total": 1,
-          "ragas": 0.08390022675736962,
-          "faithfulness": 0.14285714285714285
+          "ragas": 0.25660468659912694,
+          "faithfulness": 0.12280701754385964
         }
       },
       "failures": [
         {
-          "id": "education",
-          "ragas": 0.319,
-          "faithfulness": 0.236,
-          "correctness": 0.407,
-          "relevancy": 0.315,
-          "generated": "André Pedersen has a strong educational background, starting with his Master of Science in Applied Physics & Mathematics from UiT - The Arctic University of Nor"
+          "id": "programming-languages",
+          "ragas": 0.362,
+          "faithfulness": 0.172,
+          "correctness": 0.441,
+          "relevancy": 0.472,
+          "generated": "André knows **Python, C++, and JavaScript/TypeScript** as his primary programming languages. He also has experience with **C#, Dart**, and uses tools like **.NE"
+        },
+        {
+          "id": "publication-count",
+          "ragas": 0.327,
+          "faithfulness": 0.389,
+          "correctness": 0.345,
+          "relevancy": 0.247,
+          "generated": "André Pedersen has published 30+ peer-reviewed papers across the fields of computational pathology, brain tumour MRI segmentation, and medical imaging."
         },
         {
           "id": "consulting-availability",
-          "ragas": 0.084,
-          "faithfulness": 0.143,
-          "correctness": 0.061,
-          "relevancy": 0.048,
-          "generated": "André Pedersen is available for consulting and has experience leading technical teams across various projects. If you have a specific topic or area of expertise"
+          "ragas": 0.257,
+          "faithfulness": 0.123,
+          "correctness": 0.335,
+          "relevancy": 0.313,
+          "generated": "André Pedersen is available for consulting on medical AI, specifically focused on healthcare imaging and speech-to-text systems in Norway. His current role as a"
+        },
+        {
+          "id": "healthcare-focus",
+          "ragas": 0.248,
+          "faithfulness": 0.238,
+          "correctness": 0.284,
+          "relevancy": 0.223,
+          "generated": "André is passionate about healthcare AI because he understands how powerful technology can solve critical medical problems, especially for underserved regions i"
         }
       ],
       "stability": 1,
-      "passAtK": 0.75,
+      "passAtK": 0.5,
       "repeats": 1
     }
   }

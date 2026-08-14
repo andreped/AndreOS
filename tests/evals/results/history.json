@@ -108,5 +108,18 @@
       "plan": 0.6666666666666666,
       "answers": 0.514634570975102
     }
+  },
+  {
+    "generatedAt": "2026-08-13T17:46:38.512Z",
+    "source": "browser",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "routing": 0.8928571428571429,
+      "commands": 1,
+      "plan": 0.8888888888888888,
+      "answers": 0.4467876244887062
+    }
   }
 ]
