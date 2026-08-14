@@ -101,3 +101,50 @@ André Pedersen is a Norwegian Senior AI Engineer and researcher specialising in
 - LinkedIn: linkedin.com/in/andré-pedersen
 - Google Scholar: scholar.google.com (30+ publications, h-index 15)
 `;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Section retrieval — instead of sending the whole ~1200-token profile on every
+// QA answer, send a small stable CORE (instructions + identity) plus only the
+// profile sections relevant to the question. The CORE stays first so it remains
+// a cache-warm prefix; the retrieved sections are the small variable part.
+// ─────────────────────────────────────────────────────────────────────────────
+import { BM25 } from '../retrieval/BM25.js';
+
+const _parts = SYSTEM_PROMPT.split('\n## ');
+/** Always-sent prefix: the preamble rules + "Who is André?" identity block. */
+export const SYSTEM_CORE = `${_parts[0].trim()}\n\n## ${_parts[1].trim()}`;
+const PROFILE_SECTIONS = _parts.slice(2).map((s) => {
+    const nl = s.indexOf('\n');
+    return { heading: s.slice(0, nl).trim(), body: s.slice(nl + 1).trim() };
+});
+
+let _bm25 = null;
+function _sectionIndex() {
+    if (_bm25) return _bm25;
+    _bm25 = new BM25();
+    PROFILE_SECTIONS.forEach((s, i) => _bm25.addDocument(String(i), `${s.heading}. ${s.body}`));
+    _bm25.build();
+    return _bm25;
+}
+
+/**
+ * Build the QA system prompt for a query: the stable CORE plus the most relevant
+ * profile sections (keeps the prompt small and focused for a small model).
+ * @param {string} query
+ * @param {{ k?: number, minScore?: number }} [opts]
+ * @returns {{ prompt: string, headings: string[] }}
+ */
+export function buildProfileContext(query, { k = 3, minScore = 0.2 } = {}) {
+    const q = (query || '').trim();
+    if (!q) return { prompt: SYSTEM_CORE, headings: [] };
+    const picked = _sectionIndex().search(q, k)
+        .filter((r) => r.score >= minScore)
+        .map((r) => PROFILE_SECTIONS[Number(r.id)])
+        .filter(Boolean);
+    const sections = picked.map((s) => `## ${s.heading}\n${s.body}`).join('\n\n');
+    return {
+        prompt: sections ? `${SYSTEM_CORE}\n\n${sections}` : SYSTEM_CORE,
+        headings: picked.map((s) => s.heading),
+    };
+}
+
