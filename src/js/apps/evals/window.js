@@ -130,6 +130,7 @@ export function setupEvalsWindow(winEl) {
     let current = null;   // the scorecard currently on screen
     let history = [];     // trend history
     let running = false;
+    let runAborted = false; // set by Stop button / window close to halt a live run
     let dsActiveIdx = 0;  // which dataset the Dataset tab is showing
     let scView = 'metrics'; // Scorecard sub-view: 'metrics' | 'failures'
 
@@ -366,17 +367,25 @@ export function setupEvalsWindow(winEl) {
         } catch { /* storage full/blocked — non-fatal */ }
     }
 
+    const runLabel = runBtn.innerHTML; // restored after a run finishes or is stopped
+    function stopRun() {
+        runAborted = true;
+        try { /** @type {any} */ (window).AndreChat?.interrupt?.(); } catch { /* ignore in-flight */ }
+        runBtn.textContent = 'Stopping…';
+    }
+
     runBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
-        if (running) return;
+        if (running) { stopRun(); return; }
         running = true;
-        runBtn.disabled = true;
+        runAborted = false;
+        runBtn.textContent = '⏹ Stop';
         runIndicator.style.display = 'inline-block';
         runEmpty.style.display = 'none';
         runProgress.style.display = ''; // let CSS drive the flex column layout
         activateTab('run');
         try {
-            current = await runLive(reporter);
+            current = await runLive(reporter, () => runAborted);
             reporter.onAllDone();
             const entry = historyEntry(current);
             history = [...history, entry];
@@ -385,10 +394,10 @@ export function setupEvalsWindow(winEl) {
             statusEl.textContent = summaryLine(current);
             if (import.meta.env.DEV) await saveToDiskDev(current, entry);
         } catch (err) {
-            statusEl.textContent = `Run failed: ${err.message}`;
+            statusEl.textContent = err.message === 'aborted' ? 'Run stopped.' : `Run failed: ${err.message}`;
         } finally {
             running = false;
-            runBtn.disabled = false;
+            runBtn.innerHTML = runLabel;
             runIndicator.style.display = 'none';
         }
     });
@@ -505,24 +514,44 @@ export function setupEvalsWindow(winEl) {
         const bars = vals.slice(-16).map((v) => `<div class="bar" style="height:${Math.max(6, v * 100)}%"></div>`).join('');
         return `<div class="eval-trend" title="last ${Math.min(16, vals.length)} runs">${bars}</div>`;
     }
+
+    // Closing the window must halt a live run — the loop otherwise keeps calling
+    // the model in the background after the UI is gone.
+    new MutationObserver((_, obs) => {
+        if (!document.contains(winEl)) {
+            runAborted = true;
+            try { /** @type {any} */ (window).AndreChat?.interrupt?.(); } catch { /* ignore */ }
+            obs.disconnect();
+        }
+    }).observe(document.body, { childList: true, subtree: true });
 }
 
 // ── Live run: every suite in the browser, with per-sample progress ────────────
-const raf = () => new Promise((r) => requestAnimationFrame(() => r()));
+// rAF never fires in a background tab, which hard-stalls the run loop until the
+// tab is refocused; fall back to a timer when hidden so it keeps progressing.
+const raf = () => new Promise((r) => document.hidden ? setTimeout(r, 0) : requestAnimationFrame(() => r()));
 
-async function runLive(reporter) {
+async function runLive(reporter, shouldAbort = () => false) {
     const suites = {};
     const chat = /** @type {any} */ (window).AndreChat;
-    const engineReady = !!chat && chat.currentModelId != null;
-    const runners = buildRunners(chat);
+    let engineReady = !!chat && chat.currentModelId != null;
+    const runners = buildRunners(chat, shouldAbort);
 
     reporter.onInit(runners.map((r) => ({ key: r.key, samples: r.samples })));
 
+    // The model auto-loads on page open, but may still be downloading when a run
+    // starts — wait for it rather than skipping the LLM suites.
+    if (!engineReady && chat?.whenReady) {
+        reporter.onStatus('Waiting for the AI model to finish loading…');
+        try { await chat.whenReady(300_000); engineReady = true; } catch { /* load failed/timed out → suites skip */ }
+    }
+
     for (let idx = 0; idx < runners.length; idx++) {
+        if (shouldAbort()) throw new Error('aborted');
         const rn = runners[idx];
         reporter.onSuiteStart(idx);
         if (rn.needsModel && !engineReady) {
-            const reason = 'Open the AI assistant and ask a question to load the model first';
+            const reason = 'AI model not loaded (still downloading or failed) — try again once it\'s ready';
             suites[rn.key] = { suite: rn.key, skipped: true, reason };
             reporter.onSuiteSkip(idx, reason);
             await raf();
@@ -536,15 +565,15 @@ async function runLive(reporter) {
 }
 
 /** Ordered suite runners — deterministic suites first (instant), model suites last. */
-function buildRunners(chat) {
+function buildRunners(chat, shouldAbort = () => false) {
     return [
         { key: 'retrieval',  samples: RETRIEVAL_DATASET.map((c) => c.query), run: retrievalRunner },
         { key: 'resolution', samples: RESOLUTION_DATASET.map((c) => c.input), run: resolutionRunner },
         { key: 'integrity',  samples: ['Registry structure & capabilities'], run: integrityRunner },
-        { key: 'routing',  needsModel: true, samples: ROUTING_DATASET.map((c) => c.input),  run: (emit) => routingRunner(emit, chat) },
-        { key: 'commands', needsModel: true, samples: COMMANDS_DATASET.map((c) => c.input), run: (emit) => commandsRunner(emit, chat) },
-        { key: 'plan',     needsModel: true, samples: PLANS_DATASET.map((c) => c.id),       run: (emit) => planRunner(emit, chat) },
-        { key: 'answers',  needsModel: true, samples: ANSWERS_DATASET.map((c) => c.question), run: (emit) => answersRunner(emit, chat) },
+        { key: 'routing',  needsModel: true, samples: ROUTING_DATASET.map((c) => c.input),  run: (emit) => routingRunner(emit, chat, shouldAbort) },
+        { key: 'commands', needsModel: true, samples: COMMANDS_DATASET.map((c) => c.input), run: (emit) => commandsRunner(emit, chat, shouldAbort) },
+        { key: 'plan',     needsModel: true, samples: PLANS_DATASET.map((c) => c.id),       run: (emit) => planRunner(emit, chat, shouldAbort) },
+        { key: 'answers',  needsModel: true, samples: ANSWERS_DATASET.map((c) => c.question), run: (emit) => answersRunner(emit, chat, shouldAbort) },
     ];
 }
 
@@ -589,11 +618,12 @@ async function integrityRunner(emit) {
     return result;
 }
 
-async function routingRunner(emit, chat) {
+async function routingRunner(emit, chat, shouldAbort = () => false) {
     const rows = [];
     const consistencies = [];
     const passAtKs = [];
     for (let i = 0; i < ROUTING_DATASET.length; i++) {
+        if (shouldAbort()) throw new Error('aborted');
         const c = ROUTING_DATASET[i];
         const expected = routeLabel(c.expected);
         // Repeat to expose nondeterminism: take the majority label, and record
@@ -610,11 +640,12 @@ async function routingRunner(emit, chat) {
     return summariseRouting(rows, { stability: mean(consistencies), passAtK: mean(passAtKs), repeats: REPEATS });
 }
 
-async function commandsRunner(emit, chat) {
+async function commandsRunner(emit, chat, shouldAbort = () => false) {
     const rows = [];
     const stabilities = [];
     const passAtKs = [];
     for (let i = 0; i < COMMANDS_DATASET.length; i++) {
+        if (shouldAbort()) throw new Error('aborted');
         const c = COMMANDS_DATASET[i];
         // Repeat, score each run, then take the modal action plan as the
         // representative. Stability = how often the modal plan recurred.
@@ -630,12 +661,13 @@ async function commandsRunner(emit, chat) {
 }
 
 // ── Multi-shot planning: whole conversations, history carried across turns ────
-async function planRunner(emit, chat) {
+async function planRunner(emit, chat, shouldAbort = () => false) {
     const predictTurn = (userText, history) => chat.parseCommand(userText, history);
     const cases = [];
     const stabilities = [];
     const passAtKs = [];
     for (let i = 0; i < PLANS_DATASET.length; i++) {
+        if (shouldAbort()) throw new Error('aborted');
         const c = PLANS_DATASET[i];
         // Repeat the whole conversation; take the modal plan-correctness outcome.
         const runs = await repeat(() => scorePlanCase(c, predictTurn), REPEATS);
@@ -650,7 +682,7 @@ async function planRunner(emit, chat) {
 }
 
 // ── RAGAS-style answer quality: score the free text the model writes ──────────
-async function answersRunner(emit, chat) {
+async function answersRunner(emit, chat, shouldAbort = () => false) {
     const min = SUITE_META.answers.min;
     // The answer suite is expensive (full RAG generation per case) and its
     // metric moves slowly, so a single pass is enough — no 3× repeats here.
@@ -659,6 +691,7 @@ async function answersRunner(emit, chat) {
     const stabilities = [];
     const passAtKs = [];
     for (let i = 0; i < ANSWERS_DATASET.length; i++) {
+        if (shouldAbort()) throw new Error('aborted');
         const c = ANSWERS_DATASET[i];
         ActiveContext.setActiveApp(c.activeApp ?? null);
         // Repeat generation; average each RAGAS facet and measure run-to-run

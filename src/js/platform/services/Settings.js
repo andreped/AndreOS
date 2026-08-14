@@ -39,6 +39,27 @@ export const CUSTOM_MODELS = [
     },
 ];
 
+/**
+ * CPU-only models — run via wllama (llama.cpp compiled to WASM), no WebGPU.
+ * Slower than the GPU models (especially first-token/prefill), but they keep the
+ * whole desktop responsive because they don't contend with the OS compositor for
+ * the GPU. Each entry points at a single-file GGUF (Q4_K_M recommended).
+ *
+ * @type {{ id: string, name: string, size: string, desc: string, badge: string|null, url: string, contextSize?: number }[]}
+ */
+export const CPU_MODELS = [
+    {
+        id: 'Qwen3.5-2B-GGUF-CPU',
+        name: 'Qwen3.5 2B (CPU)',
+        size: '~1.8 GB',
+        desc: 'Same model as the GPU default · Runs on CPU · No GPU needed · Slower',
+        badge: 'CPU',
+        // Same base model as the GPU default (Qwen/Qwen3.5-2B), GGUF Q4_K_M.
+        url: 'https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q4_K_M.gguf',
+        contextSize: 8192,
+    },
+];
+
 export const WHISPER_MODELS = [
     { id: 'Xenova/whisper-tiny',  name: 'Whisper Tiny',  size: '~39 MB',  desc: 'Fastest · Multilingual · Lower accuracy', badge: null },
     { id: 'Xenova/whisper-base',  name: 'Whisper Base',  size: '~74 MB',  desc: 'Recommended · Multilingual · Good balance', badge: 'Recommended' },
@@ -98,6 +119,12 @@ export function saveSettings(partial) {
 }
 
 export function getModelId()        { return getSettings().chatModel      || DEFAULT_MODEL_ID; }
+
+/** True when the selected (or given) model runs on CPU via wllama. */
+export function isCpuModel(id = getModelId()) { return CPU_MODELS.some(m => m.id === id); }
+/** The CPU model record for the selected (or given) id, or null. */
+export function getCpuModel(id = getModelId()) { return CPU_MODELS.find(m => m.id === id) ?? null; }
+
 export function getWhisperModel()   { return getSettings().whisperModel   || 'Xenova/whisper-base'; }
 export function getTranscribeLang() { return getSettings().transcribeLang || 'english'; }  // default English — more reliable than auto
 export function getLLMLanguage()    { return getSettings().llmLang        || 'en'; }        // default English

@@ -2,10 +2,10 @@
 // Loaded as <script type="module">. Exposes window.AndreChat for classic script.js.
 
 import * as webllm from "@mlc-ai/web-llm";
-import { SYSTEM_PROMPT } from "./andre-profile.js";
+import { buildProfileContext } from "./andre-profile.js";
 import { RAGEngine }   from "../retrieval/RAGEngine.js";
 import { ActiveContext } from "../retrieval/ActiveContext.js";
-import { getModelId, MODELS, getLLMLanguage, CUSTOM_MODELS, getReasoningEffort, REASONING_LEVELS } from "../../platform/services/Settings.js";
+import { getModelId, MODELS, getLLMLanguage, CUSTOM_MODELS, getReasoningEffort, REASONING_LEVELS, isCpuModel, getCpuModel } from "../../platform/services/Settings.js";
 import { appRegistry } from "../../apps/index.js";
 
 const MODEL_ID = getModelId(); // resolved from Settings at load time — re-read on retry()
@@ -29,6 +29,10 @@ let engine        = null;
 let engineState   = 'idle'; // idle | loading | ready | error
 let engineError   = '';     // human-readable error stored when state === 'error'
 let lastProgress  = { text: 'Starting model download…', pct: 0 };
+// Full teardown for whatever engine is currently loaded (WebLLM worker or
+// wllama). Called before loading a different model so we never keep two models
+// resident in memory. Set at load time; null when nothing is loaded.
+let teardown      = null;
 const registeredWindows = new Set();
 const messageHistory    = [];
 
@@ -41,6 +45,25 @@ function setGenerating(active) {
     generating = active;
     document.dispatchEvent(new CustomEvent(active ? 'andreos:generation-start' : 'andreos:generation-end'));
 }
+
+// ── DEV: main-thread blocking probe ───────────────────────────────────────────
+// Quantifies how long the *main thread* stalls during a generation. Large totals
+// here mean inference is CPU/main-thread bound (a worker engine helps); a near-
+// zero total while the UI still hitches means the stall is GPU occupancy
+// starving the compositor, which a worker can't fix. tl;dr: longtask only
+// reports tasks >50ms, so sub-50ms churn is invisible — read totals, not zero.
+if (import.meta.env.DEV && typeof PerformanceObserver !== 'undefined') {
+    let blocked = 0, longest = 0, count = 0;
+    try {
+        new PerformanceObserver((list) => {
+            for (const e of list.getEntries()) { blocked += e.duration; longest = Math.max(longest, e.duration); count++; }
+        }).observe({ type: 'longtask', buffered: false });
+        document.addEventListener('andreos:generation-start', () => { blocked = 0; longest = 0; count = 0; });
+        document.addEventListener('andreos:generation-end', () =>
+            console.log(`[AndreChat] main-thread blocked ${Math.round(blocked)}ms over ${count} long task(s), longest ${Math.round(longest)}ms`));
+    } catch { /* longtask unsupported */ }
+}
+
 
 /**
  * Detect a degenerate repetition loop: the trailing chunk of text recurring
@@ -80,12 +103,25 @@ function structuredGenConfig(baseTokens) {
     };
 }
 
+// ── Prompt debug logging ──────────────────────────────────────────────────────
+// Auto-on in `vite dev`. In a production build (incl. `vite preview`) it's off
+// unless enabled from the console: localStorage.setItem('andreos:debug-prompts','1').
+// Logs the exact message array sent to the model for every call.
+function logPrompt(label, messages) {
+    if (!import.meta.env.DEV && localStorage.getItem('andreos:debug-prompts') !== '1') return;
+    const chars = messages.reduce((n, m) => n + (m.content?.length || 0), 0);
+    console.groupCollapsed(`[AndreChat] prompt ▶ ${label} · ${chars} chars · ~${Math.round(chars / 4)} tok`);
+    for (const m of messages) console.log(`── ${m.role} ──\n${m.content}`);
+    console.groupEnd();
+}
+
 /**
  * Streamed completion with the same loop-breaker as the chat UI, returning the
  * reasoning-stripped text. Used by the structured/eval calls so a thinking loop
  * gets cut off instead of blocking until max_tokens (non-streaming can't do that).
  */
 async function completeText(messages, { maxTokens, temperature = 0.7, think = false }) {
+    logPrompt('structured', messages);
     const stream = await engine.chat.completions.create({
         messages,
         stream: true,
@@ -251,11 +287,14 @@ async function sendMessage(winEl, userText) {
         : '';
 
     const activeCtx    = ActiveContext.getContextBlock(userText);
+    // Only the profile sections relevant to the question (not the whole bio).
+    const { prompt: profile, headings } = buildProfileContext(userText);
     // When the user is viewing a specific paper, that paper is the context —
     // don't also inject other RAG papers or the small model conflates them.
-    const ragContext   = activeCtx ? '' : ragEngine.query(userText);
+    // Otherwise only pull specific papers when the question is research-related.
+    const ragContext   = (activeCtx || !headings.includes('Research & Publications')) ? '' : ragEngine.query(userText);
     const systemContent = [
-        SYSTEM_PROMPT,
+        profile,
         activeCtx || null,
         ragContext
             ? `## Relevant Research Papers\nThese papers from André's publications are relevant to this question:\n\n${ragContext}\n\nCite paper titles when they are relevant to your answer.`
@@ -269,6 +308,7 @@ async function sendMessage(winEl, userText) {
 
     abortRequested = false;
     setGenerating(true);
+    logPrompt('chat', messages);
     try {
         const stream = await engine.chat.completions.create({
             messages,
@@ -333,10 +373,11 @@ async function assertGPULimits() {
 async function loadEngine() {
     if (engineState === 'loading' || engineState === 'ready') return;
     engineState = 'loading';
-    console.log('[AndreChat] Starting model load:', getModelId());
+    const cpuModel = getCpuModel();
+    console.log('[AndreChat] Starting model load:', getModelId(), cpuModel ? '(CPU/wllama)' : '(WebGPU)');
 
     // Update the loading title to show the actual selected model name
-    const modelInfo = MODELS.find(m => m.id === getModelId());
+    const modelInfo = MODELS.find(m => m.id === getModelId()) ?? cpuModel;
     const modelLabel = modelInfo?.name ?? getModelId();
     registeredWindows.forEach(w => {
         const titleEl = w.querySelector('.chat-model-name');
@@ -345,47 +386,76 @@ async function loadEngine() {
 
     // Show NC card — but only on the first load (not on refreshes within the same session)
     const silentLoad = !!sessionStorage.getItem('andreos:model-loaded');
+    const loadingBlurb = cpuModel
+        ? 'Downloading the CPU model… first run fetches the weights, then it\'s cached.'
+        : 'Compiling WebGPU shaders… this takes ~30s the first time.';
     whenReady(() => {
         if (engineState !== 'ready' && !silentLoad) {
-            window.__AndreOSApp?.createLiveNotification(
-                'ai-model', 'Loading AI Model', 'Compiling WebGPU shaders… this takes ~30s the first time.', '⚙️'
-            );
+            window.__AndreOSApp?.createLiveNotification('ai-model', 'Loading AI Model', loadingBlurb, '⚙️');
         }
     });
-    updateAll('Compiling WebGPU shaders…', 0);
+    updateAll(cpuModel ? 'Loading CPU model…' : 'Compiling WebGPU shaders…', 0);
 
     try {
-        await assertGPULimits();
-        // Merge any custom MLC models into the app config so they load like built-ins.
-        const appConfig = CUSTOM_MODELS.length
-            ? { ...webllm.prebuiltAppConfig, model_list: [...webllm.prebuiltAppConfig.model_list, ...CUSTOM_MODELS] }
-            : undefined;
-        engine = await webllm.CreateMLCEngine(getModelId(), {
-            appConfig,
-            initProgressCallback: (report) => {
-                const pct  = Math.round((report.progress || 0) * 100);
-                const text = report.text || 'Loading…';
-                console.log('[AndreChat]', pct + '%', text);
+        if (cpuModel) {
+            // CPU path — wllama (llama.cpp/WASM). Lazily imported so the ~big
+            // wllama bundle only loads when a CPU model is actually selected.
+            const { createWllamaEngine } = await import('./wllama-engine.js');
+            const eng = await createWllamaEngine(cpuModel.url, {
+                contextSize: cpuModel.contextSize ?? 4096,
+                onProgress: (frac) => {
+                    const pct  = Math.round(frac * 100);
+                    const text = pct >= 100 ? 'Preparing model…' : `Downloading… ${pct}%`;
+                    updateAll(text, pct);
+                    if (!silentLoad) window.__AndreOSApp?.updateLiveNotification('ai-model', pct, text);
+                },
+            });
+            engine = eng;
+            teardown = async () => {
+                try { eng.interruptGenerate?.(); } catch { /* ignore */ }
+                try { await eng.unload?.(); } catch (e) { console.warn('[AndreChat] wllama unload failed:', e); }
+            };
+        } else {
+            await assertGPULimits();
+            // Merge any custom MLC models into the app config so they load like built-ins.
+            const appConfig = CUSTOM_MODELS.length
+                ? { ...webllm.prebuiltAppConfig, model_list: [...webllm.prebuiltAppConfig.model_list, ...CUSTOM_MODELS] }
+                : undefined;
+            // Run the engine in a Web Worker so per-dispatch command submission (the
+            // batch-1 CPU bottleneck) stays off the UI thread — see mlc.worker.js.
+            const worker = new Worker(new URL('./mlc.worker.js', import.meta.url), { type: 'module' });
+            const eng = await webllm.CreateWebWorkerMLCEngine(worker, getModelId(), {
+                appConfig,
+                initProgressCallback: (report) => {
+                    const pct  = Math.round((report.progress || 0) * 100);
+                    const text = report.text || 'Loading…';
+                    console.log('[AndreChat]', pct + '%', text);
 
-                // First real callback — shaders done, download starting
-                const isFetching = text.toLowerCase().includes('fetch') || pct > 0;
-                const mbMatch    = text.match(/(\d+)MB fetched/);
-                const shortText  = mbMatch
-                    ? `Downloading… ${mbMatch[1]} MB`
-                    : isFetching ? 'Downloading weights…' : 'Compiling WebGPU shaders…';
+                    // First real callback — shaders done, download starting
+                    const isFetching = text.toLowerCase().includes('fetch') || pct > 0;
+                    const mbMatch    = text.match(/(\d+)MB fetched/);
+                    const shortText  = mbMatch
+                        ? `Downloading… ${mbMatch[1]} MB`
+                        : isFetching ? 'Downloading weights…' : 'Compiling WebGPU shaders…';
 
-                updateAll(shortText, pct);
-                if (!silentLoad) window.__AndreOSApp?.updateLiveNotification('ai-model', pct, shortText);
+                    updateAll(shortText, pct);
+                    if (!silentLoad) window.__AndreOSApp?.updateLiveNotification('ai-model', pct, shortText);
 
-                // Update NC card icon once download actually starts
-                if (isFetching) {
-                    const icon = document.querySelector('#nc-live-ai-model .nc-item-icon');
-                    if (icon) icon.textContent = '⬇️';
-                    const title = document.querySelector('#nc-live-ai-model .nc-item-title');
-                    if (title) title.textContent = 'Downloading AI Model';
+                    // Update NC card icon once download actually starts
+                    if (isFetching) {
+                        const icon = document.querySelector('#nc-live-ai-model .nc-item-icon');
+                        if (icon) icon.textContent = '⬇️';
+                        const title = document.querySelector('#nc-live-ai-model .nc-item-title');
+                        if (title) title.textContent = 'Downloading AI Model';
+                    }
                 }
-            }
-        });
+            });
+            engine = eng;
+            teardown = async () => {
+                try { await eng.unload?.(); }  catch (e) { console.warn('[AndreChat] engine unload failed:', e); }
+                try { worker.terminate(); }    catch (e) { console.warn('[AndreChat] worker terminate failed:', e); }
+            };
+        }
 
         engineState = 'ready';
         sessionStorage.setItem('andreos:model-loaded', '1');
@@ -425,15 +495,36 @@ async function loadEngine() {
     }
 }
 
+// ── Full teardown ─────────────────────────────────────────────────────────────
+// Release the current engine before loading another one, so we never keep a
+// previous model's weights (GPU VRAM / WASM heap) and its worker(s) resident.
+async function unloadEngine() {
+    const t = teardown;
+    teardown = null;
+    // Abort any in-flight generation first, else teardown blocks on a busy worker.
+    abortRequested = true;
+    try { engine?.interruptGenerate?.(); } catch { /* ignore */ }
+    engine = null;
+    engineState = 'idle';
+    setGenerating(false);
+    // tl;dr: race a timeout — a wllama CPU worker mid-prefill can't service exit()
+    // until it finishes, which would otherwise hang Restart indefinitely. On
+    // timeout we orphan the old worker (it finishes then gets GC'd) rather than block.
+    if (t) {
+        try { await Promise.race([t(), new Promise((r) => setTimeout(r, 3000))]); }
+        catch (err) { console.warn('[AndreChat] teardown failed:', err); }
+    }
+}
+
 // ── Public API ────────────────────────────────────────────────────────────────
 window.AndreChat = {
     setupWindow(winEl) {
-        if (!navigator.gpu) {
+        if (!navigator.gpu && !isCpuModel()) {
             const overlay = winEl.querySelector('.chat-load-overlay');
             if (overlay) overlay.innerHTML = `
                 <div class="chat-load-icon">⚠️</div>
                 <div class="chat-load-title">WebGPU not available</div>
-                <div class="chat-load-subtitle">Please use Chrome 113+, Edge 113+, or Safari 18+<br>to run the local AI model.</div>
+                <div class="chat-load-subtitle">Please use Chrome 113+, Edge 113+, or Safari 18+<br>to run the local AI model,<br>or pick a CPU model in Settings.</div>
             `;
             return;
         }
@@ -501,6 +592,9 @@ window.AndreChat = {
     /** Currently loaded model ID (null if not yet loaded). */
     get currentModelId() { return engineState === 'ready' ? getModelId() : null; },
 
+    /** True when the loaded model runs on the CPU (wllama) backend. */
+    get isCpuBackend() { return engineState === 'ready' && isCpuModel(); },
+
     /**
      * BM25 paper search — used by SearchOverlay to include publications in
      * the desktop search results.
@@ -527,6 +621,20 @@ window.AndreChat = {
     isGenerating() { return generating; },
 
     /**
+     * Abort whatever model call is currently streaming, without the `generating`
+     * guard stopGeneration() uses. The eval runner needs this because its calls
+     * (routeIntent/parseCommand/answer) don't set the generating flag.
+     */
+    interrupt() { try { engine?.interruptGenerate?.(); } catch { /* ignore */ } },
+
+    /**
+     * Mark the assistant busy for a whole sidebar pipeline (router + parser +
+     * answer), so the Stop button shows and stopGeneration() works during the
+     * classification passes — not only during the final streamed answer.
+     */
+    markBusy(active) { setGenerating(!!active); },
+
+    /**
      * Stream a conversational LLM response without touching the chat window.
      * Used by the OS Assistant sidebar for non-command queries.
      * @param {string}                     text
@@ -535,8 +643,8 @@ window.AndreChat = {
      */
     async querySidebar(text, onChunk, onDone) {
         if (engineState !== 'ready') {
-            if (!navigator.gpu) {
-                onDone?.('This browser has no WebGPU support, so the local AI model can\'t run. Try Chrome/Edge 113+ or Safari 18+.');
+            if (!navigator.gpu && !isCpuModel()) {
+                onDone?.('This browser has no WebGPU support, so the local AI model can\'t run. Try Chrome/Edge 113+ or Safari 18+, or pick a CPU model in Settings.');
                 return;
             }
             // Auto-(re)start loading if it never started or previously failed,
@@ -559,10 +667,12 @@ window.AndreChat = {
             : '';
         const effort = REASONING_LEVELS.find(l => l.id === getReasoningEffort()) ?? REASONING_LEVELS[0];
         const activeCtx  = ActiveContext.getContextBlock(text);
-        // A viewed paper takes priority over general RAG retrieval.
-        const ragContext = activeCtx ? '' : ragEngine.query(text);
+        const { prompt: profile, headings } = buildProfileContext(text);
+        // A viewed paper takes priority; otherwise only pull specific papers when
+        // the question is research-related (per the section retriever).
+        const ragContext = (activeCtx || !headings.includes('Research & Publications')) ? '' : ragEngine.query(text);
         const systemContent = [
-            SYSTEM_PROMPT,
+            profile,
             activeCtx || null,
             ragContext
                 ? `## Relevant Research Papers\nThese papers from André's publications are relevant to this question:\n\n${ragContext}\n\nCite paper titles when relevant.`
@@ -571,12 +681,14 @@ window.AndreChat = {
         ].filter(Boolean).join('\n\n') + langInstruction;
         abortRequested = false;
         setGenerating(true);
+        const messages = [
+            { role: "system", content: systemContent },
+            { role: "user",   content: text },
+        ];
+        logPrompt('sidebar', messages);
         try {
             const stream = await engine.chat.completions.create({
-                messages: [
-                    { role: "system", content: systemContent },
-                    { role: "user",   content: text },
-                ],
+                messages,
                 stream: true,
                 max_tokens: effort.maxTokens,
                 temperature: 0.7,
@@ -628,10 +740,11 @@ window.AndreChat = {
             : langSetting === 'en' ? '\n\nAlways respond in English.'
             : '';
         const activeCtx  = ActiveContext.getContextBlock(text);
-        const ragContext = activeCtx ? '' : ragEngine.query(text);
+        const { prompt: profile, headings } = buildProfileContext(text);
+        const ragContext = (activeCtx || !headings.includes('Research & Publications')) ? '' : ragEngine.query(text);
         const context    = activeCtx || ragContext || '';
         const systemContent = [
-            SYSTEM_PROMPT,
+            profile,
             activeCtx || null,
             ragContext
                 ? `## Relevant Research Papers\nThese papers from André's publications are relevant to this question:\n\n${ragContext}\n\nCite paper titles when relevant.`
@@ -765,15 +878,18 @@ Message: "${text.replace(/"/g, "'")}"`;
         });
     },
 
-    retry() {
-        engineState = 'idle';
-        engine = null;
+    async retry() {
+        await unloadEngine();
+        const label = (MODELS.find(m => m.id === getModelId()) ?? getCpuModel())?.name ?? getModelId();
+        const blurb = getCpuModel()
+            ? 'Runs on your CPU — no GPU needed.<br>First load downloads the weights (cached after).'
+            : 'A local AI running entirely in your browser.<br>First load downloads the weights (cached after).';
         registeredWindows.forEach(winEl => {
             const overlay = winEl.querySelector('.chat-load-overlay');
             if (overlay) overlay.innerHTML = `
                 <div class="chat-load-icon">🤖</div>
-                <div class="chat-load-title">SmolLM2-135M</div>
-                <div class="chat-load-subtitle">A tiny AI running entirely in your browser.<br>First load downloads ~135 MB (cached after).</div>
+                <div class="chat-load-title">${label}</div>
+                <div class="chat-load-subtitle">${blurb}</div>
                 <div class="chat-progress-track"><div class="chat-progress-fill"></div></div>
                 <div class="chat-load-status">Starting…</div>
             `;
@@ -783,7 +899,7 @@ Message: "${text.replace(/"/g, "'")}"`;
 };
 
 // ── Start loading on page load ────────────────────────────────────────────────
-if (navigator.gpu) {
+if (navigator.gpu || isCpuModel()) {
     loadEngine();
 } else {
     console.warn('[AndreChat] WebGPU not available — model will not load.');
@@ -791,7 +907,7 @@ if (navigator.gpu) {
 
 // ── React to settings changes ─────────────────────────────────────────────────
 document.addEventListener('andreos:settings-apply', () => {
-    if (!navigator.gpu) return;
+    if (!navigator.gpu && !isCpuModel()) return;
     sessionStorage.removeItem('andreos:model-loaded'); // show NC card for new model
     window.AndreChat.retry();
 });

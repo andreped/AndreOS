@@ -1,11 +1,8 @@
 /** Settings window content (AI engine + speech configuration). */
+import { MODELS, CPU_MODELS } from '../../platform/services/Settings.js';
+
 export function render() {
-    const modelCards = [
-        { id: 'SmolLM2-135M-Instruct-q0f16-MLC',      name: 'SmolLM2 135M',  size: '~265 MB', desc: 'Fastest load · English only',                          badge: null },
-        { id: 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC',    name: 'Qwen2.5 1.5B',  size: '~1 GB',   desc: 'Multilingual · Norwegian ✓ · Compact',                   badge: null },
-        { id: 'Llama-3.2-3B-Instruct-q4f16_1-MLC',    name: 'Llama 3.2 3B',  size: '~2 GB',   desc: 'Multilingual · Meta',                                   badge: null },
-        { id: 'Qwen3.5-2B-q4f16_1-MLC',               name: 'Qwen3.5 2B',    size: '~1.4 GB', desc: 'Newest · 201 languages · Optional reasoning',            badge: 'Recommended' },
-    ].map(m => `
+    const modelCard = (m) => `
         <div class="model-card" data-model-id="${m.id}">
             <div class="model-card-radio"><span class="model-radio-dot"></span></div>
             <div class="model-card-info">
@@ -16,7 +13,9 @@ export function render() {
                 </div>
                 <div class="model-desc">${m.desc}</div>
             </div>
-        </div>`).join('');
+        </div>`;
+    const modelCards    = MODELS.map(modelCard).join('');
+    const cpuModelCards = CPU_MODELS.map(modelCard).join('');
 
     const themes = [
         { id: 'light',  icon: '☀️', name: 'Light',  desc: 'Bright surfaces — the default look' },
@@ -68,6 +67,10 @@ export function render() {
                     <h2 class="settings-section-title">AI Engine</h2>
                     <p class="settings-section-desc">Powers the AI assistant chat and the AI voice command parser. The model is downloaded once and cached in your browser.</p>
                     <div class="model-cards">${modelCards}</div>
+
+                    <h3 class="settings-subsection-title">CPU-only (no GPU)</h3>
+                    <p class="settings-section-desc">Runs on the CPU via llama.cpp/WASM — no WebGPU. Slower to answer (especially the first token), but it keeps the whole desktop responsive during inference.</p>
+                    <div class="model-cards">${cpuModelCards}</div>
 
                     <h3 class="settings-subsection-title">Reasoning effort</h3>
                     <p class="settings-section-desc">How much the model thinks before answering (Qwen3.5). Higher = deeper reasoning and a larger token budget; None skips thinking for the fastest reply.</p>

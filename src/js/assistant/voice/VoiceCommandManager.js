@@ -88,12 +88,13 @@ export class VoiceCommandManager {
  *   openSidebar?:     () => void,
      * }} opts
      */
-    constructor({ windowManager, notifications, onStateChange, onMessage, onStreamMessage, onPlan, isSidebarOpen, openSidebar }) {
+    constructor({ windowManager, notifications, onStateChange, onMessage, onStreamMessage, onPlan, isSidebarOpen, openSidebar, onDiscardStream }) {
         this._windowManager   = windowManager;
         this._notifications   = notifications;
         this._onStateChange   = onStateChange   ?? (() => {});
         this._onMessage       = onMessage       ?? (() => {});
         this._onStreamMessage = onStreamMessage ?? null;
+        this._onDiscardStream = onDiscardStream ?? (() => {});
         this._onPlan          = onPlan          ?? null;
         this._isSidebarOpen   = isSidebarOpen   ?? (() => false);
         this._openSidebar     = openSidebar     ?? (() => {});
@@ -264,40 +265,56 @@ export class VoiceCommandManager {
         // 1. Two-step LLM path (when model is loaded) ─────────────────────────
         //    Call 1: route — decide "command" vs "direct response"
         //    Call 2: if command, parse into an action sequence using history
-        //    Gate: routeIntent returns null when engine isn’t ready —
-        //    fall through to the keyword fallback in that case.
-        if (window.AndreChat?.routeIntent) {
-            const route = await window.AndreChat.routeIntent(text, this._history);
+        //    A "thinking" bubble + Stop button show immediately (before routing),
+        //    so slow CPU classification isn't an invisible dead wait.
+        if (window.AndreChat?.currentModelId && window.AndreChat?.routeIntent) {
+            this._beginThinking();
+            try {
+                // On the CPU backend the router + parser passes each add a full
+                // prefill AND evict the KV cache, so the next turn re-prefills the
+                // whole system prompt. For plainly conversational text, skip them and
+                // answer directly — keeping the cached prefix warm across turns (so
+                // only the first message is slow). GPU routing is cheap, so it's
+                // gated to CPU only. Eval suites call routeIntent/parseCommand
+                // directly, so their scores are unaffected.
+                const skipRouting = window.AndreChat.isCpuBackend && !_looksLikeOSCommand(text);
+                const route = skipRouting ? 'direct' : await window.AndreChat.routeIntent(text, this._history);
+                if (this._aborted) { if (fromVoice) this._setState('ready'); return; }
 
-            if (route !== null) {
-                if (route === 'command') {
-                    const actions = await window.AndreChat.parseCommand(text, this._history);
-                    if (actions?.length) {
-                        // Record the plan in history (for LLM context) but render
-                        // it as a live checklist block instead of a chat bubble.
-                        const planText = actions
-                            .map((a, i) => `${i + 1}. ${this._describeSingleAction(a)}`)
-                            .join('\n');
-                        this._addHistory('assistant', `📋 Plan:\n${planText}`);
+                if (route !== null) {
+                    if (route === 'command') {
+                        const actions = await window.AndreChat.parseCommand(text, this._history);
+                        if (this._aborted) { if (fromVoice) this._setState('ready'); return; }
+                        if (actions?.length) {
+                            this._discardThinking(); // a plan replaces the thinking bubble
+                            // Record the plan in history (for LLM context) but render
+                            // it as a live checklist block instead of a chat bubble.
+                            const planText = actions
+                                .map((a, i) => `${i + 1}. ${this._describeSingleAction(a)}`)
+                                .join('\n');
+                            this._addHistory('assistant', `📋 Plan:\n${planText}`);
 
-                        await this._executeSequence(actions, { showPlan: true });
-                        if (!actions.some(a => a.a === 'chat')) {
-                            const reply = `✓ Done`;
-                            this._onMessage('assistant', reply);
-                            this._addHistory('assistant', reply);
+                            await this._executeSequence(actions, { showPlan: true });
+                            if (!actions.some(a => a.a === 'chat')) {
+                                const reply = `✓ Done`;
+                                this._onMessage('assistant', reply);
+                                this._addHistory('assistant', reply);
+                            }
+                            if (fromVoice) this._setState('ready');
+                            return;
                         }
-                        if (fromVoice) this._setState('ready');
-                        return;
+                        // parseCommand returned null — treat as direct response
                     }
-                    // parseCommand returned null — treat as direct response
-                }
 
-                // "direct" or command parse failed → stream conversational response
-                await this._streamToSidebar(text);
-                if (fromVoice) this._setState('ready');
-                return;
+                    // "direct" or command parse failed → stream conversational response
+                    await this._streamToSidebar(text);
+                    if (fromVoice) this._setState('ready');
+                    return;
+                }
+                // route === null → engine not ready, fall through to keyword fallback
+            } finally {
+                this._endThinking();
             }
-            // route === null → engine not ready, fall through to keyword fallback
         }
 
         // 2. Fallback: LLM not loaded — keyword/regex pipeline ─────────────────
@@ -397,8 +414,16 @@ export class VoiceCommandManager {
         if (!this._isSidebarOpen()) this._openSidebar();
 
         if (window.AndreChat?.querySidebar) {
-            if (this._onStreamMessage) {
-                const update = this._onStreamMessage('assistant');
+            // Reuse the pipeline's "thinking" bubble if it's still unclaimed,
+            // otherwise start a fresh streaming bubble.
+            let update = null;
+            if (this._thinkingUpdate && !this._thinkingClaimed) {
+                update = this._thinkingUpdate;
+                this._thinkingClaimed = true;
+            } else if (this._onStreamMessage) {
+                update = this._onStreamMessage('assistant');
+            }
+            if (update) {
                 await window.AndreChat.querySidebar(text, update, update);
             } else {
                 await window.AndreChat.querySidebar(
@@ -410,6 +435,31 @@ export class VoiceCommandManager {
         } else {
             this._onMessage('assistant', 'The AI model is still loading — please try again in a moment.');
         }
+    }
+
+    // ── Sidebar "thinking" lifecycle ─────────────────────────────────────────
+    // Shows an immediate placeholder + Stop button for the whole router→parser→
+    // answer pipeline, so slow CPU classification isn't an invisible wait.
+
+    _beginThinking() {
+        if (!this._isSidebarOpen()) this._openSidebar();
+        window.AndreChat?.markBusy?.(true);
+        this._thinkingUpdate  = this._onStreamMessage ? this._onStreamMessage('assistant') : null;
+        this._thinkingClaimed = false;
+    }
+
+    /** Drop the thinking bubble (e.g. a plan is about to replace it). */
+    _discardThinking() {
+        if (this._thinkingUpdate && !this._thinkingClaimed) this._onDiscardStream();
+        this._thinkingUpdate = null;
+    }
+
+    _endThinking() {
+        // Unclaimed and not explicitly discarded → remove the stray placeholder.
+        if (this._thinkingUpdate && !this._thinkingClaimed) this._onDiscardStream();
+        this._thinkingUpdate  = null;
+        this._thinkingClaimed = false;
+        window.AndreChat?.markBusy?.(false);
     }
 
     // ── Private: context-aware commands (active window) ──────────────────────
