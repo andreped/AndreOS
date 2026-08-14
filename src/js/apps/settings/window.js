@@ -1,5 +1,5 @@
-import { getModelId, getSettings, saveSettings, getWhisperModel, getTranscribeLang, getLLMLanguage, getReasoningEffort, getTheme } from '../../platform/services/Settings.js';
-import { setTheme } from '../../platform/services/ThemeManager.js';
+import { getModelId, getSettings, saveSettings, getWhisperModel, getTranscribeLang, getLLMLanguage, getReasoningEffort, getTheme, getBackground } from '../../platform/services/Settings.js';
+import { setTheme, setBackground } from '../../platform/services/ThemeManager.js';
 
 export function setupSettingsWindow(winEl) {
     winEl.querySelectorAll('.settings-nav-item').forEach(item => {
@@ -110,6 +110,20 @@ export function setupSettingsWindow(winEl) {
         card.addEventListener('click', () => {
             setTheme(card.dataset.themeId);
             refreshThemeCards();
+        });
+    });
+
+    // Appearance / background cards
+    const refreshBackgroundCards = () => {
+        const cur = getBackground();
+        winEl.querySelectorAll('.theme-card[data-background-id]').forEach(c => c.classList.toggle('selected', c.dataset.backgroundId === cur));
+    };
+    refreshBackgroundCards();
+
+    winEl.querySelectorAll('.theme-card[data-background-id]').forEach(card => {
+        card.addEventListener('click', () => {
+            setBackground(card.dataset.backgroundId);
+            refreshBackgroundCards();
         });
     });
 }
