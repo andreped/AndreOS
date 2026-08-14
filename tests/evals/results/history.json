@@ -121,5 +121,28 @@
       "plan": 0.8888888888888888,
       "answers": 0.4467876244887062
     }
+  },
+  {
+    "generatedAt": "2026-08-14T07:42:41.504Z",
+    "source": "node",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "scorers": 1
+    }
+  },
+  {
+    "generatedAt": "2026-08-14T07:52:11.083Z",
+    "source": "browser",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "routing": 0.8928571428571429,
+      "commands": 1,
+      "plan": 0.8888888888888888,
+      "answers": 0.616833029221432
+    }
   }
 ]
