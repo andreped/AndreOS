@@ -55,6 +55,14 @@ function looksLooping(text) {
     return count >= 3;
 }
 
+/**
+ * Remove `<think>…</think>` reasoning blocks (including the empty one WebLLM
+ * injects when thinking is disabled) so structured/eval outputs stay clean.
+ */
+function stripThink(text) {
+    return String(text ?? '').replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+}
+
 // ── Desktop-ready gate ────────────────────────────────────────────────────────
 // Notifications are buffered until the OS signals the desktop is visible,
 // so toasts never appear over the loading screen.
@@ -220,8 +228,12 @@ async function sendMessage(winEl, userText) {
         const stream = await engine.chat.completions.create({
             messages,
             stream: true,
-            max_tokens: 300,
+            max_tokens: 512,
             temperature: 0.7,
+            top_p: 0.9,
+            frequency_penalty: 0.4,
+            presence_penalty: 1.3,
+            extra_body: { enable_thinking: false },
         });
         let fullText = '';
         let frozen = null;
@@ -231,16 +243,17 @@ async function sendMessage(winEl, userText) {
             // (breaking out mid-stream leaves WebLLM in a stuck state and the
             // NEXT generation hangs), but freeze the text at the stop point.
             if (abortRequested) { if (frozen === null) frozen = fullText; continue; }
-            assistantEntry.content = fullText;
+            const shown = stripThink(fullText);
+            assistantEntry.content = shown;
             typingBubbles.forEach((bubble, w) => {
                 if (bubble) {
-                    bubble.textContent = fullText + '▋';
+                    bubble.textContent = shown + '▋';
                     const area = w.querySelector('.chat-messages-area');
                     if (area) area.scrollTop = area.scrollHeight;
                 }
             });
         }
-        const finalText = frozen ?? fullText;
+        const finalText = stripThink(frozen ?? fullText);
         assistantEntry.content = finalText;
         typingBubbles.forEach(b => { if (b) b.textContent = finalText; });
     } catch (err) {
@@ -617,10 +630,13 @@ window.AndreChat = {
                     ...history.filter(m => m.role !== 'system'),
                     { role: 'user', content: text },
                 ],
-                max_tokens: 300,
+                max_tokens: 512,
                 temperature,
+                frequency_penalty: 0.4,
+                presence_penalty: 1.3,
+                extra_body: { enable_thinking: false },
             });
-            return { text: res.choices[0]?.message?.content?.trim() ?? '', context };
+            return { text: stripThink(res.choices[0]?.message?.content ?? ''), context };
         } catch (err) {
             console.error('[AndreChat] answer error:', err);
             return { text: '', context };
@@ -675,8 +691,9 @@ Request: "${text.replace(/"/g, "'")}"`;
                 messages: [{ role: 'user', content: prompt }],
                 max_tokens: 150,
                 temperature: 0.1,
+                extra_body: { enable_thinking: false },
             });
-            const raw     = response.choices[0]?.message?.content?.trim() ?? '';
+            const raw     = stripThink(response.choices[0]?.message?.content ?? '');
             const jsonMatch = raw.match(/\[[\s\S]*?\]/);
             if (!jsonMatch) return null;
             const actions = JSON.parse(jsonMatch[0]);
@@ -716,10 +733,11 @@ Message: "${text.replace(/"/g, "'")}"`;
         try {
             const res = await engine.chat.completions.create({
                 messages: [{ role: 'user', content: prompt }],
-                max_tokens: 5,
+                max_tokens: 8,
                 temperature: 0,
+                extra_body: { enable_thinking: false },
             });
-            const out = res.choices[0]?.message?.content?.trim().toLowerCase() ?? '';
+            const out = stripThink(res.choices[0]?.message?.content ?? '').toLowerCase();
             return out.includes('command') ? 'command' : 'direct';
         } catch {
             return null;

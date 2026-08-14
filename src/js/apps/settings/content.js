@@ -2,9 +2,9 @@
 export function render() {
     const modelCards = [
         { id: 'SmolLM2-135M-Instruct-q0f16-MLC',      name: 'SmolLM2 135M',  size: '~265 MB', desc: 'Fastest load · English only',                          badge: null },
-        { id: 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC',    name: 'Qwen2.5 1.5B',  size: '~1 GB',   desc: 'Multilingual · Norwegian ✓ · Best speed/quality balance', badge: 'Recommended' },
+        { id: 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC',    name: 'Qwen2.5 1.5B',  size: '~1 GB',   desc: 'Multilingual · Norwegian ✓ · Compact',                   badge: null },
         { id: 'Llama-3.2-3B-Instruct-q4f16_1-MLC',    name: 'Llama 3.2 3B',  size: '~2 GB',   desc: 'Multilingual · Meta',                                   badge: null },
-        { id: 'Qwen3.5-2B-q4f16_1-MLC',               name: 'Qwen3.5 2B',    size: '~1.4 GB', desc: 'Newest · 201 languages · Reasoning',                   badge: null },
+        { id: 'Qwen3.5-2B-q4f16_1-MLC',               name: 'Qwen3.5 2B',    size: '~1.4 GB', desc: 'Newest · 201 languages · Optional reasoning',            badge: 'Recommended' },
     ].map(m => `
         <div class="model-card" data-model-id="${m.id}">
             <div class="model-card-radio"><span class="model-radio-dot"></span></div>
