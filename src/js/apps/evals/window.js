@@ -16,6 +16,7 @@
 import { BM25 } from '../../assistant/retrieval/BM25.js';
 import { assistantRegistry } from '../../assistant/registry/AssistantRegistry.js';
 import { ActiveContext } from '../../assistant/retrieval/ActiveContext.js';
+import { resolveResearchIntent } from '../../assistant/researchContext.js';
 
 import { FIXTURE_CORPUS } from '../../../../tests/evals/datasets/fixtureCorpus.js';
 import { RETRIEVAL_DATASET } from '../../../../tests/evals/datasets/retrieval.js';
@@ -660,9 +661,25 @@ async function commandsRunner(emit, chat, shouldAbort = () => false) {
     return summariseCommands(rows, { stability: mean(stabilities), passAtK: mean(passAtKs), repeats: REPEATS });
 }
 
+// Map the shared research-context resolver's intent to the plan action schema.
+// Only the intents that exist in the plan dataset (open paper / chat) map; the
+// rest (sort/filter/search) fall through to the LLM planner.
+function contextualAction(text, activeApp) {
+    if (activeApp !== 'research') return null;
+    const hit = resolveResearchIntent(text);
+    if (hit?.intent === 'research_open_nth') return [{ a: 'open_paper', n: hit.args.n }];
+    if (hit?.intent === 'research_question') return [{ a: 'chat', t: text }];
+    return null;
+}
+
 // ── Multi-shot planning: whole conversations, history carried across turns ────
 async function planRunner(emit, chat, shouldAbort = () => false) {
-    const predictTurn = (userText, history) => chat.parseCommand(userText, history);
+    // Mirror the live pipeline: when an app is focused, resolve context-app
+    // commands deterministically (as _parseContextual does) BEFORE the LLM —
+    // otherwise the eval unfairly forces the planner to handle turns production
+    // never sends to it (e.g. "let me see the second one" → open paper #2).
+    const predictTurn = (userText, history, activeApp) =>
+        contextualAction(userText, activeApp) ?? chat.parseCommand(userText, history);
     const cases = [];
     const stabilities = [];
     const passAtKs = [];
