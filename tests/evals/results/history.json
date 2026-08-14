@@ -144,5 +144,44 @@
       "plan": 0.8888888888888888,
       "answers": 0.616833029221432
     }
+  },
+  {
+    "generatedAt": "2026-08-14T08:13:05.465Z",
+    "source": "browser",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "routing": 0.7142857142857143,
+      "commands": 0.9285714285714286,
+      "plan": 0.5555555555555556,
+      "answers": 0.5612448322312695
+    }
+  },
+  {
+    "generatedAt": "2026-08-14T08:24:41.214Z",
+    "source": "browser",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "routing": 0.8928571428571429,
+      "commands": 1,
+      "plan": 0.8888888888888888,
+      "answers": 0.6278337180854016
+    }
+  },
+  {
+    "generatedAt": "2026-08-14T08:42:59.256Z",
+    "source": "browser",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "routing": 0.8928571428571429,
+      "commands": 1,
+      "plan": 0.8888888888888888,
+      "answers": 0.6216106339717955
+    }
   }
 ]

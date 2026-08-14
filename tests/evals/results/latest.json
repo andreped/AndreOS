@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-14T07:52:11.083Z",
+  "generatedAt": "2026-08-14T08:42:59.256Z",
   "source": "browser",
   "suites": {
     "retrieval": {
@@ -159,8 +159,8 @@
       "total": 9,
       "turns": 22,
       "planExactMatch": 0.8888888888888888,
-      "turnExactMatch": 0.9090909090909091,
-      "turnF1": 0.9090909090909091,
+      "turnExactMatch": 0.9545454545454546,
+      "turnF1": 0.9545454545454546,
       "byTag": {
         "multishot": {
           "total": 9,
@@ -208,9 +208,9 @@
                 "open:research"
               ],
               "predicted": [
-                "browse:github.com/andreped"
+                "open:research"
               ],
-              "exact": false
+              "exact": true
             },
             {
               "expected": [
@@ -240,51 +240,51 @@
     "answers": {
       "suite": "answers",
       "total": 8,
-      "ragas": 0.616833029221432,
-      "faithfulness": 0.7125431710474727,
-      "correctness": 0.602949304236069,
-      "relevancy": 0.5350066123807543,
+      "ragas": 0.6216106339717955,
+      "faithfulness": 0.672646966219605,
+      "correctness": 0.6237615056372342,
+      "relevancy": 0.5684234300585475,
       "hallucinationRate": 0,
       "byTag": {
         "bio": {
           "total": 3,
-          "ragas": 0.6212075550394974,
-          "faithfulness": 0.6557971014492753
+          "ragas": 0.631111067877593,
+          "faithfulness": 0.6324784364688045
         },
         "career": {
           "total": 1,
-          "ragas": 0.6695261437908497,
-          "faithfulness": 0.6666666666666666
+          "ragas": 0.6953547849878071,
+          "faithfulness": 0.7058823529411765
         },
         "education": {
           "total": 1,
-          "ragas": 0.7393368842644206,
-          "faithfulness": 0.8717948717948718
+          "ragas": 0.5564937047987896,
+          "faithfulness": 0.711864406779661
         },
         "research-question": {
           "total": 3,
-          "ragas": 0.6019804220758621,
-          "faithfulness": 0.7407564510427713
+          "ragas": 0.6305453725606278,
+          "faithfulness": 0.6478862056441055
         },
         "projects": {
           "total": 1,
-          "ragas": 0.7214672861014324,
-          "faithfulness": 0.8048780487804879
+          "ragas": 0.6287623896023757,
+          "faithfulness": 0.6417910447761194
         },
         "skills": {
           "total": 1,
-          "ragas": 0.49998548894983524,
-          "faithfulness": 0.6774193548387096
+          "ragas": 0.5903774587985114,
+          "faithfulness": 0.7272727272727273
         },
         "contact": {
           "total": 1,
-          "ragas": 0.6132822123675782,
-          "faithfulness": 0.5121951219512195
+          "ragas": 0.5827566381298949,
+          "faithfulness": 0.5641025641025641
         },
         "abstain": {
           "total": 1,
-          "ragas": 0.6132822123675782,
-          "faithfulness": 0.5121951219512195
+          "ragas": 0.5827566381298949,
+          "faithfulness": 0.5641025641025641
         }
       },
       "failures": [],

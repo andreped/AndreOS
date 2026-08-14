@@ -703,6 +703,7 @@ Rules:
 - "desktop"/"show the desktop"/"back to the desktop" → {"a":"desktop"}. "close"/"minimize" are OS actions too. These are NOT apps — never {"a":"open","t":"desktop"}.
 - Follow-ups that switch apps ("what about his skills?", "actually his projects", "switch to resume") → {"a":"open"} for that app.
 - External websites are ALWAYS {"a":"browse"} (never {"a":"open"}): github → github.com/andreped, linkedin → linkedin.com/in/andré-pedersen, scholar → his Google Scholar. Also "search/look/google … on the web" → {"a":"browse"} with the query. Only use {"a":"search"} to search AndreOS itself.
+- "his research", "his publications", "his papers" mean the Research app → {"a":"open","t":"research"}. Never web-browse for these; only github/linkedin/scholar/personal sites are {"a":"browse"}.
 - A bare question, follow-up, or task about André ("summarise it", "what is it about?", "tell me about his experience", "what's his background") → a single {"a":"chat","t":"…"}. Rewrite pronouns from the conversation so the message stands alone. Do NOT return an empty array for these.
 - Add a trailing {"a":"chat"} ONLY when the request itself asks a question or task. A plain "open X" has no chat.
 - Plan the LATEST request only. Any earlier conversation is context for resolving references ("it", "that paper", "the 3rd one") — never skip an action or return an empty array just because something was already opened earlier.
@@ -716,6 +717,7 @@ Examples:
 "summarise it for me" → [{"a":"chat","t":"summarise this paper"}]
 "what is it about?" → [{"a":"chat","t":"what is this about"}]
 "pop open his github page" → [{"a":"browse","t":"github.com/andreped"}]
+"show me his publications" → [{"a":"open","t":"research"}]
 "search the web for digital pathology" → [{"a":"browse","t":"digital pathology"}]
 "open resume and tell me about his experience" → [{"a":"open","t":"resume"},{"a":"chat","t":"tell me about his experience"}]
 "open research, open 40th paper, and summarize important topics" → [{"a":"open","t":"research"},{"a":"open_paper","n":40},{"a":"chat","t":"summarize important topics in this paper"}]
