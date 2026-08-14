@@ -8,7 +8,7 @@
  *
  * Light is the default. 'system' follows the OS `prefers-color-scheme`.
  */
-import { getTheme, saveSettings } from './Settings.js';
+import { getTheme, getBackground, saveSettings } from './Settings.js';
 
 const THEME_CHANGE_EVENT = 'andreos:theme-change';
 
@@ -25,7 +25,28 @@ function resolve(pref) {
 export function applyTheme(pref = getTheme()) {
     const resolved = resolve(pref);
     document.documentElement.setAttribute('data-theme', resolved);
+    applyBackground();
     return resolved;
+}
+
+/**
+ * Write the desktop background choice onto <html data-background="…">.
+ * 'match' clears the attribute so the wallpaper follows the resolved theme;
+ * 'light'/'dark' pin the wallpaper regardless of the UI theme.
+ */
+export function applyBackground(pref = getBackground()) {
+    if (pref === 'light' || pref === 'dark') {
+        document.documentElement.setAttribute('data-background', pref);
+    } else {
+        document.documentElement.removeAttribute('data-background');
+    }
+    return pref;
+}
+
+/** Persist a new background preference and apply it immediately. */
+export function setBackground(pref) {
+    saveSettings({ background: pref });
+    return applyBackground(pref);
 }
 
 /** Persist a new preference and apply it immediately. */
@@ -50,6 +71,7 @@ function watchSystem(pref) {
 export function initTheme() {
     const pref = getTheme();
     applyTheme(pref);
+    applyBackground();
     watchSystem(pref);
     return pref;
 }

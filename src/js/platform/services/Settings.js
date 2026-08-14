@@ -76,6 +76,16 @@ export const THEMES = [
     { id: 'system', label: 'System', icon: '💻', desc: 'Follow your operating system setting' },
 ];
 
+/**
+ * Desktop background animation. Independent of the UI theme so you can keep the
+ * bright wallpaper even in Dark mode. 'match' follows whatever the theme resolves to.
+ */
+export const BACKGROUNDS = [
+    { id: 'match', label: 'Match theme', icon: '🎭', desc: 'Follow the UI theme above' },
+    { id: 'light', label: 'Bright',      icon: '🌈', desc: 'Vivid daytime wallpaper, any theme' },
+    { id: 'dark',  label: 'Dark',        icon: '🌌', desc: 'Deep night wallpaper, any theme' },
+];
+
 export function getSettings() {
     try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}'); }
     catch { return {}; }
@@ -94,3 +104,4 @@ export function getLLMLanguage()    { return getSettings().llmLang        || 'en
 export function isVoiceAIEnabled()  { return getSettings().voiceAI !== false; }
 export function getReasoningEffort(){ return getSettings().reasoningEffort || 'none'; }     // none | low | medium | high
 export function getTheme()          { return getSettings().theme          || 'light'; }     // default Light
+export function getBackground()     { return getSettings().background     || 'light'; }     // match | light | dark — default Bright

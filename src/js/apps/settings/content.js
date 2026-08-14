@@ -33,6 +33,21 @@ export function render() {
             </div>
         </div>`).join('');
 
+    const backgrounds = [
+        { id: 'match', icon: '🎭', name: 'Match theme', desc: 'Follow the UI theme above' },
+        { id: 'light', icon: '🌈', name: 'Bright',      desc: 'Vivid daytime wallpaper — even in Dark mode' },
+        { id: 'dark',  icon: '🌌', name: 'Dark',        desc: 'Deep night wallpaper — even in Light mode' },
+    ];
+    const backgroundCards = backgrounds.map(b => `
+        <div class="theme-card" data-background-id="${b.id}">
+            <div class="model-card-radio"><span class="model-radio-dot"></span></div>
+            <span class="theme-card-icon">${b.icon}</span>
+            <div class="model-card-info">
+                <div class="model-card-header"><span class="model-name">${b.name}</span></div>
+                <div class="model-desc">${b.desc}</div>
+            </div>
+        </div>`).join('');
+
     return `
         <div class="settings-container">
             <nav class="settings-sidebar">
@@ -136,6 +151,12 @@ export function render() {
                     <h3 class="settings-subsection-title">Theme</h3>
                     <div class="theme-cards" id="theme-cards">
                         ${themeCards}
+                    </div>
+
+                    <h3 class="settings-subsection-title">Background</h3>
+                    <p class="settings-section-desc">The animated desktop wallpaper. Keep it independent of the theme — for example, a bright background even while the UI stays in Dark mode.</p>
+                    <div class="theme-cards" id="background-cards">
+                        ${backgroundCards}
                     </div>
                 </div>
 

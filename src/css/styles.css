@@ -102,6 +102,22 @@
     color-scheme: dark;
 }
 
+/* ──────────────────────────────────────────────────────────────────────────
+   BACKGROUND OVERRIDE
+   Pins the animated desktop wallpaper independently of the UI theme, so Dark
+   mode can still show the bright wallpaper (Settings ▸ Appearance ▸ Background).
+   `html[…]` outranks the single-attribute `[data-theme="dark"]` selector above.
+   ────────────────────────────────────────────────────────────────────────── */
+html[data-background="light"] {
+    --wallpaper: linear-gradient(135deg,
+        #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+}
+
+html[data-background="dark"] {
+    --wallpaper: linear-gradient(135deg,
+        #16213e 0%, #1a1a2e 30%, #24243e 55%, #302b4a 78%, #0f2027 100%);
+}
+
 /* Prevent fixed panels that use translateX(100%) from causing horizontal scroll
    or shifting the desktop when an off-screen input is focused. */
 html, body {
