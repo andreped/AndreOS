@@ -60,7 +60,52 @@ function looksLooping(text) {
  * injects when thinking is disabled) so structured/eval outputs stay clean.
  */
 function stripThink(text) {
-    return String(text ?? '').replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+    return String(text ?? '')
+        .replace(/<think>[\s\S]*?<\/think>/g, '')  // completed reasoning blocks
+        .replace(/<think>[\s\S]*$/, '')            // unterminated (e.g. cut mid-think)
+        .trim();
+}
+
+/**
+ * Generation config for the answer/eval path, honouring the Reasoning effort
+ * setting. When thinking is on the budget is widened (thinking eats tokens);
+ * when off it uses the tight per-call default.
+ * @param {number} baseTokens tokens to allow when NOT thinking
+ */
+function structuredGenConfig(baseTokens) {
+    const effort = REASONING_LEVELS.find(l => l.id === getReasoningEffort()) ?? REASONING_LEVELS[0];
+    return {
+        think: effort.think,
+        maxTokens: effort.think ? Math.max(effort.maxTokens, baseTokens) : baseTokens,
+    };
+}
+
+/**
+ * Streamed completion with the same loop-breaker as the chat UI, returning the
+ * reasoning-stripped text. Used by the structured/eval calls so a thinking loop
+ * gets cut off instead of blocking until max_tokens (non-streaming can't do that).
+ */
+async function completeText(messages, { maxTokens, temperature = 0.7, think = false }) {
+    const stream = await engine.chat.completions.create({
+        messages,
+        stream: true,
+        max_tokens: maxTokens,
+        temperature,
+        top_p: 0.9,
+        frequency_penalty: 0.4,
+        presence_penalty: 1.3,
+        extra_body: { enable_thinking: think },
+    });
+    let full = '';
+    let cut = false;
+    for await (const chunk of stream) {
+        full += chunk.choices[0]?.delta?.content || '';
+        if (!cut && looksLooping(full)) {
+            cut = true;
+            try { engine.interruptGenerate?.(); } catch { /* ignore */ }
+        }
+    }
+    return stripThink(full);
 }
 
 // ── Desktop-ready gate ────────────────────────────────────────────────────────
@@ -624,19 +669,13 @@ window.AndreChat = {
                 : null,
         ].filter(Boolean).join('\n\n') + langInstruction;
         try {
-            const res = await engine.chat.completions.create({
-                messages: [
-                    { role: 'system', content: systemContent },
-                    ...history.filter(m => m.role !== 'system'),
-                    { role: 'user', content: text },
-                ],
-                max_tokens: 512,
-                temperature,
-                frequency_penalty: 0.4,
-                presence_penalty: 1.3,
-                extra_body: { enable_thinking: false },
-            });
-            return { text: stripThink(res.choices[0]?.message?.content ?? ''), context };
+            const cfg = structuredGenConfig(512);
+            const out = await completeText([
+                { role: 'system', content: systemContent },
+                ...history.filter(m => m.role !== 'system'),
+                { role: 'user', content: text },
+            ], { maxTokens: cfg.maxTokens, temperature, think: cfg.think });
+            return { text: out, context };
         } catch (err) {
             console.error('[AndreChat] answer error:', err);
             return { text: '', context };
@@ -664,6 +703,7 @@ Rules:
 - "desktop"/"show the desktop"/"back to the desktop" → {"a":"desktop"}. "close"/"minimize" are OS actions too. These are NOT apps — never {"a":"open","t":"desktop"}.
 - Follow-ups that switch apps ("what about his skills?", "actually his projects", "switch to resume") → {"a":"open"} for that app.
 - External websites are ALWAYS {"a":"browse"} (never {"a":"open"}): github → github.com/andreped, linkedin → linkedin.com/in/andré-pedersen, scholar → his Google Scholar. Also "search/look/google … on the web" → {"a":"browse"} with the query. Only use {"a":"search"} to search AndreOS itself.
+- "his research", "his publications", "his papers" mean the Research app → {"a":"open","t":"research"}. Never web-browse for these; only github/linkedin/scholar/personal sites are {"a":"browse"}.
 - A bare question, follow-up, or task about André ("summarise it", "what is it about?", "tell me about his experience", "what's his background") → a single {"a":"chat","t":"…"}. Rewrite pronouns from the conversation so the message stands alone. Do NOT return an empty array for these.
 - Add a trailing {"a":"chat"} ONLY when the request itself asks a question or task. A plain "open X" has no chat.
 - Plan the LATEST request only. Any earlier conversation is context for resolving references ("it", "that paper", "the 3rd one") — never skip an action or return an empty array just because something was already opened earlier.
@@ -677,6 +717,7 @@ Examples:
 "summarise it for me" → [{"a":"chat","t":"summarise this paper"}]
 "what is it about?" → [{"a":"chat","t":"what is this about"}]
 "pop open his github page" → [{"a":"browse","t":"github.com/andreped"}]
+"show me his publications" → [{"a":"open","t":"research"}]
 "search the web for digital pathology" → [{"a":"browse","t":"digital pathology"}]
 "open resume and tell me about his experience" → [{"a":"open","t":"resume"},{"a":"chat","t":"tell me about his experience"}]
 "open research, open 40th paper, and summarize important topics" → [{"a":"open","t":"research"},{"a":"open_paper","n":40},{"a":"chat","t":"summarize important topics in this paper"}]
@@ -687,13 +728,9 @@ Reply with ONLY the JSON array for the latest request.${histCtx ? `\nEarlier con
 Request: "${text.replace(/"/g, "'")}"`;
 
         try {
-            const response = await engine.chat.completions.create({
-                messages: [{ role: 'user', content: prompt }],
-                max_tokens: 150,
-                temperature: 0.1,
-                extra_body: { enable_thinking: false },
-            });
-            const raw     = stripThink(response.choices[0]?.message?.content ?? '');
+            // Classification doesn't benefit from reasoning and loops with it — keep it fast/deterministic.
+            const raw = await completeText([{ role: 'user', content: prompt }],
+                { maxTokens: 150, temperature: 0.1, think: false });
             const jsonMatch = raw.match(/\[[\s\S]*?\]/);
             if (!jsonMatch) return null;
             const actions = JSON.parse(jsonMatch[0]);
@@ -731,13 +768,9 @@ Examples:
 "can you tell me about his projects" → direct
 Message: "${text.replace(/"/g, "'")}"`;
         try {
-            const res = await engine.chat.completions.create({
-                messages: [{ role: 'user', content: prompt }],
-                max_tokens: 8,
-                temperature: 0,
-                extra_body: { enable_thinking: false },
-            });
-            const out = stripThink(res.choices[0]?.message?.content ?? '').toLowerCase();
+            // Classification doesn't benefit from reasoning and loops with it — keep it fast/deterministic.
+            const out = (await completeText([{ role: 'user', content: prompt }],
+                { maxTokens: 8, temperature: 0, think: false })).toLowerCase();
             return out.includes('command') ? 'command' : 'direct';
         } catch {
             return null;

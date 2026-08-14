@@ -25,6 +25,8 @@
  * Pure & shared by the Node self-tests and the in-browser Evals app.
  */
 import { tokenSet, contentTokens, setF1, coverage, keywordCoverage, containsPhrase } from './text.js';
+// The assistant answers from its profile, so that IS the grounding for faithfulness.
+import { SYSTEM_PROMPT } from '../../../src/js/assistant/engine/andre-profile.js';
 
 /**
  * @typedef {{
@@ -63,8 +65,11 @@ export function scoreAnswerRow(c, generated, retrievedContext = '') {
     const correctness = 0.5 * refF1 + 0.5 * kpCoverage;
 
     // ── faithfulness: grounded in the supplied context (no hallucination) ────
+    // Support = reference + curated facts + retrieved RAG context + the assistant
+    // profile (its system prompt) — the model's actual knowledge source, so true
+    // detail it adds isn't mistaken for hallucination.
     const supportSet = tokenSet(
-        [c.reference ?? '', ...(c.groundTruth ?? []), retrievedContext].join(' '),
+        [c.reference ?? '', ...(c.groundTruth ?? []), retrievedContext, SYSTEM_PROMPT].join(' '),
     );
     let faithfulness = genContent.length ? coverage(new Set(genContent), supportSet) : 0;
     const banned = (c.mustNotContain ?? []).filter((p) => containsPhrase(gen, p));

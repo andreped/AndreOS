@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-13T17:46:38.512Z",
+  "generatedAt": "2026-08-14T08:42:59.256Z",
   "source": "browser",
   "suites": {
     "retrieval": {
@@ -159,8 +159,8 @@
       "total": 9,
       "turns": 22,
       "planExactMatch": 0.8888888888888888,
-      "turnExactMatch": 0.9090909090909091,
-      "turnF1": 0.9090909090909091,
+      "turnExactMatch": 0.9545454545454546,
+      "turnF1": 0.9545454545454546,
       "byTag": {
         "multishot": {
           "total": 9,
@@ -208,9 +208,9 @@
                 "open:research"
               ],
               "predicted": [
-                "browse:github.com/andreped"
+                "open:research"
               ],
-              "exact": false
+              "exact": true
             },
             {
               "expected": [
@@ -240,89 +240,56 @@
     "answers": {
       "suite": "answers",
       "total": 8,
-      "ragas": 0.4467876244887062,
-      "faithfulness": 0.3465145041171584,
-      "correctness": 0.5304835197210083,
-      "relevancy": 0.46336484962795177,
+      "ragas": 0.6216106339717955,
+      "faithfulness": 0.672646966219605,
+      "correctness": 0.6237615056372342,
+      "relevancy": 0.5684234300585475,
       "hallucinationRate": 0,
       "byTag": {
         "bio": {
           "total": 3,
-          "ragas": 0.4153611270412076,
-          "faithfulness": 0.2804615705931495
+          "ragas": 0.631111067877593,
+          "faithfulness": 0.6324784364688045
         },
         "career": {
           "total": 1,
-          "ragas": 0.5745411916888997,
-          "faithfulness": 0.3157894736842105
+          "ragas": 0.6953547849878071,
+          "faithfulness": 0.7058823529411765
         },
         "education": {
           "total": 1,
-          "ragas": 0.7128825475599668,
-          "faithfulness": 0.625
+          "ragas": 0.5564937047987896,
+          "faithfulness": 0.711864406779661
         },
         "research-question": {
           "total": 3,
-          "ragas": 0.41505859372608883,
-          "faithfulness": 0.4162019162019162
+          "ragas": 0.6305453725606278,
+          "faithfulness": 0.6478862056441055
         },
         "projects": {
           "total": 1,
-          "ragas": 0.6697733447733447,
-          "faithfulness": 0.6216216216216216
+          "ragas": 0.6287623896023757,
+          "faithfulness": 0.6417910447761194
         },
         "skills": {
           "total": 1,
-          "ragas": 0.3620258189223707,
-          "faithfulness": 0.1724137931034483
+          "ragas": 0.5903774587985114,
+          "faithfulness": 0.7272727272727273
         },
         "contact": {
           "total": 1,
-          "ragas": 0.25660468659912694,
-          "faithfulness": 0.12280701754385964
+          "ragas": 0.5827566381298949,
+          "faithfulness": 0.5641025641025641
         },
         "abstain": {
           "total": 1,
-          "ragas": 0.25660468659912694,
-          "faithfulness": 0.12280701754385964
+          "ragas": 0.5827566381298949,
+          "faithfulness": 0.5641025641025641
         }
       },
-      "failures": [
-        {
-          "id": "programming-languages",
-          "ragas": 0.362,
-          "faithfulness": 0.172,
-          "correctness": 0.441,
-          "relevancy": 0.472,
-          "generated": "André knows **Python, C++, and JavaScript/TypeScript** as his primary programming languages. He also has experience with **C#, Dart**, and uses tools like **.NE"
-        },
-        {
-          "id": "publication-count",
-          "ragas": 0.327,
-          "faithfulness": 0.389,
-          "correctness": 0.345,
-          "relevancy": 0.247,
-          "generated": "André Pedersen has published 30+ peer-reviewed papers across the fields of computational pathology, brain tumour MRI segmentation, and medical imaging."
-        },
-        {
-          "id": "consulting-availability",
-          "ragas": 0.257,
-          "faithfulness": 0.123,
-          "correctness": 0.335,
-          "relevancy": 0.313,
-          "generated": "André Pedersen is available for consulting on medical AI, specifically focused on healthcare imaging and speech-to-text systems in Norway. His current role as a"
-        },
-        {
-          "id": "healthcare-focus",
-          "ragas": 0.248,
-          "faithfulness": 0.238,
-          "correctness": 0.284,
-          "relevancy": 0.223,
-          "generated": "André is passionate about healthcare AI because he understands how powerful technology can solve critical medical problems, especially for underserved regions i"
-        }
-      ],
+      "failures": [],
       "stability": 1,
-      "passAtK": 0.5,
+      "passAtK": 1,
       "repeats": 1
     }
   }
