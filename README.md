@@ -100,6 +100,9 @@ https://andreped.dev/?ask=Tell%20me%20about%20Andr%C3%A9%27s%20research
 # Open the Research app, navigate to the 40th paper, and summarise it
 # (requires the AI model to be loaded first — open the OS Assistant once to cache it)
 https://andreped.dev/?ask=Open%20research%2C%20open%2040th%20paper%2C%20and%20summarize%20important%20topics%20in%20paper
+
+# Casual, multi-step phrasing — pull up his research, open a paper, and get the gist
+https://andreped.dev/?ask=Can%20you%20pull%20up%20his%20research%2C%20open%20the%20second%20paper%2C%20and%20give%20me%20the%20gist%20of%20it
 ```
 
 
