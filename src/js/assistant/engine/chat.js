@@ -79,6 +79,19 @@ function looksLooping(text) {
 }
 
 /**
+ * Sampling penalties, keyed off the active model. Qwen3.5's recurrent
+ * architecture falls into degenerate repetition loops without an aggressive
+ * presence_penalty (per MLC's guidance), but that same value garbles non-Qwen
+ * models (Ministral/Llama/etc.) on basic tasks — they only need a light
+ * frequency penalty. `looksLooping` is the shared safety net for both.
+ */
+function samplingPenalties() {
+    return /qwen/i.test(getModelId())
+        ? { frequency_penalty: 0.4, presence_penalty: 1.3 }
+        : { frequency_penalty: 0.3, presence_penalty: 0.0 };
+}
+
+/**
  * Remove `<think>…</think>` reasoning blocks (including the empty one WebLLM
  * injects when thinking is disabled) so structured/eval outputs stay clean.
  */
@@ -128,8 +141,7 @@ async function completeText(messages, { maxTokens, temperature = 0.7, think = fa
         max_tokens: maxTokens,
         temperature,
         top_p: 0.9,
-        frequency_penalty: 0.4,
-        presence_penalty: 1.3,
+        ...samplingPenalties(),
         extra_body: { enable_thinking: think },
     });
     let full = '';
@@ -316,8 +328,7 @@ async function sendMessage(winEl, userText) {
             max_tokens: 512,
             temperature: 0.7,
             top_p: 0.9,
-            frequency_penalty: 0.4,
-            presence_penalty: 1.3,
+            ...samplingPenalties(),
             extra_body: { enable_thinking: false },
         });
         let fullText = '';
@@ -695,8 +706,7 @@ window.AndreChat = {
                 top_p: 0.9,
                 // Penalise repeats so the small model doesn't fall into a
                 // reasoning loop (Qwen recommends presence_penalty for this).
-                frequency_penalty: 0.4,
-                presence_penalty: 1.3,
+                ...samplingPenalties(),
                 extra_body: { enable_thinking: effort.think },
             });
             let fullText = '';

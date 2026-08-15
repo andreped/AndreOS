@@ -330,5 +330,31 @@
       "plan": 1,
       "answers": 0.5334881973386796
     }
+  },
+  {
+    "generatedAt": "2026-08-15T09:45:10.491Z",
+    "source": "browser",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "routing": 0.75,
+      "commands": 0.9285714285714286,
+      "plan": 0.4444444444444444,
+      "answers": 0.5302748821036937
+    }
+  },
+  {
+    "generatedAt": "2026-08-15T09:54:16.953Z",
+    "source": "browser",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "routing": 0.6428571428571429,
+      "commands": 0.5,
+      "plan": 0,
+      "answers": 0.5186751612391327
+    }
   }
 ]

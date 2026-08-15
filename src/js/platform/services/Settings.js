@@ -12,6 +12,8 @@ export const MODELS = [
     { id: 'Llama-3.2-3B-Instruct-q4f16_1-MLC', name: 'Llama 3.2 3B',  size: '~2 GB',   desc: 'Multilingual · Meta',                                     badge: null },
     { id: 'Qwen3.5-2B-q4f16_1-MLC',            name: 'Qwen3.5 2B',    size: '~1.4 GB', desc: 'Newest · 201 languages · Optional reasoning',              badge: 'Recommended' },
     { id: 'Qwen3.5-4B-q4f16_1-MLC',            name: 'Qwen3.5 4B',    size: '~2.8 GB', desc: 'Largest · 201 languages · Optional reasoning · Needs more VRAM', badge: null },
+    { id: 'Ministral-3-3B-Instruct-2512-BF16-q4f16_1-MLC', name: 'Ministral 3B',           size: '~2 GB', desc: 'Mistral AI · Multilingual · Instruct',              badge: null },
+    { id: 'Ministral-3-3B-Reasoning-2512-q4f16_1-MLC',     name: 'Ministral 3B Reasoning', size: '~2 GB', desc: 'Mistral AI · Multilingual · Built-in reasoning', badge: null },
 ];
 
 /**
@@ -46,6 +48,23 @@ export const CUSTOM_MODELS = [
         model_id: 'Qwen3.5-4B-q4f16_1-MLC',
         model_lib: 'https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/main/web-llm-models/v0_2_84/base/Qwen3.5-4B-q4f16_1_cs1k-webgpu.wasm',
         overrides: { context_window_size: 8192, max_history_size: 1 },
+    },
+    // Ministral 3B (Mistral AI) — ministral3 architecture, standard attention
+    // (sliding_window_size: -1), so no max_history_size hack. Native context is
+    // 262k via YARN rope; capped to 8192 to match the other GPU models' VRAM budget.
+    {
+        model: 'https://huggingface.co/mlc-ai/Ministral-3-3B-Instruct-2512-BF16-q4f16_1-MLC',
+        model_id: 'Ministral-3-3B-Instruct-2512-BF16-q4f16_1-MLC',
+        model_lib: 'https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/main/web-llm-models/v0_2_84/base/Ministral-3-3B-Instruct-2512-BF16-q4f16_1_cs1k-webgpu.wasm',
+        overrides: { context_window_size: 8192 },
+    },
+    // Reasoning variant — thinks natively (no enable_thinking flag needed); the
+    // Reasoning-effort setting still widens its token budget.
+    {
+        model: 'https://huggingface.co/mlc-ai/Ministral-3-3B-Reasoning-2512-q4f16_1-MLC',
+        model_id: 'Ministral-3-3B-Reasoning-2512-q4f16_1-MLC',
+        model_lib: 'https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/main/web-llm-models/v0_2_84/base/Ministral-3-3B-Reasoning-2512-q4f16_1_cs1k-webgpu.wasm',
+        overrides: { context_window_size: 8192 },
     },
 ];
 
