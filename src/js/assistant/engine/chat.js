@@ -784,7 +784,7 @@ Rules:
 - The apps listed above are ALWAYS {"a":"open","t":"<app>"} — for "open/show/pull up/see/switch to/what about <app>". Never {"a":"browse"} an app, and never {"a":"open","t":"chat"}.
 - "desktop"/"show the desktop"/"back to the desktop" → {"a":"desktop"}. "close"/"minimize" are OS actions too. These are NOT apps — never {"a":"open","t":"desktop"}.
 - Follow-ups that switch apps ("what about his skills?", "actually his projects", "switch to resume") → {"a":"open"} for that app.
-- External websites are ALWAYS {"a":"browse"} (never {"a":"open"}): github → github.com/andreped, linkedin → linkedin.com/in/andré-pedersen, scholar → his Google Scholar. Also "search/look/google … on the web" → {"a":"browse"} with the query. Only use {"a":"search"} to search AndreOS itself.
+- External websites are ALWAYS {"a":"browse"} (never {"a":"open"}). If the user gives an explicit URL or domain (e.g. "github.com", "example.org/x"), browse it VERBATIM — never rewrite it. Only a bare service name maps to André's profile: github → github.com/andreped, linkedin → linkedin.com/in/andré-pedersen, scholar → his Google Scholar. Also "search/look/google … on the web" → {"a":"browse"} with the query. Only use {"a":"search"} to search AndreOS itself.
 - "his research", "his publications", "his papers" mean the Research app → {"a":"open","t":"research"}. Never web-browse for these; only github/linkedin/scholar/personal sites are {"a":"browse"}.
 - A bare question, follow-up, or task about André ("summarise it", "what is it about?", "tell me about his experience", "what's his background") → a single {"a":"chat","t":"…"}. Rewrite pronouns from the conversation so the message stands alone. Do NOT return an empty array for these.
 - Add a trailing {"a":"chat"} ONLY when the request itself asks a question or task. A plain "open X" has no chat.
@@ -799,6 +799,7 @@ Examples:
 "summarise it for me" → [{"a":"chat","t":"summarise this paper"}]
 "what is it about?" → [{"a":"chat","t":"what is this about"}]
 "pop open his github page" → [{"a":"browse","t":"github.com/andreped"}]
+"go to github.com" → [{"a":"browse","t":"github.com"}]
 "show me his publications" → [{"a":"open","t":"research"}]
 "search the web for digital pathology" → [{"a":"browse","t":"digital pathology"}]
 "open resume and tell me about his experience" → [{"a":"open","t":"resume"},{"a":"chat","t":"tell me about his experience"}]
@@ -830,8 +831,8 @@ Request: "${text.replace(/"/g, "'")}"`;
             .join('\n');
         const prompt =
 `You are AndreOS's intent router. Classify the user's latest message as "command" or "direct".
-- "command" = an OS action: open/show/close/minimize an app or window; show desktop; browse or search the web; open a numbered paper; or act on the current app (sort, filter, find papers). Includes non-English, e.g. Norwegian ("åpne", "lukk", "vis").
-- "direct" = a question or conversation to answer about André (bio, career, research, skills, opinions).
+- "command" = an OS action: open/show/close/minimize a named app or window; show desktop; browse or search the web; open a numbered paper; or act on the current app (sort, filter, find papers). Includes non-English, e.g. Norwegian ("åpne", "lukk", "vis").
+- "direct" = a question or conversation to answer about André (bio, career, research, skills, opinions). A question about what/where/how he worked is "direct" even if it opens with "show me" or "tell me" (nothing gets opened).
 ${histCtx ? `Recent conversation:\n${histCtx}\n` : ''}Reply with ONLY "command" or "direct".
 Examples:
 "open research" → command
@@ -846,6 +847,7 @@ Examples:
 "lukk vinduet" → command
 "who is André?" → direct
 "tell me about his work" → direct
+"show me what he worked on at SINTEF" → direct
 "what programming languages does he know?" → direct
 "can you tell me about his projects" → direct
 Message: "${text.replace(/"/g, "'")}"`;

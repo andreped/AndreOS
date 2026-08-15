@@ -11,6 +11,7 @@ export const MODELS = [
     { id: 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC', name: 'Qwen2.5 1.5B',  size: '~1 GB',   desc: 'Multilingual · Norwegian ✓ · Compact',                     badge: null },
     { id: 'Llama-3.2-3B-Instruct-q4f16_1-MLC', name: 'Llama 3.2 3B',  size: '~2 GB',   desc: 'Multilingual · Meta',                                     badge: null },
     { id: 'Qwen3.5-2B-q4f16_1-MLC',            name: 'Qwen3.5 2B',    size: '~1.4 GB', desc: 'Newest · 201 languages · Optional reasoning',              badge: 'Recommended' },
+    { id: 'Qwen3.5-4B-q4f16_1-MLC',            name: 'Qwen3.5 4B',    size: '~2.8 GB', desc: 'Largest · 201 languages · Optional reasoning · Needs more VRAM', badge: null },
 ];
 
 /**
@@ -35,6 +36,15 @@ export const CUSTOM_MODELS = [
         model: 'https://huggingface.co/mlc-ai/Qwen3.5-2B-q4f16_1-MLC',
         model_id: 'Qwen3.5-2B-q4f16_1-MLC',
         model_lib: 'https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/main/web-llm-models/v0_2_84/base/Qwen3.5-2B-q4f16_1_cs1k-webgpu.wasm',
+        overrides: { context_window_size: 8192, max_history_size: 1 },
+    },
+    // Qwen3.5 4B — same qwen3_5 architecture as the 2B (standard attention, no sliding
+    // window), official MLC build with a v0_2_84 wasm. max_history_size: 1 for the same
+    // hybrid/recurrent reason. Heavier (~2.8 GB VRAM) — needs a roomier GPU than the 2B.
+    {
+        model: 'https://huggingface.co/mlc-ai/Qwen3.5-4B-q4f16_1-MLC',
+        model_id: 'Qwen3.5-4B-q4f16_1-MLC',
+        model_lib: 'https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/main/web-llm-models/v0_2_84/base/Qwen3.5-4B-q4f16_1_cs1k-webgpu.wasm',
         overrides: { context_window_size: 8192, max_history_size: 1 },
     },
 ];
