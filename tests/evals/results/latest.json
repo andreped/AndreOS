@@ -1,6 +1,15 @@
 {
-  "generatedAt": "2026-08-14T15:49:44.325Z",
+  "generatedAt": "2026-08-15T08:27:34.280Z",
   "source": "browser",
+  "config": {
+    "model": "Qwen3.5-2B-q4f16_1-MLC",
+    "backend": "webgpu",
+    "reasoning": "none",
+    "language": "en",
+    "repeats": 3
+  },
+  "configKey": "Qwen3.5-2B-q4f16_1-MLC·webgpu·r:none·en",
+  "runtimeMs": 365566.98999999464,
   "suites": {
     "retrieval": {
       "suite": "retrieval",
@@ -27,15 +36,15 @@
     "routing": {
       "suite": "routing",
       "total": 28,
-      "accuracy": 0.8928571428571429,
-      "precision": 0.8333333333333334,
+      "accuracy": 0.9642857142857143,
+      "precision": 0.9375,
       "recall": 1,
-      "f1": 0.9090909090909091,
+      "f1": 0.967741935483871,
       "confusion": {
         "tp": 15,
-        "fp": 3,
+        "fp": 1,
         "fn": 0,
-        "tn": 10
+        "tn": 12
       },
       "byTag": {
         "open": {
@@ -60,11 +69,11 @@
         },
         "bio": {
           "total": 7,
-          "accuracy": 0.8571428571428571
+          "accuracy": 1
         },
         "research-question": {
           "total": 3,
-          "accuracy": 0.3333333333333333
+          "accuracy": 0.6666666666666666
         },
         "skills": {
           "total": 1,
@@ -76,7 +85,7 @@
         },
         "tricky": {
           "total": 5,
-          "accuracy": 0.8
+          "accuracy": 1
         },
         "meta": {
           "total": 1,
@@ -88,21 +97,19 @@
           "input": "summarize his PhD research",
           "expected": "direct",
           "predicted": "command"
-        },
-        {
-          "input": "how many publications does he have?",
-          "expected": "direct",
-          "predicted": "command"
-        },
-        {
-          "input": "show me what he worked on at SINTEF",
-          "expected": "direct",
-          "predicted": "command"
         }
       ],
       "stability": 1,
-      "passAtK": 0.8928571428571429,
-      "repeats": 3
+      "passAtK": 0.9642857142857143,
+      "repeats": 3,
+      "latency": {
+        "n": 84,
+        "meanMs": 615.3796428575048,
+        "p50Ms": 613.5349999964237,
+        "p95Ms": 735.0799999982119,
+        "minMs": 507.63499999046326,
+        "maxMs": 788.4099999964237
+      }
     },
     "commands": {
       "suite": "commands",
@@ -150,9 +157,17 @@
         }
       },
       "failures": [],
-      "stability": 1,
+      "stability": 0.9761904761904762,
       "passAtK": 1,
-      "repeats": 3
+      "repeats": 3,
+      "latency": {
+        "n": 42,
+        "meanMs": 2707.608095238606,
+        "p50Ms": 2555.8250000029802,
+        "p95Ms": 3840.8499999940395,
+        "minMs": 1943.6300000101328,
+        "maxMs": 4098.269999995828
+      }
     },
     "plan": {
       "suite": "plan",
@@ -202,62 +217,87 @@
       "failures": [],
       "stability": 1,
       "passAtK": 1,
-      "repeats": 3
+      "repeats": 3,
+      "latency": {
+        "n": 57,
+        "meanMs": 2619.358157894329,
+        "p50Ms": 2666.109999999404,
+        "p95Ms": 3086.4749999940395,
+        "minMs": 2017.7749999910593,
+        "maxMs": 3201.645000010729
+      }
     },
     "answers": {
       "suite": "answers",
       "total": 8,
-      "ragas": 0.5887195233245791,
-      "faithfulness": 0.6771674234325443,
-      "correctness": 0.559362703501417,
-      "relevancy": 0.5296284430397759,
+      "ragas": 0.5334881973386796,
+      "faithfulness": 0.6194779261728549,
+      "correctness": 0.5048631074454658,
+      "relevancy": 0.4761235583977181,
       "hallucinationRate": 0,
       "byTag": {
         "bio": {
           "total": 3,
-          "ragas": 0.6659846803681965,
-          "faithfulness": 0.7344034944034944
+          "ragas": 0.6970299687621456,
+          "faithfulness": 0.7221174524400332
         },
         "career": {
           "total": 1,
-          "ragas": 0.7042289348171701,
-          "faithfulness": 0.72
+          "ragas": 0.6728775834658188,
+          "faithfulness": 0.68
         },
         "education": {
           "total": 1,
-          "ragas": 0.4658972085833788,
-          "faithfulness": 0.71875
+          "ragas": 0.49210104250200476,
+          "faithfulness": 0.4883720930232558
         },
         "research-question": {
           "total": 3,
-          "ragas": 0.6173250433204404,
-          "faithfulness": 0.663896038896039
+          "ragas": 0.5319262734318436,
+          "faithfulness": 0.5973664459902992
         },
         "projects": {
           "total": 1,
-          "ragas": 0.620100912612077,
-          "faithfulness": 0.6031746031746031
+          "ragas": 0.43264575001960326,
+          "faithfulness": 0.48623853211009177
         },
         "skills": {
           "total": 1,
-          "ragas": 0.45301321956670004,
-          "faithfulness": 0.4838709677419355
+          "ragas": 0.4679593386489938,
+          "faithfulness": 0.5172413793103449
         },
         "contact": {
           "total": 1,
-          "ragas": 0.41654475792406825,
-          "faithfulness": 0.5333333333333333
+          "ragas": 0.2468253968253968,
+          "faithfulness": 0.6071428571428571
         },
         "abstain": {
           "total": 1,
-          "ragas": 0.41654475792406825,
-          "faithfulness": 0.5333333333333333
+          "ragas": 0.2468253968253968,
+          "faithfulness": 0.6071428571428571
         }
       },
-      "failures": [],
+      "failures": [
+        {
+          "id": "consulting-availability",
+          "ragas": 0.247,
+          "faithfulness": 0.607,
+          "correctness": 0.048,
+          "relevancy": 0.086,
+          "generated": "André is an experienced Senior AI Engineer, but I do not have specific information regarding his current availability for consulting projects.\n\nIf you are inter"
+        }
+      ],
       "stability": 1,
-      "passAtK": 1,
-      "repeats": 1
+      "passAtK": 0.875,
+      "repeats": 1,
+      "latency": {
+        "n": 8,
+        "meanMs": 6292.65124999918,
+        "p50Ms": 5967.060000002384,
+        "p95Ms": 14951.745000004768,
+        "minMs": 3179.064999997616,
+        "maxMs": 14951.745000004768
+      }
     }
   }
 }
