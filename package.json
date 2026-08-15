@@ -11,8 +11,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "eval": "node tests/evals/runNode.js"
-  },
+    "eval": "node tests/evals/runNode.js",
+    "eval:experiment": "node tests/evals/experiment.selfcheck.mjs",
+    "eval:publish": "node scripts/publish-eval.mjs"  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/andreped/AndreOS.git"

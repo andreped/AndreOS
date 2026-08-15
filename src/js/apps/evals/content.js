@@ -150,6 +150,10 @@ export function render() {
             .eval-ds-tag { display: inline-block; background: var(--fill); color: var(--text-muted); border-radius: 10px;
                 padding: 1px 7px; font-size: 10px; margin: 1px 2px 1px 0; }
 
+            /* Experiments (cloud store) — reuses the dataset table, rows load a run */
+            .eval-exp-table tbody tr { cursor: pointer; }
+            .eval-exp-table td { font-variant-numeric: tabular-nums; }
+
             @keyframes evalsSpin { to { transform: rotate(360deg); } }
             @keyframes evalsPulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
         </style>
@@ -166,6 +170,7 @@ export function render() {
             <button class="evals-tab active" data-tab="scorecard">Scorecard</button>
             <button class="evals-tab" data-tab="run">Run <span class="evals-tab-dot" id="evals-run-indicator" style="display:none"></span></button>
             <button class="evals-tab" data-tab="dataset">Dataset</button>
+            <button class="evals-tab" data-tab="experiments">Experiments</button>
             <button class="evals-tab" data-tab="json">JSON</button>
         </div>
 
@@ -216,6 +221,19 @@ export function render() {
                 </div>
                 <div class="evals-scroll">
                     <div id="evals-dataset"></div>
+                </div>
+            </div>
+
+            <div class="evals-panel" data-panel="experiments">
+                <div class="evals-subhead">
+                    <div class="eval-runbar">
+                        <span class="evals-sub" id="evals-exp-status">Loading experiments…</span>
+                        <div class="evals-spacer"></div>
+                        <button class="evals-btn secondary" id="evals-exp-refresh">↻ Refresh</button>
+                    </div>
+                </div>
+                <div class="evals-scroll">
+                    <div id="evals-experiments"></div>
                 </div>
             </div>
 
