@@ -207,6 +207,19 @@ See **[docs/strava-feed.md](docs/strava-feed.md)** for how it works and the one-
 
 </details>
 
+<details>
+<summary><strong>Experiment store (eval runs over time)</strong></summary>
+
+The **Evals** app's **Experiments** tab reads a log of past runs — each tagged
+with its config (model, backend, reasoning, language) plus metrics and runtime —
+from a **Cloudflare D1** database. It's an MLflow-style run log without the
+MLflow server: **reads are public**, and **publishing** happens from your machine
+or CI (never the browser) so the write token never ships to a client.
+
+See **[docs/architecture/experiment-store.md](docs/architecture/experiment-store.md)** for the data model, API, and one-time setup.
+
+</details>
+
 ---
 
 ## Architecture notes
@@ -217,6 +230,7 @@ Short design docs for the trickier subsystems:
 - [Prompt compression](docs/architecture/prompt-compression.md) — retrieval instead of a big system prompt (TTFT on CPU)
 - [Background work](docs/architecture/background-workers.md) — workers, non-blocking evals, cancellable pipeline
 - [Assistant & evals](docs/architecture/assistant-evals-architecture.md) — the assistant pipeline and eval suites
+- [Experiment store](docs/architecture/experiment-store.md) — persisting & comparing eval runs across configs (Cloudflare D1)
 
 ---
 

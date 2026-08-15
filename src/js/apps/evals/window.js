@@ -33,6 +33,8 @@ import { scorePlanCase, summarisePlan } from '../../../../tests/evals/harness/sc
 import { scoreAnswerRow, summariseAnswers } from '../../../../tests/evals/harness/scoreAnswers.js';
 import { routeLabel } from '../../../../tests/evals/harness/normalize.js';
 import { mean, stdev, majority, mode, passAtK, repeat } from '../../../../tests/evals/harness/stats.js';
+import { getModelId, getReasoningEffort, getLLMLanguage, isCpuModel } from '../../platform/services/Settings.js';
+import { snapshotConfig, makeTimer } from './experiment.js';
 
 // How many times each LLM sample is re-run to measure nondeterminism. Real
 // model calls vary run-to-run, so a single sample is misleading — we repeat and
@@ -98,6 +100,14 @@ function reconstructSuite(key, suite) {
 // committed latest.json, so everyone sees the published, canonical results first.
 const LS_HISTORY = 'andreos:evals:history';
 
+// Cloud experiment store (Cloudflare D1 via /api/evals). Reads are public — no
+// token — so anyone can browse the published experiments. Publishing is done
+// from a trusted place (CI or a local script, see scripts/publish-eval.mjs) so
+// the write token never touches a browser.
+// Override the read endpoint (e.g. a deployed URL while developing) with:
+//   localStorage.setItem('andreos:evals:endpoint', 'https://…/api/evals')
+const evalsEndpoint = () => localStorage.getItem('andreos:evals:endpoint') || '/api/evals';
+
 export function setupEvalsWindow(winEl) {
     const grid       = winEl.querySelector('#evals-grid');
     const failuresEl = winEl.querySelector('#evals-failures');
@@ -113,6 +123,11 @@ export function setupEvalsWindow(winEl) {
     const datasetEl  = winEl.querySelector('#evals-dataset');
     const dsTabsEl   = winEl.querySelector('#evals-ds-tabs');
     const runIndicator = winEl.querySelector('#evals-run-indicator');
+
+    // Experiments panel (cloud store)
+    const expListEl   = winEl.querySelector('#evals-experiments');
+    const expStatusEl = winEl.querySelector('#evals-exp-status');
+    const expRefresh  = winEl.querySelector('#evals-exp-refresh');
 
     // Run-panel elements
     const runEmpty    = winEl.querySelector('#evals-run-empty');
@@ -142,6 +157,7 @@ export function setupEvalsWindow(winEl) {
         tabs.forEach((t) => t.classList.toggle('active', t.dataset.tab === name));
         panels.forEach((p) => p.classList.toggle('active', p.dataset.panel === name));
         if (name === 'json') paintJson();
+        if (name === 'experiments') loadExperiments();
     }
     tabs.forEach((t) => t.addEventListener('click', (e) => { e.stopPropagation(); activateTab(t.dataset.tab); }));
     paintDataset();
@@ -443,6 +459,83 @@ export function setupEvalsWindow(winEl) {
         } catch { /* dev endpoint unavailable — ignore */ }
     }
 
+    // ── Experiments (cloud store) ─────────────────────────────────────────────
+    let expLoading = false;
+    async function loadExperiments() {
+        if (expLoading) return;
+        expLoading = true;
+        expStatusEl.textContent = 'Loading experiments…';
+        try {
+            const res = await fetch(`${evalsEndpoint()}?limit=300`, { headers: { accept: 'application/json' } });
+            const data = await res.json().catch(() => ({}));
+            if (!data.ok) {
+                expStatusEl.textContent = data.reason === 'unbound'
+                    ? 'No experiment store configured (bind D1 as EVALS_DB to enable).'
+                    : `Could not load experiments (${data.reason ?? res.status}).`;
+                expListEl.innerHTML = '';
+                return;
+            }
+            renderExperiments(data.runs ?? []);
+            expStatusEl.textContent = `${data.runs?.length ?? 0} runs · grouped by config`;
+        } catch {
+            expStatusEl.textContent = 'Experiment store unreachable (dev build has no /api — deploy or set an endpoint override).';
+            expListEl.innerHTML = '';
+        } finally {
+            expLoading = false;
+        }
+    }
+
+    // Group runs by config; show the latest run's headline metrics + timings per
+    // config, with a run count. Rows are sorted by most-recent activity.
+    function renderExperiments(runs) {
+        if (!runs.length) { expListEl.innerHTML = '<div class="eval-empty">No runs published yet.</div>'; return; }
+        const groups = new Map();
+        for (const r of runs) {
+            const g = groups.get(r.config_key) ?? { key: r.config_key, latest: r, count: 0, runtimes: [] };
+            g.count++;
+            if (Number.isFinite(r.runtime_ms)) g.runtimes.push(r.runtime_ms);
+            if (new Date(r.created_at) > new Date(g.latest.created_at)) g.latest = r;
+            groups.set(r.config_key, g);
+        }
+        const cols = ['routing', 'commands', 'plan', 'answers'];
+        const rows = [...groups.values()]
+            .sort((a, b) => new Date(b.latest.created_at) - new Date(a.latest.created_at))
+            .map((g) => {
+                const l = g.latest;
+                const m = l.metrics ?? {};
+                const metricCells = cols.map((k) => `<td>${m[k] != null ? pct(m[k]) : '—'}</td>`).join('');
+                const runtime = median(g.runtimes);
+                return `<tr data-run-id="${l.id}" title="Load this run's scorecard">
+                    <td><b>${escapeHtml(l.model ?? '?')}</b><br><span class="eval-ds-tag">${escapeHtml(l.backend ?? '?')}</span>`
+                    + `<span class="eval-ds-tag">reason:${escapeHtml(l.reasoning ?? '?')}</span>`
+                    + `<span class="eval-ds-tag">${escapeHtml(l.language ?? '?')}</span></td>`
+                    + `<td>${g.count}</td>${metricCells}`
+                    + `<td>${runtime != null ? fmtMs(runtime) : '—'}</td>`
+                    + `<td>${new Date(l.created_at).toLocaleString()}</td></tr>`;
+            }).join('');
+        expListEl.innerHTML = `
+            <table class="eval-ds-table eval-exp-table">
+                <thead><tr>
+                    <th>Config</th><th>Runs</th>
+                    <th>Routing</th><th>Commands</th><th>Plan</th><th>Answers</th>
+                    <th>Runtime</th><th>Last run</th>
+                </tr></thead>
+                <tbody>${rows}</tbody>
+            </table>`;
+    }
+
+    expRefresh?.addEventListener('click', (e) => { e.stopPropagation(); loadExperiments(); });
+    expListEl?.addEventListener('click', async (e) => {
+        const tr = e.target.closest('[data-run-id]');
+        if (!tr) return;
+        e.stopPropagation();
+        try {
+            const res = await fetch(`${evalsEndpoint()}?id=${tr.dataset.runId}`);
+            const scorecard = await res.json();
+            if (scorecard?.suites) { current = scorecard; paint(); showLastRun(scorecard); activateTab('scorecard'); }
+        } catch { /* ignore */ }
+    });
+
     // ── Render ──────────────────────────────────────────────────────────────
     function paint() {
         if (!current) return;
@@ -495,6 +588,13 @@ export function setupEvalsWindow(winEl) {
             .map(([lbl, field, f]) => `<span><b>${fmtVal(suite[field], f)}</b> ${lbl}</span>`)
             .join('');
 
+        // Single-shot inference latency, when this run recorded it (LLM suites).
+        const lat = suite.latency
+            ? `<div class="eval-sub"><span><b>${fmtMs(suite.latency.p50Ms)}</b> p50</span>`
+              + `<span><b>${fmtMs(suite.latency.p95Ms)}</b> p95</span>`
+              + `<span><b>${fmtMs(suite.latency.meanMs)}</b> mean</span></div>`
+            : '';
+
         return `
         <div class="eval-card">
             <h3>${meta.label}</h3>
@@ -505,6 +605,7 @@ export function setupEvalsWindow(winEl) {
             </div>
             ${badge}
             ${subs ? `<div class="eval-sub">${subs}</div>` : ''}
+            ${lat}
             ${trendHtml(key, hist)}
         </div>`;
     }
@@ -536,7 +637,8 @@ async function runLive(reporter, shouldAbort = () => false) {
     const suites = {};
     const chat = /** @type {any} */ (window).AndreChat;
     let engineReady = !!chat && chat.currentModelId != null;
-    const runners = buildRunners(chat, shouldAbort);
+    const timer = makeTimer();
+    const runners = buildRunners(chat, shouldAbort, timer);
 
     reporter.onInit(runners.map((r) => ({ key: r.key, samples: r.samples })));
 
@@ -547,6 +649,7 @@ async function runLive(reporter, shouldAbort = () => false) {
         try { await chat.whenReady(300_000); engineReady = true; } catch { /* load failed/timed out → suites skip */ }
     }
 
+    const startedAt = performance.now();
     for (let idx = 0; idx < runners.length; idx++) {
         if (shouldAbort()) throw new Error('aborted');
         const rn = runners[idx];
@@ -562,19 +665,32 @@ async function runLive(reporter, shouldAbort = () => false) {
         reporter.onSuiteDone(idx);
     }
     reporter.onStatus('Done.');
-    return { generatedAt: new Date().toISOString(), source: 'browser', suites };
+
+    // Attach single-shot latency (measured per model call) to each suite, plus
+    // the overall wall-clock and the config this run was produced under.
+    const runtimeMs = performance.now() - startedAt;
+    for (const [k, lat] of Object.entries(timer.summary())) if (suites[k] && lat) suites[k].latency = lat;
+    const modelId = chat?.currentModelId ?? getModelId();
+    const { config, configKey } = snapshotConfig({
+        model: modelId,
+        backend: isCpuModel(modelId) ? 'wllama-cpu' : 'webgpu',
+        reasoning: getReasoningEffort(),
+        language: getLLMLanguage(),
+        repeats: REPEATS,
+    });
+    return { generatedAt: new Date().toISOString(), source: 'browser', config, configKey, runtimeMs, suites };
 }
 
 /** Ordered suite runners — deterministic suites first (instant), model suites last. */
-function buildRunners(chat, shouldAbort = () => false) {
+function buildRunners(chat, shouldAbort = () => false, timer = makeTimer()) {
     return [
         { key: 'retrieval',  samples: RETRIEVAL_DATASET.map((c) => c.query), run: retrievalRunner },
         { key: 'resolution', samples: RESOLUTION_DATASET.map((c) => c.input), run: resolutionRunner },
         { key: 'integrity',  samples: ['Registry structure & capabilities'], run: integrityRunner },
-        { key: 'routing',  needsModel: true, samples: ROUTING_DATASET.map((c) => c.input),  run: (emit) => routingRunner(emit, chat, shouldAbort) },
-        { key: 'commands', needsModel: true, samples: COMMANDS_DATASET.map((c) => c.input), run: (emit) => commandsRunner(emit, chat, shouldAbort) },
-        { key: 'plan',     needsModel: true, samples: PLANS_DATASET.map((c) => c.id),       run: (emit) => planRunner(emit, chat, shouldAbort) },
-        { key: 'answers',  needsModel: true, samples: ANSWERS_DATASET.map((c) => c.question), run: (emit) => answersRunner(emit, chat, shouldAbort) },
+        { key: 'routing',  needsModel: true, samples: ROUTING_DATASET.map((c) => c.input),  run: (emit) => routingRunner(emit, chat, shouldAbort, timer) },
+        { key: 'commands', needsModel: true, samples: COMMANDS_DATASET.map((c) => c.input), run: (emit) => commandsRunner(emit, chat, shouldAbort, timer) },
+        { key: 'plan',     needsModel: true, samples: PLANS_DATASET.map((c) => c.id),       run: (emit) => planRunner(emit, chat, shouldAbort, timer) },
+        { key: 'answers',  needsModel: true, samples: ANSWERS_DATASET.map((c) => c.question), run: (emit) => answersRunner(emit, chat, shouldAbort, timer) },
     ];
 }
 
@@ -619,7 +735,7 @@ async function integrityRunner(emit) {
     return result;
 }
 
-async function routingRunner(emit, chat, shouldAbort = () => false) {
+async function routingRunner(emit, chat, shouldAbort = () => false, timer = makeTimer()) {
     const rows = [];
     const consistencies = [];
     const passAtKs = [];
@@ -629,7 +745,7 @@ async function routingRunner(emit, chat, shouldAbort = () => false) {
         const expected = routeLabel(c.expected);
         // Repeat to expose nondeterminism: take the majority label, and record
         // how consistent the runs were + whether any run got it right (pass@k).
-        const labels = await repeat(async () => routeLabel(await chat.routeIntent(c.input, [])), REPEATS);
+        const labels = await repeat(async () => routeLabel(await timer.run('routing', () => chat.routeIntent(c.input, []))), REPEATS);
         const { label: predicted, consistency } = majority(labels);
         const correct = predicted === expected;
         consistencies.push(consistency);
@@ -641,7 +757,7 @@ async function routingRunner(emit, chat, shouldAbort = () => false) {
     return summariseRouting(rows, { stability: mean(consistencies), passAtK: mean(passAtKs), repeats: REPEATS });
 }
 
-async function commandsRunner(emit, chat, shouldAbort = () => false) {
+async function commandsRunner(emit, chat, shouldAbort = () => false, timer = makeTimer()) {
     const rows = [];
     const stabilities = [];
     const passAtKs = [];
@@ -650,7 +766,7 @@ async function commandsRunner(emit, chat, shouldAbort = () => false) {
         const c = COMMANDS_DATASET[i];
         // Repeat, score each run, then take the modal action plan as the
         // representative. Stability = how often the modal plan recurred.
-        const runs = await repeat(async () => buildRow(c, (await chat.parseCommand(c.input, [])) ?? []), REPEATS);
+        const runs = await repeat(async () => buildRow(c, (await timer.run('commands', () => chat.parseCommand(c.input, []))) ?? []), REPEATS);
         const { item: row, consistency } = mode(runs, (r) => r.predicted.join('|'));
         stabilities.push(consistency);
         passAtKs.push(passAtK(runs.map((r) => r.exact)));
@@ -673,13 +789,13 @@ function contextualAction(text, activeApp) {
 }
 
 // ── Multi-shot planning: whole conversations, history carried across turns ────
-async function planRunner(emit, chat, shouldAbort = () => false) {
+async function planRunner(emit, chat, shouldAbort = () => false, timer = makeTimer()) {
     // Mirror the live pipeline: when an app is focused, resolve context-app
     // commands deterministically (as _parseContextual does) BEFORE the LLM —
     // otherwise the eval unfairly forces the planner to handle turns production
     // never sends to it (e.g. "let me see the second one" → open paper #2).
     const predictTurn = (userText, history, activeApp) =>
-        contextualAction(userText, activeApp) ?? chat.parseCommand(userText, history);
+        contextualAction(userText, activeApp) ?? timer.run('plan', () => chat.parseCommand(userText, history));
     const cases = [];
     const stabilities = [];
     const passAtKs = [];
@@ -699,7 +815,7 @@ async function planRunner(emit, chat, shouldAbort = () => false) {
 }
 
 // ── RAGAS-style answer quality: score the free text the model writes ──────────
-async function answersRunner(emit, chat, shouldAbort = () => false) {
+async function answersRunner(emit, chat, shouldAbort = () => false, timer = makeTimer()) {
     const min = SUITE_META.answers.min;
     // The answer suite is expensive (full RAG generation per case) and its
     // metric moves slowly, so a single pass is enough — no 3× repeats here.
@@ -714,7 +830,7 @@ async function answersRunner(emit, chat, shouldAbort = () => false) {
         // Repeat generation; average each RAGAS facet and measure run-to-run
         // stability of the headline (1 − stdev of ragas).
         const runs = await repeat(async () => {
-            const out = (await chat.answer(c.question)) ?? { text: '', context: '' };
+            const out = (await timer.run('answers', () => chat.answer(c.question))) ?? { text: '', context: '' };
             return scoreAnswerRow(c, out.text, out.context);
         }, ANSWERS_REPEATS);
         const avgRow = {
@@ -796,6 +912,7 @@ function summaryLine(scorecard) {
     const parts = SUITE_ORDER
         .filter((k) => scorecard.suites[k] && !scorecard.suites[k].skipped)
         .map((k) => `${SUITE_META[k].label} ${fmtVal(scorecard.suites[k][SUITE_META[k].metric], SUITE_META[k].fmt)}`);
+    if (Number.isFinite(scorecard.runtimeMs)) parts.push(`⏱ ${fmtMs(scorecard.runtimeMs)}`);
     return parts.join('   ·   ') || 'No suites recorded.';
 }
 
@@ -872,4 +989,14 @@ function fmtVal(v, fmt) {
 
 function escapeHtml(s) {
     return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
+// ── Experiments-table formatters ──────────────────────────────────────────────
+const pct = (v) => `${Math.round(v * 100)}%`;
+const fmtMs = (ms) => (ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${Math.round(ms)}ms`);
+function median(arr) {
+    if (!arr.length) return null;
+    const s = [...arr].sort((a, b) => a - b);
+    const mid = Math.floor(s.length / 2);
+    return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
 }
