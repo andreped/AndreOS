@@ -163,6 +163,7 @@ export function render() {
             <span class="evals-sub" id="evals-source"></span>
             <div class="evals-spacer"></div>
             <button class="evals-btn secondary" id="evals-export" title="Download the current scorecard as JSON">⬇ Export</button>
+            <button class="evals-btn secondary" id="evals-publish" style="display:none" title="Publish this run to the cloud experiment store (dev only)">☁ Publish</button>
             <button class="evals-btn" id="evals-run">▶ Run live evals</button>
         </div>
 

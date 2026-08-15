@@ -44,6 +44,68 @@ function evalsSavePlugin() {
                     }
                 });
             });
+
+            // Dev-only publish proxy: forwards a scorecard to the cloud experiment
+            // store using EVALS_ENDPOINT + EVALS_WRITE_TOKEN from the dev server's
+            // env (.env). The token stays in Node — it never reaches the browser —
+            // so the one-click UI publish is as safe as the CLI script, and only
+            // exists under `vite dev`.
+            server.middlewares.use('/__evals/publish', (req, res, next) => {
+                if (req.method !== 'POST') return next();
+                let body = '';
+                req.on('data', (chunk) => { body += chunk; });
+                req.on('end', async () => {
+                    try { process.loadEnvFile(path.resolve(__dirname, '.env')); } catch { /* no .env — use real env */ }
+                    const endpoint = process.env.EVALS_ENDPOINT;
+                    const token = process.env.EVALS_WRITE_TOKEN;
+                    if (!endpoint || !token) {
+                        res.statusCode = 200;
+                        res.end(JSON.stringify({ ok: false, reason: 'no-credentials' }));
+                        return;
+                    }
+                    try {
+                        const upstream = await fetch(endpoint, {
+                            method: 'POST',
+                            headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+                            body: body || '{}',
+                        });
+                        const text = await upstream.text();
+                        res.statusCode = upstream.status;
+                        res.setHeader('content-type', 'application/json');
+                        res.end(text || JSON.stringify({ ok: upstream.ok }));
+                    } catch (err) {
+                        res.statusCode = 502;
+                        res.end(JSON.stringify({ ok: false, reason: String(err) }));
+                    }
+                });
+            });
+
+            // Dev-only read proxy: forwards a GET (with its query string) to the
+            // cloud store's public read endpoint, server-side, so the Experiments
+            // tab works under `vite dev` — where /api isn't served and a direct
+            // cross-origin fetch to the deployed Function would be CORS-blocked.
+            server.middlewares.use('/__evals/list', async (req, res, next) => {
+                if (req.method !== 'GET') return next();
+                try { process.loadEnvFile(path.resolve(__dirname, '.env')); } catch { /* no .env — use real env */ }
+                const endpoint = process.env.EVALS_ENDPOINT;
+                if (!endpoint) {
+                    res.statusCode = 200;
+                    res.end(JSON.stringify({ ok: false, reason: 'no-credentials', runs: [] }));
+                    return;
+                }
+                const q = req.url.indexOf('?');
+                const qs = q >= 0 ? req.url.slice(q) : '';
+                try {
+                    const upstream = await fetch(endpoint + qs);
+                    const text = await upstream.text();
+                    res.statusCode = upstream.status;
+                    res.setHeader('content-type', 'application/json');
+                    res.end(text);
+                } catch (err) {
+                    res.statusCode = 502;
+                    res.end(JSON.stringify({ ok: false, reason: String(err), runs: [] }));
+                }
+            });
         },
     };
 }

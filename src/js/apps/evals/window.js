@@ -106,7 +106,11 @@ const LS_HISTORY = 'andreos:evals:history';
 // the write token never touches a browser.
 // Override the read endpoint (e.g. a deployed URL while developing) with:
 //   localStorage.setItem('andreos:evals:endpoint', 'https://…/api/evals')
-const evalsEndpoint = () => localStorage.getItem('andreos:evals:endpoint') || '/api/evals';
+// Under `vite dev` there's no /api, so reads go through the dev list proxy
+// (vite.config.js), which forwards to EVALS_ENDPOINT server-side.
+const evalsEndpoint = () =>
+    localStorage.getItem('andreos:evals:endpoint')
+    || (import.meta.env.DEV ? '/__evals/list' : '/api/evals');
 
 export function setupEvalsWindow(winEl) {
     const grid       = winEl.querySelector('#evals-grid');
@@ -118,6 +122,7 @@ export function setupEvalsWindow(winEl) {
     const sourceEl   = winEl.querySelector('#evals-source');
     const runBtn     = winEl.querySelector('#evals-run');
     const exportBtn  = winEl.querySelector('#evals-export');
+    const publishBtn = winEl.querySelector('#evals-publish');
     const copyBtn    = winEl.querySelector('#evals-copy');
     const jsonEl     = winEl.querySelector('#evals-json');
     const datasetEl  = winEl.querySelector('#evals-dataset');
@@ -458,6 +463,43 @@ export function setupEvalsWindow(winEl) {
             if (res.ok) statusEl.textContent = `${summaryLine(scorecard)} · saved to tests/evals/results/latest.json`;
         } catch { /* dev endpoint unavailable — ignore */ }
     }
+
+    // Publish the current run to the cloud store via the dev-only proxy, which
+    // holds the write token server-side (never in the browser). Only wired up in
+    // `vite dev` — the button stays hidden in production builds.
+    if (import.meta.env.DEV) publishBtn.style.display = '';
+    async function publishDev() {
+        if (!current) return;
+        publishBtn.disabled = true;
+        publishBtn.textContent = '☁ Publishing…';
+        try {
+            const res = await fetch('/__evals/publish', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify(current),
+            });
+            const data = await res.json().catch(() => ({}));
+            if (data.ok) {
+                statusEl.textContent = `${summaryLine(current)} · published to experiments ☁`;
+                publishBtn.textContent = '✓ Published';
+            } else if (data.reason === 'no-credentials') {
+                statusEl.textContent = 'Set EVALS_ENDPOINT + EVALS_WRITE_TOKEN in .env to publish.';
+                publishBtn.textContent = '☁ Publish';
+            } else if (data.reason === 'invalid-scorecard') {
+                statusEl.textContent = 'This run has no config to publish — run live evals first.';
+                publishBtn.textContent = '☁ Publish';
+            } else {
+                statusEl.textContent = `Publish failed (${data.reason ?? res.status}).`;
+                publishBtn.textContent = '☁ Publish';
+            }
+        } catch {
+            statusEl.textContent = 'Publish failed (dev proxy unreachable).';
+            publishBtn.textContent = '☁ Publish';
+        } finally {
+            setTimeout(() => { publishBtn.disabled = false; publishBtn.textContent = '☁ Publish'; }, 2500);
+        }
+    }
+    publishBtn.addEventListener('click', (e) => { e.stopPropagation(); publishDev(); });
 
     // ── Experiments (cloud store) ─────────────────────────────────────────────
     let expLoading = false;
