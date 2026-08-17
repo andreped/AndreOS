@@ -41,7 +41,7 @@ export function setupSettingsWindow(winEl) {
 
     const refreshApplyBtn = () => {
         if (!applyBtn) return;
-        const loadedId = window.AndreChat?.currentModelId ?? null;
+        const loadedId = window.OSAssistant?.currentModelId ?? null;
         applyBtn.textContent = (loadedId && loadedId === getModelId()) ? 'Restart AI' : 'Apply & Restart AI';
         applyBtn.disabled = false;
     };

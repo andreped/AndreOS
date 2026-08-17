@@ -103,18 +103,17 @@ class DesktopPortfolio {
     setupTaskbarFeatures() {
         new SearchOverlay((fileType) => this.windowManager.openFile(fileType));
 
-        // Mount mic button immediately before the notification bell
-        this.voiceMicBtn.mount(document.querySelector('.notification-button'));
-
-        // Mount language button before the notification bell (after voiceMicBtn)
-        this.langBtn.mount(document.querySelector('.notification-button'));
+        // Mount mic + language buttons immediately before the assistant (sakura)
+        // tray icon, so the taskbar order is: mic · EN · assistant · notifications.
+        this.voiceMicBtn.mount(document.getElementById('asstTrayBtn'));
+        this.langBtn.mount(document.getElementById('asstTrayBtn'));
 
         this._syncRightPanelInset();
+        this._syncTrayButtons();
 
-        document.getElementById('asstTrayBtn')?.addEventListener('click', () => {
-            document.getElementById('notificationCenter')?.classList.remove('nc-open');
-            this.sidebar.toggle();
-            document.getElementById('asstTrayBtn')?.classList.toggle('asst-tray-active', this.sidebar.isOpen);
+        document.getElementById('asstTrayBtn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.sidebar.toggle('assistant');
         });
 
         document.querySelector('.task-view-button')?.addEventListener('click', () => {
@@ -122,11 +121,12 @@ class DesktopPortfolio {
             if (!opened) this.notifications.show('No open windows', 'info');
         });
 
-        document.querySelector('.notification-button')?.addEventListener('click', () => {
-            this.sidebar.close();
-            document.getElementById('asstTrayBtn')?.classList.remove('asst-tray-active');
-            this.notifications.toggleCenter();
+        document.querySelector('.notification-button')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.sidebar.toggle('notifications');
         });
+        // NotificationManager.toggleCenter() (e.g. from other services) routes here.
+        document.addEventListener('andreos:toggle-notifications', () => this.sidebar.toggle('notifications'));
 
         document.querySelector('.hidden-icons-chevron')?.addEventListener('click', () => {
             this.notifications.show('Hidden icons toggled', 'info');
@@ -153,17 +153,30 @@ class DesktopPortfolio {
      */
     _syncRightPanelInset() {
         const sidebar = document.getElementById('assistantSidebar');
-        const nc      = document.getElementById('notificationCenter');
 
         const update = () => {
-            const open = !!sidebar?.classList.contains('asst-open')
-                      || !!nc?.classList.contains('nc-open');
-            document.body.classList.toggle('right-panel-open', open);
+            document.body.classList.toggle('right-panel-open', !!sidebar?.classList.contains('asst-open'));
         };
 
-        const observer = new MutationObserver(update);
-        if (sidebar) observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
-        if (nc)      observer.observe(nc,      { attributes: true, attributeFilter: ['class'] });
+        if (sidebar) new MutationObserver(update).observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+        update();
+    }
+
+    /** Highlight the tray icon (assistant) or bell (notifications) matching the
+     *  sidebar's open tab. A single observer covers every open/close/switch path. */
+    _syncTrayButtons() {
+        const sidebar = document.getElementById('assistantSidebar');
+        const tray    = document.getElementById('asstTrayBtn');
+        const bell    = document.querySelector('.notification-button');
+
+        const update = () => {
+            const open = !!sidebar?.classList.contains('asst-open');
+            const tab  = sidebar?.getAttribute('data-tab');
+            tray?.classList.toggle('asst-tray-active', open && tab === 'assistant');
+            bell?.classList.toggle('nc-active',        open && tab === 'notifications');
+        };
+
+        if (sidebar) new MutationObserver(update).observe(sidebar, { attributes: true, attributeFilter: ['class', 'data-tab'] });
         update();
     }
 
@@ -257,17 +270,8 @@ class DesktopPortfolio {
         const taskViewOverlay = document.querySelector('.task-view-overlay');
         if (taskViewOverlay) { taskViewOverlay.remove(); return; }
 
-        // Close open right-side panels before touching windows
-        if (this.sidebar?.isOpen) {
-            this.sidebar.close();
-            document.getElementById('asstTrayBtn')?.classList.remove('asst-tray-active');
-            return;
-        }
-        if (document.getElementById('notificationCenter')?.classList.contains('nc-open')) {
-            this.notifications.toggleCenter();
-            return;
-        }
-
+        // The sidebar is intentionally NOT closed by Escape — only its ✕ button
+        // closes it, so windows can be closed while the sidebar stays open.
         document.querySelectorAll('.taskbar-context-menu, .context-menu').forEach(m => m.remove());
 
         const id = this.windowManager.activeWindowId;
@@ -475,8 +479,8 @@ class DesktopPortfolio {
         // used instead of the keyword-only fallback.
         if (askQuery) {
             const submit = () => this.voice.submitText(askQuery);
-            if (window.AndreChat?.whenReady) {
-                window.AndreChat.whenReady()
+            if (window.OSAssistant?.whenReady) {
+                window.OSAssistant.whenReady()
                     .then(submit)
                     .catch(submit); // timed out or no WebGPU — keyword fallback handles it
             } else {

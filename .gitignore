@@ -7,3 +7,4 @@ package-lock.json
 wrangler.jsonc
 .wrangler/
 
+*.svgwork/

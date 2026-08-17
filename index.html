@@ -240,7 +240,9 @@
                     </div>
                     <span id="batteryTrayIcon" class="tray-icon" title="Battery">🔋</span>
                 </div>
-                <div class="asst-tray-btn" id="asstTrayBtn" title="OS Assistant">🤖</div>
+                <div class="asst-tray-btn" id="asstTrayBtn" title="OS Assistant">
+                    <img src="assets/icons/sakura.png" alt="OS Assistant" width="18" height="18">
+                </div>
                 <div class="notification-button" title="Notifications">
                     <div class="notification-icon">🔔</div>
                     <span class="nc-badge" id="ncBadge" style="display:none">0</span>
@@ -358,47 +360,64 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Notification Centre panel -->
-    <div id="notificationCenter" class="notification-center">
-        <div class="nc-header">
-            <button class="nc-close-mobile" aria-label="Close">✕</button>
-            <span class="nc-title">Notifications</span>
-            <button class="nc-clear-all" id="ncClearAll">Clear all</button>
-        </div>
-        <div class="nc-list" id="ncList">
-            <div class="nc-empty">No new notifications</div>
-        </div>
-    </div>
-
-    <!-- OS Assistant sidebar -->
-    <div id="assistantSidebar" class="assistant-sidebar">
-        <div class="asst-header">
-            <div class="asst-header-left">
-                <span class="asst-title-icon">🤖</span>
-                <span class="asst-title">OS Assistant</span>
-            </div>
-            <div class="asst-header-actions">
-                <button class="asst-clear" title="Clear conversation">Clear</button>
-                <button class="asst-close" title="Close">✕</button>
-            </div>
-        </div>
-        <div class="asst-messages" id="asstMessages">
-            <div class="asst-welcome">
-                <div class="asst-welcome-icon">🤖</div>
-                <div class="asst-welcome-text">Ask me anything about André, or give a command — open an app, search the web, and more.</div>
-                <div class="asst-welcome-hint">Try: &quot;open resume&quot; · &quot;tell me about André's research&quot;</div>
-            </div>
-        </div>
-        <div class="asst-input-row">
-            <button class="asst-mic-btn" data-mic-state="idle" title="Click to load voice model">
-                <span class="asst-mic-icon">🎤</span>
+    <!-- OS Assistant + Notifications sidebar (tabbed) — kept inside .desktop so it
+         shares the taskbar's stacking context and tray popups render above it -->
+    <div id="assistantSidebar" class="assistant-sidebar" data-tab="assistant">
+        <div class="asst-tabs" role="tablist">
+            <button class="asst-tab asst-tab-active" data-asst-tab="assistant" role="tab">
+                <img src="assets/icons/sakura.png" alt="" width="16" height="16">
+                <span>Assistant</span>
             </button>
-            <input type="text" class="asst-input" placeholder="Ask or command…" autocomplete="off" />
-            <button class="asst-send-btn" title="Send">↑</button>
+            <button class="asst-tab" data-asst-tab="notifications" role="tab">
+                <span class="asst-tab-bell">🔔</span>
+                <span>Notifications</span>
+                <span class="asst-tab-badge" id="ncTabBadge" style="display:none">0</span>
+            </button>
+            <span class="asst-tabs-spacer"></span>
+            <button class="asst-clear" title="Clear conversation">Clear</button>
+            <button class="nc-clear-all" id="ncClearAll">Clear all</button>
+            <button class="asst-close" title="Close">✕</button>
+        </div>
+
+        <!-- Assistant pane -->
+        <div class="asst-pane" data-asst-pane="assistant">
+            <div class="asst-messages" id="asstMessages">
+                <div class="asst-welcome">
+                    <div class="asst-welcome-icon">
+                        <img src="assets/icons/sakura.png" alt="" width="46" height="46">
+                    </div>
+                    <div class="asst-welcome-text">Ask me anything about André, or give a command — open an app, search the web, and more.</div>
+                    <div class="asst-welcome-hint">Try: &quot;open resume&quot; · &quot;tell me about André's research&quot;</div>
+                </div>
+            </div>
+            <div class="asst-input-row">
+                <button class="asst-mic-btn" data-mic-state="idle" title="Click to load voice model">
+                    <span class="asst-mic-icon">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <rect x="9" y="3" width="6" height="11" rx="3" stroke="currentColor" stroke-width="1.6"/>
+                            <path d="M5.5 11a6.5 6.5 0 0 0 13 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                            <line x1="12" y1="17.5" x2="12" y2="21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                </button>
+                <input type="text" class="asst-input" placeholder="Ask or command…" autocomplete="off" />
+                <div class="asst-listening" hidden>
+                    <span class="asst-listening-dot" aria-hidden="true"></span>
+                    <span class="asst-listening-text">Listening…</span>
+                </div>
+                <button class="asst-send-btn" title="Send">↑</button>
+            </div>
+        </div>
+
+        <!-- Notifications pane -->
+        <div class="asst-pane" data-asst-pane="notifications" hidden>
+            <div class="nc-list" id="ncList">
+                <div class="nc-empty">No new notifications</div>
+            </div>
         </div>
     </div>
+    </div><!-- /.desktop -->
 
     <script type="module" src="src/js/main.js"></script>
     <script type="module" src="src/js/assistant/engine/chat.js"></script>

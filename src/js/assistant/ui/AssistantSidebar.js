@@ -9,6 +9,18 @@
  * Hidden on mobile (≤768 px) via CSS — voice commands are available there
  * through the taskbar mic button instead.
  */
+const MIC_SVG = `
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="9" y="3" width="6" height="11" rx="3" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M5.5 11a6.5 6.5 0 0 0 13 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        <line x1="12" y1="17.5" x2="12" y2="21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>`;
+const STOP_SVG = `
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="6" y="6" width="12" height="12" rx="2.5" fill="currentColor"/>
+    </svg>`;
+const BOT_ICON = `<img src="${new URL('../../../../assets/icons/sakura.png', import.meta.url).href}" alt="" width="46" height="46">`;
+
 export class AssistantSidebar {
     /**
      * @param {{
@@ -27,6 +39,7 @@ export class AssistantSidebar {
         this._micBtn      = null;
         this._sendBtn     = null;
         this._isOpen      = false;
+        this._activeTab   = 'assistant';
         this._streaming   = false;
         this._lastUserText = '';
         this._setup();
@@ -34,13 +47,14 @@ export class AssistantSidebar {
 
     // ── Public API ─────────────────────────────────────────────────────────────
 
-    open() {
-        // Only one panel open at a time
-        document.getElementById('notificationCenter')?.classList.remove('nc-open');
+    open(tab) {
+        if (tab) this.showTab(tab);
         this._panel?.classList.add('asst-open');
         this._isOpen = true;
-        // preventScroll: focusing must not scroll the (off-screen) desktop into view
-        setTimeout(() => this._input?.focus({ preventScroll: true }), 50);
+        if (this._activeTab === 'assistant') {
+            // preventScroll: focusing must not scroll the (off-screen) desktop into view
+            setTimeout(() => this._input?.focus({ preventScroll: true }), 50);
+        }
     }
 
     close() {
@@ -48,9 +62,34 @@ export class AssistantSidebar {
         this._isOpen = false;
     }
 
-    toggle() { this._isOpen ? this.close() : this.open(); }
+    /**
+     * Toggle the sidebar. With a tab: open to it if closed, switch to it if open
+     * on another tab, or close if it's already the active tab.
+     */
+    toggle(tab = 'assistant') {
+        if (!this._isOpen) { this.open(tab); return; }
+        if (this._activeTab === tab) { this.close(); return; }
+        this.showTab(tab);
+    }
 
     get isOpen() { return this._isOpen; }
+
+    get activeTab() { return this._activeTab; }
+
+    /** Switch the visible tab pane. */
+    showTab(tab) {
+        if (tab !== 'assistant' && tab !== 'notifications') return;
+        this._activeTab = tab;
+        this._panel?.setAttribute('data-tab', tab);
+        this._tabs?.forEach(btn => btn.classList.toggle('asst-tab-active', btn.dataset.asstTab === tab));
+        this._panes?.forEach(p => { p.hidden = p.dataset.asstPane !== tab; });
+        if (tab === 'notifications') {
+            // Viewing notifications clears the unread indicator.
+            document.dispatchEvent(new CustomEvent('andreos:notifications-viewed'));
+        } else if (this._isOpen) {
+            setTimeout(() => this._input?.focus({ preventScroll: true }), 30);
+        }
+    }
 
     /** Remove the current streaming bubble if it was never filled (e.g. a
      *  "thinking" placeholder that's being replaced by a plan). */
@@ -64,7 +103,7 @@ export class AssistantSidebar {
         if (!this._messages) return;
         this._messages.innerHTML = `
             <div class="asst-welcome">
-                <div class="asst-welcome-icon">🤖</div>
+                <div class="asst-welcome-icon">${BOT_ICON}</div>
                 <div class="asst-welcome-text">Ask me anything about André, or give a command — open an app, search the web, and more.</div>
                 <div class="asst-welcome-hint">Try: "open resume" · "tell me about André's research"</div>
             </div>`;
@@ -271,14 +310,6 @@ export class AssistantSidebar {
         if (!this._micBtn) return;
         this._micBtn.dataset.micState = state;
 
-        const ICONS = {
-            idle:       '🎤',
-            loading:    '⏳',
-            ready:      '🎤',
-            recording:  '⏹',
-            processing: '⚙️',
-            error:      '🚫',
-        };
         const TITLES = {
             idle:       'Click to load voice model',
             loading:    'Loading Whisper model…',
@@ -291,17 +322,31 @@ export class AssistantSidebar {
         const iconEl = this._micBtn.querySelector('.asst-mic-icon');
         if (iconEl) {
             if (state === 'processing') {
-                // Animated "thinking" dots instead of a static gear
+                // Animated "thinking" dots instead of a static icon
                 iconEl.innerHTML = '<span class="asst-mic-dots"><i></i><i></i><i></i></span>';
+            } else if (state === 'recording') {
+                iconEl.innerHTML = STOP_SVG;
             } else {
-                iconEl.textContent = ICONS[state] ?? '🎤';
+                iconEl.innerHTML = MIC_SVG;
             }
         }
         this._micBtn.title = TITLES[state] ?? 'Voice input';
 
-        // Disable text input while recording so the two channels don't clash
+        // Swap the text field for an inline status while loading the model or
+        // recording, so the user knows to wait / that we're listening.
+        const busy = state === 'recording' || state === 'loading';
+        if (this._listeningEl) {
+            this._listeningEl.hidden = !busy;
+            this._listeningEl.dataset.state = state;
+            const textEl = this._listeningEl.querySelector('.asst-listening-text');
+            if (textEl) {
+                textEl.textContent = state === 'loading' ? 'Preparing model…' : 'Listening…';
+            }
+        }
         if (this._input) {
-            this._input.disabled = state === 'recording' || state === 'processing';
+            this._input.style.display = busy ? 'none' : '';
+            // Disable text input while the two channels could clash
+            this._input.disabled = busy || state === 'processing';
         }
     }
 
@@ -311,10 +356,18 @@ export class AssistantSidebar {
         if (!this._panel) return;
         this._input  = this._panel.querySelector('.asst-input');
         this._micBtn = this._panel.querySelector('.asst-mic-btn');
+        this._listeningEl = this._panel.querySelector('.asst-listening');
+        this._tabs   = Array.from(this._panel.querySelectorAll('.asst-tab'));
+        this._panes  = Array.from(this._panel.querySelectorAll('.asst-pane'));
         const sendBtn  = this._panel.querySelector('.asst-send-btn');
         const closeBtn = this._panel.querySelector('.asst-close');
         const clearBtn = this._panel.querySelector('.asst-clear');
         this._sendBtn = sendBtn;
+
+        this._tabs.forEach(btn => btn.addEventListener('click', e => {
+            e.stopPropagation();
+            this.showTab(btn.dataset.asstTab);
+        }));
 
         const submit = () => {
             const text = this._input?.value?.trim();
@@ -331,7 +384,7 @@ export class AssistantSidebar {
         // While a response is streaming the send button becomes a stop button.
         sendBtn?.addEventListener('click',  e => {
             e.stopPropagation();
-            if (this._streaming) window.AndreChat?.stopGeneration?.();
+            if (this._streaming) window.OSAssistant?.stopGeneration?.();
             else submit();
         });
         this._micBtn?.addEventListener('click', e => { e.stopPropagation(); this._onMicToggle(); });
@@ -339,7 +392,7 @@ export class AssistantSidebar {
         // Clear aborts any in-flight generation first, then wipes the transcript.
         clearBtn?.addEventListener('click',  e => {
             e.stopPropagation();
-            window.AndreChat?.stopGeneration?.();
+            window.OSAssistant?.stopGeneration?.();
             this.clear();
             this._input?.focus();
         });

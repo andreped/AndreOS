@@ -1,5 +1,5 @@
 // chat.js — WebLLM-powered chat assistant for AndreOS
-// Loaded as <script type="module">. Exposes window.AndreChat for classic script.js.
+// Loaded as <script type="module">. Exposes window.OSAssistant for classic script.js.
 
 import * as webllm from "@mlc-ai/web-llm";
 import { buildProfileContext } from "./andre-profile.js";
@@ -60,7 +60,7 @@ if (import.meta.env.DEV && typeof PerformanceObserver !== 'undefined') {
         }).observe({ type: 'longtask', buffered: false });
         document.addEventListener('andreos:generation-start', () => { blocked = 0; longest = 0; count = 0; });
         document.addEventListener('andreos:generation-end', () =>
-            console.log(`[AndreChat] main-thread blocked ${Math.round(blocked)}ms over ${count} long task(s), longest ${Math.round(longest)}ms`));
+            console.log(`[OSAssistant] main-thread blocked ${Math.round(blocked)}ms over ${count} long task(s), longest ${Math.round(longest)}ms`));
     } catch { /* longtask unsupported */ }
 }
 
@@ -123,7 +123,7 @@ function structuredGenConfig(baseTokens) {
 function logPrompt(label, messages) {
     if (!import.meta.env.DEV && localStorage.getItem('andreos:debug-prompts') !== '1') return;
     const chars = messages.reduce((n, m) => n + (m.content?.length || 0), 0);
-    console.groupCollapsed(`[AndreChat] prompt ▶ ${label} · ${chars} chars · ~${Math.round(chars / 4)} tok`);
+    console.groupCollapsed(`[OSAssistant] prompt ▶ ${label} · ${chars} chars · ~${Math.round(chars / 4)} tok`);
     for (const m of messages) console.log(`── ${m.role} ──\n${m.content}`);
     console.groupEnd();
 }
@@ -356,7 +356,7 @@ async function sendMessage(winEl, userText) {
         const msg = 'Sorry, something went wrong. Please try again.';
         assistantEntry.content = msg;
         typingBubbles.forEach(b => { if (b) b.textContent = msg; });
-        console.error('[AndreChat] send error:', err);
+        console.error('[OSAssistant] send error:', err);
     } finally {
         setGenerating(false);
     }
@@ -385,7 +385,7 @@ async function loadEngine() {
     if (engineState === 'loading' || engineState === 'ready') return;
     engineState = 'loading';
     const cpuModel = getCpuModel();
-    console.log('[AndreChat] Starting model load:', getModelId(), cpuModel ? '(CPU/wllama)' : '(WebGPU)');
+    console.log('[OSAssistant] Starting model load:', getModelId(), cpuModel ? '(CPU/wllama)' : '(WebGPU)');
 
     // Update the loading title to show the actual selected model name
     const modelInfo = MODELS.find(m => m.id === getModelId()) ?? cpuModel;
@@ -424,7 +424,7 @@ async function loadEngine() {
             engine = eng;
             teardown = async () => {
                 try { eng.interruptGenerate?.(); } catch { /* ignore */ }
-                try { await eng.unload?.(); } catch (e) { console.warn('[AndreChat] wllama unload failed:', e); }
+                try { await eng.unload?.(); } catch (e) { console.warn('[OSAssistant] wllama unload failed:', e); }
             };
         } else {
             await assertGPULimits();
@@ -440,7 +440,7 @@ async function loadEngine() {
                 initProgressCallback: (report) => {
                     const pct  = Math.round((report.progress || 0) * 100);
                     const text = report.text || 'Loading…';
-                    console.log('[AndreChat]', pct + '%', text);
+                    console.log('[OSAssistant]', pct + '%', text);
 
                     // First real callback — shaders done, download starting
                     const isFetching = text.toLowerCase().includes('fetch') || pct > 0;
@@ -463,14 +463,14 @@ async function loadEngine() {
             });
             engine = eng;
             teardown = async () => {
-                try { await eng.unload?.(); }  catch (e) { console.warn('[AndreChat] engine unload failed:', e); }
-                try { worker.terminate(); }    catch (e) { console.warn('[AndreChat] worker terminate failed:', e); }
+                try { await eng.unload?.(); }  catch (e) { console.warn('[OSAssistant] engine unload failed:', e); }
+                try { worker.terminate(); }    catch (e) { console.warn('[OSAssistant] worker terminate failed:', e); }
             };
         }
 
         engineState = 'ready';
         sessionStorage.setItem('andreos:model-loaded', '1');
-        console.log('[AndreChat] Model ready ✓');
+        console.log('[OSAssistant] Model ready ✓');
         if (!silentLoad) whenReady(() => window.__AndreOSApp?.completeLiveNotification(
             'ai-model', 'AI Model ready', 'The AI assistant is ready to chat!', '✅', 'success',
             () => window.__AndreOSApp?.openAssistant()
@@ -482,7 +482,7 @@ async function loadEngine() {
         engineState = 'error';
         const msg = err?.message || String(err);
         engineError = msg;
-        console.error('[AndreChat] Load error:', err);
+        console.error('[OSAssistant] Load error:', err);
         whenReady(() => {
             window.__AndreOSApp?.completeLiveNotification(
                 'ai-model', 'AI Model failed', msg, '❌', 'error'
@@ -490,7 +490,7 @@ async function loadEngine() {
             showToast('❌ Failed to load AI model', {
             type: 'error',
             duration: 10000,
-            action: { label: 'Retry', fn: () => window.AndreChat?.retry() }
+            action: { label: 'Retry', fn: () => window.OSAssistant?.retry() }
             });
         });
 
@@ -500,7 +500,7 @@ async function loadEngine() {
                 <div class="chat-load-icon">⚠️</div>
                 <div class="chat-load-title">Failed to load model</div>
                 <div class="chat-load-subtitle" style="color:rgba(255,100,100,0.8);font-size:12px;word-break:break-word">${msg}</div>
-                <button class="chat-retry-btn" onclick="window.AndreChat&&window.AndreChat.retry()">Retry</button>
+                <button class="chat-retry-btn" onclick="window.OSAssistant&&window.OSAssistant.retry()">Retry</button>
             `;
         });
     }
@@ -523,12 +523,12 @@ async function unloadEngine() {
     // timeout we orphan the old worker (it finishes then gets GC'd) rather than block.
     if (t) {
         try { await Promise.race([t(), new Promise((r) => setTimeout(r, 3000))]); }
-        catch (err) { console.warn('[AndreChat] teardown failed:', err); }
+        catch (err) { console.warn('[OSAssistant] teardown failed:', err); }
     }
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
-window.AndreChat = {
+window.OSAssistant = {
     setupWindow(winEl) {
         if (!navigator.gpu && !isCpuModel()) {
             const overlay = winEl.querySelector('.chat-load-overlay');
@@ -546,7 +546,7 @@ window.AndreChat = {
                 <div class="chat-load-icon">⚠️</div>
                 <div class="chat-load-title">Failed to load model</div>
                 <div class="chat-load-subtitle" style="color:rgba(255,100,100,0.8);font-size:12px;word-break:break-word">${engineError}</div>
-                <button class="chat-retry-btn" onclick="window.AndreChat&&window.AndreChat.retry()">Retry</button>
+                <button class="chat-retry-btn" onclick="window.OSAssistant&&window.OSAssistant.retry()">Retry</button>
             `;
             return;
         }
@@ -572,7 +572,7 @@ window.AndreChat = {
         }
         if (sendBtn) sendBtn.addEventListener('click', e => {
             e.stopPropagation();
-            if (generating) window.AndreChat.stopGeneration();
+            if (generating) window.OSAssistant.stopGeneration();
             else submit();
         });
 
@@ -623,7 +623,7 @@ window.AndreChat = {
     stopGeneration() {
         if (!generating) return false;
         abortRequested = true;
-        try { engine?.interruptGenerate?.(); } catch (err) { console.warn('[AndreChat] interrupt failed:', err); }
+        try { engine?.interruptGenerate?.(); } catch (err) { console.warn('[OSAssistant] interrupt failed:', err); }
         document.dispatchEvent(new CustomEvent('andreos:assistant-abort'));
         return true;
     },
@@ -666,7 +666,7 @@ window.AndreChat = {
             }
             onChunk?.('⏳ Loading the AI model… (first run downloads the weights, then it\'s cached)');
             try {
-                await window.AndreChat.whenReady(180_000);
+                await window.OSAssistant.whenReady(180_000);
             } catch {
                 onDone?.('The AI model couldn\'t load. Please try again in a moment.');
                 return;
@@ -726,7 +726,7 @@ window.AndreChat = {
             }
             onDone?.(frozen ?? fullText);
         } catch (err) {
-            console.error('[AndreChat] querySidebar error:', err);
+            console.error('[OSAssistant] querySidebar error:', err);
             onDone?.('Sorry, something went wrong.');
         } finally {
             setGenerating(false);
@@ -769,7 +769,7 @@ window.AndreChat = {
             ], { maxTokens: cfg.maxTokens, temperature, think: cfg.think });
             return { text: out, context };
         } catch (err) {
-            console.error('[AndreChat] answer error:', err);
+            console.error('[OSAssistant] answer error:', err);
             return { text: '', context };
         }
     },
@@ -829,7 +829,7 @@ Request: "${text.replace(/"/g, "'")}"`;
             const actions = JSON.parse(jsonMatch[0]);
             return Array.isArray(actions) && actions.length > 0 ? actions : null;
         } catch (err) {
-            console.warn('[AndreChat] parseCommand failed:', err);
+            console.warn('[OSAssistant] parseCommand failed:', err);
             return null;
         }
     },
@@ -914,12 +914,12 @@ Message: "${text.replace(/"/g, "'")}"`;
 if (navigator.gpu || isCpuModel()) {
     loadEngine();
 } else {
-    console.warn('[AndreChat] WebGPU not available — model will not load.');
+    console.warn('[OSAssistant] WebGPU not available — model will not load.');
 }
 
 // ── React to settings changes ─────────────────────────────────────────────────
 document.addEventListener('andreos:settings-apply', () => {
     if (!navigator.gpu && !isCpuModel()) return;
     sessionStorage.removeItem('andreos:model-loaded'); // show NC card for new model
-    window.AndreChat.retry();
+    window.OSAssistant.retry();
 });
