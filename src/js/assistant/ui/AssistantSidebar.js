@@ -19,7 +19,7 @@ const STOP_SVG = `
     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <rect x="6" y="6" width="12" height="12" rx="2.5" fill="currentColor"/>
     </svg>`;
-const BOT_ICON = `<img src="${new URL('../../../../assets/icons/sakura.png', import.meta.url).href}" alt="" width="46" height="46">`;
+const BOT_ICON = `<img src="${new URL('../../../../assets/icons/sakura.svg', import.meta.url).href}" alt="" width="46" height="46">`;
 
 export class AssistantSidebar {
     /**
