@@ -18,6 +18,13 @@ import { VoiceEngine }       from './VoiceEngine.js';
 import { isVoiceAIEnabled, getWhisperModel, getTranscribeLang } from '../../platform/services/Settings.js';
 import { appRegistry }       from '../../apps/registry/AppRegistry.js';
 import { assistantRegistry } from '../registry/AssistantRegistry.js';
+
+// Notification-column mic icon — matches the sidebar's transcription mic.
+const MIC_ICON = `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect x="9" y="3" width="6" height="11" rx="3" stroke="currentColor" stroke-width="1.6"/>
+    <path d="M5.5 11a6.5 6.5 0 0 0 13 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+    <line x1="12" y1="17.5" x2="12" y2="21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+</svg>`;
 import { ActionDispatcher }  from '../registry/ActionDispatcher.js';
 import { resolveResearchIntent } from '../researchContext.js';
 
@@ -151,7 +158,7 @@ export class VoiceCommandManager {
             this._liveCardId,
             'Voice Commands',
             'Downloading Whisper base model (~74 MB) — cached after first use',
-            '🎤'
+            MIC_ICON
         );
         await this._engine.init();
     }
@@ -165,6 +172,9 @@ export class VoiceCommandManager {
         if (this._state === 'loading' || this._state === 'processing') return;
 
         if (!this._loadStarted) {
+            // First click: kick off the model download and remember that the user
+            // wants to record — we auto-start once the model reports ready.
+            this._startOnReady = true;
             await this.loadModel();
             return;
         }
@@ -197,8 +207,9 @@ export class VoiceCommandManager {
     /** Reload the voice engine with new settings (called when settings change). */
     reloadVoiceEngine() {
         this._engine.destroy();
-        this._engine      = this._buildEngine();
-        this._loadStarted = false;
+        this._engine       = this._buildEngine();
+        this._loadStarted  = false;
+        this._startOnReady = false;
         if (this._state !== 'idle') this._setState('idle');
     }
 
@@ -209,10 +220,17 @@ export class VoiceCommandManager {
             this._liveCardId,
             'Voice Commands',
             'Whisper ready — click the mic and speak a command',
-            '🎤',
+            MIC_ICON,
             'success'
         );
         this._setState('ready');
+
+        // Auto-start recording if the user clicked the mic to speak (the first
+        // click only had time to load the model).
+        if (this._startOnReady) {
+            this._startOnReady = false;
+            this.toggleRecording();
+        }
     }
 
     _onModelProgress({ file, progress }) {
@@ -268,7 +286,7 @@ export class VoiceCommandManager {
         //    Call 2: if command, parse into an action sequence using history
         //    A "thinking" bubble + Stop button show immediately (before routing),
         //    so slow CPU classification isn't an invisible dead wait.
-        if (window.AndreChat?.currentModelId && window.AndreChat?.routeIntent) {
+        if (window.OSAssistant?.currentModelId && window.OSAssistant?.routeIntent) {
             this._beginThinking();
             try {
                 // On the CPU backend the router + parser passes each add a full
@@ -278,13 +296,13 @@ export class VoiceCommandManager {
                 // only the first message is slow). GPU routing is cheap, so it's
                 // gated to CPU only. Eval suites call routeIntent/parseCommand
                 // directly, so their scores are unaffected.
-                const skipRouting = window.AndreChat.isCpuBackend && !_looksLikeOSCommand(text);
-                const route = skipRouting ? 'direct' : await window.AndreChat.routeIntent(text, this._history);
+                const skipRouting = window.OSAssistant.isCpuBackend && !_looksLikeOSCommand(text);
+                const route = skipRouting ? 'direct' : await window.OSAssistant.routeIntent(text, this._history);
                 if (this._aborted) { if (fromVoice) this._setState('ready'); return; }
 
                 if (route !== null) {
                     if (route === 'command') {
-                        const actions = await window.AndreChat.parseCommand(text, this._history);
+                        const actions = await window.OSAssistant.parseCommand(text, this._history);
                         if (this._aborted) { if (fromVoice) this._setState('ready'); return; }
                         if (actions?.length) {
                             this._discardThinking(); // a plan replaces the thinking bubble
@@ -389,11 +407,11 @@ export class VoiceCommandManager {
      */
     async retryQuery(text, update, history) {
         if (Array.isArray(history)) this._history = history.slice(-20);
-        if (!window.AndreChat?.querySidebar) {
+        if (!window.OSAssistant?.querySidebar) {
             update('The AI model is still loading — please try again in a moment.');
             return;
         }
-        await window.AndreChat.querySidebar(text, update, (full) => {
+        await window.OSAssistant.querySidebar(text, update, (full) => {
             const reply = full || 'No response.';
             update(reply);
             this._addHistory('assistant', reply);
@@ -401,6 +419,7 @@ export class VoiceCommandManager {
     }
 
     _onEngineError(message) {
+        this._startOnReady = false;
         this._notifications.show(`Voice error: ${message}`, 'error');
         this._setState(this._engine.isReady ? 'ready' : 'error');
     }
@@ -414,7 +433,7 @@ export class VoiceCommandManager {
         // Make sure the sidebar is visible so the streamed reply is seen.
         if (!this._isSidebarOpen()) this._openSidebar();
 
-        if (window.AndreChat?.querySidebar) {
+        if (window.OSAssistant?.querySidebar) {
             // Reuse the pipeline's "thinking" bubble if it's still unclaimed,
             // otherwise start a fresh streaming bubble.
             let update = null;
@@ -425,9 +444,9 @@ export class VoiceCommandManager {
                 update = this._onStreamMessage('assistant');
             }
             if (update) {
-                await window.AndreChat.querySidebar(text, update, update);
+                await window.OSAssistant.querySidebar(text, update, update);
             } else {
-                await window.AndreChat.querySidebar(
+                await window.OSAssistant.querySidebar(
                     text,
                     null,
                     (full) => this._onMessage('assistant', full || 'No response.')
@@ -444,7 +463,7 @@ export class VoiceCommandManager {
 
     _beginThinking() {
         if (!this._isSidebarOpen()) this._openSidebar();
-        window.AndreChat?.markBusy?.(true);
+        window.OSAssistant?.markBusy?.(true);
         this._thinkingUpdate  = this._onStreamMessage ? this._onStreamMessage('assistant') : null;
         this._thinkingClaimed = false;
     }
@@ -460,7 +479,7 @@ export class VoiceCommandManager {
         if (this._thinkingUpdate && !this._thinkingClaimed) this._onDiscardStream();
         this._thinkingUpdate  = null;
         this._thinkingClaimed = false;
-        window.AndreChat?.markBusy?.(false);
+        window.OSAssistant?.markBusy?.(false);
     }
 
     // ── Private: context-aware commands (active window) ──────────────────────
@@ -534,7 +553,7 @@ export class VoiceCommandManager {
     async _parseLLM(text) {
         if (!isVoiceAIEnabled()) return null;
         try {
-            return await window.AndreChat?.parseCommand(text) ?? null;
+            return await window.OSAssistant?.parseCommand(text) ?? null;
         } catch {
             return null;
         }
@@ -780,7 +799,7 @@ export class VoiceCommandManager {
         this._notifications.push(
             'Voice Commands',
             lines.join('  ·  '),
-            '🎤',
+            MIC_ICON,
             'info'
         );
     }

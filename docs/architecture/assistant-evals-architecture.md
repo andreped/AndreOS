@@ -140,7 +140,7 @@ therefore directly comparable — no "it passed locally" ambiguity.
 flowchart TB
     IN["utterance"] --> Q{"needs the LLM?"}
     Q -->|no| DET["Node scorer<br/>(BM25 · resolveId · registry)"]
-    Q -->|yes| LLM["window.AndreChat<br/>routeIntent / parseCommand"]
+    Q -->|yes| LLM["window.OSAssistant<br/>routeIntent / parseCommand"]
     DET --> OK["✅ runs in CI on every push"]
     LLM --> BR["🧪 runs in the Evals app<br/>(model on WebGPU)"]
 ```
@@ -273,7 +273,7 @@ only run in a browser — reach the deployed site.
 
 1. Re-run the deterministic suites in-page (instant, for parity).
 2. If the Ask André model is loaded, run **routing**, **commands**, **plan**, and
-   **answers** through `window.AndreChat` — each sample repeated `REPEATS` times
+   **answers** through `window.OSAssistant` — each sample repeated `REPEATS` times
    for stability — and score them with the shared scorers.
 3. Render the scorecard with pass/below-threshold badges, stability/pass@k, and
    trend sparklines. The run stays private (localStorage); a **developer** can

@@ -7,7 +7,7 @@
  *   • Live       — re-runs every suite in the browser. The deterministic suites
  *                  (retrieval / resolution / integrity) run instantly; the
  *                  LLM suites (routing / commands) call the real Ask André
- *                  engine (window.AndreChat) and only run once the model is
+ *                  engine (window.OSAssistant) and only run once the model is
  *                  loaded. A live run can be downloaded as JSON to commit.
  *
  * The scorers are the exact same modules the Node harness uses, so committed
@@ -392,7 +392,7 @@ export function setupEvalsWindow(winEl) {
     const runLabel = runBtn.innerHTML; // restored after a run finishes or is stopped
     function stopRun() {
         runAborted = true;
-        try { /** @type {any} */ (window).AndreChat?.interrupt?.(); } catch { /* ignore in-flight */ }
+        try { /** @type {any} */ (window).OSAssistant?.interrupt?.(); } catch { /* ignore in-flight */ }
         runBtn.textContent = 'Stopping…';
     }
 
@@ -664,7 +664,7 @@ export function setupEvalsWindow(winEl) {
     new MutationObserver((_, obs) => {
         if (!document.contains(winEl)) {
             runAborted = true;
-            try { /** @type {any} */ (window).AndreChat?.interrupt?.(); } catch { /* ignore */ }
+            try { /** @type {any} */ (window).OSAssistant?.interrupt?.(); } catch { /* ignore */ }
             obs.disconnect();
         }
     }).observe(document.body, { childList: true, subtree: true });
@@ -677,7 +677,7 @@ const raf = () => new Promise((r) => document.hidden ? setTimeout(r, 0) : reques
 
 async function runLive(reporter, shouldAbort = () => false) {
     const suites = {};
-    const chat = /** @type {any} */ (window).AndreChat;
+    const chat = /** @type {any} */ (window).OSAssistant;
     let engineReady = !!chat && chat.currentModelId != null;
     const timer = makeTimer();
     const runners = buildRunners(chat, shouldAbort, timer);

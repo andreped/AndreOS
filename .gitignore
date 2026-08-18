@@ -3,7 +3,9 @@ dist/
 package-lock.json
 .env
 .env.*
+*.DS_Store
 
 wrangler.jsonc
 .wrangler/
 
+*.svgwork/

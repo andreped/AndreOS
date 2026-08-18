@@ -164,7 +164,7 @@ export class SearchOverlay {
         const static_ = index.filter(({ label, subtitle, keywords }) =>
             `${label} ${subtitle} ${keywords}`.toLowerCase().includes(query)
         );
-        const papers = window.AndreChat?.searchPapers(query) ?? [];
+        const papers = window.OSAssistant?.searchPapers(query) ?? [];
         return [...static_, ...papers];
     }
 

@@ -7,6 +7,11 @@
 export class NotificationManager {
     constructor() {
         this._ncUnread = 0;
+        // Viewing the notifications tab clears the unread indicator.
+        document.addEventListener('andreos:notifications-viewed', () => {
+            this._ncUnread = 0;
+            this._updateBadge();
+        });
     }
 
     // ── Public API ────────────────────────────────────────────────────────────
@@ -114,7 +119,7 @@ export class NotificationManager {
         const titleEl = item.querySelector('.nc-item-title');
         const msgEl   = item.querySelector('.nc-item-msg');
         const timeEl  = item.querySelector('.nc-item-time');
-        if (iconEl)  iconEl.textContent  = icon;
+        if (iconEl)  iconEl.innerHTML   = icon; // icon may be an emoji or an inline SVG/img
         if (titleEl) titleEl.textContent = title;
         if (msgEl)   msgEl.textContent   = message;
         if (timeEl)  timeEl.textContent  = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -125,54 +130,32 @@ export class NotificationManager {
         this._showToast(icon, title, message, type, onClick);
     }
 
-    /** Toggles the notification centre panel open/closed. */
+    /**
+     * Reveal the notifications view. Notifications now live in the assistant
+     * sidebar's Notifications tab; main.js wires the bell to
+     * sidebar.toggle('notifications'). Kept as a thin, dependency-free hook that
+     * dispatches an event main.js listens for, so callers don't need the sidebar.
+     */
     toggleCenter() {
-        const panel = document.getElementById('notificationCenter');
-        if (!panel) return;
-        const isOpen = panel.classList.contains('nc-open');
-        if (isOpen) {
-            panel.classList.remove('nc-open');
-            document.getElementById('nc-backdrop')?.remove();
-        } else {
-            panel.classList.add('nc-open');
-            // Only one panel open at a time — close the assistant sidebar
-            document.getElementById('assistantSidebar')?.classList.remove('asst-open');
-            document.getElementById('asstTrayBtn')?.classList.remove('asst-tray-active');
-            this._ncUnread = 0;
-            this._updateBadge();
-
-            // Mobile: add a tappable backdrop behind the panel
-            if (window.innerWidth <= 768) {
-                const bd = document.createElement('div');
-                bd.id = 'nc-backdrop';
-                bd.style.cssText = 'position:fixed;inset:0;z-index:4999;background:rgba(0,0,0,0.4)';
-                bd.addEventListener('click', () => this.toggleCenter());
-                document.body.appendChild(bd);
-            }
-
-            setTimeout(() => {
-                const closeOutside = (e) => {
-                    if (!panel.contains(e.target) && !e.target.closest('.notification-button')) {
-                        panel.classList.remove('nc-open');
-                        document.getElementById('nc-backdrop')?.remove();
-                        document.removeEventListener('click', closeOutside);
-                    }
-                };
-                document.addEventListener('click', closeOutside);
-            }, 50);
-        }
+        document.dispatchEvent(new CustomEvent('andreos:toggle-notifications'));
     }
 
     // ── Private helpers ───────────────────────────────────────────────────────
 
     _updateBadge() {
+        const show  = this._ncUnread > 0;
+        const label = this._ncUnread > 9 ? '9+' : String(this._ncUnread);
         const badge = document.getElementById('ncBadge');
-        if (!badge) return;
-        if (this._ncUnread > 0) {
-            badge.textContent = this._ncUnread > 9 ? '9+' : this._ncUnread;
-            badge.style.display = 'flex';
-        } else {
-            badge.style.display = 'none';
+        if (badge) {
+            badge.textContent   = label;
+            badge.style.display = show ? 'flex' : 'none';
+        }
+        // Mirror the count on the sidebar's Notifications tab so an indicator
+        // shows while the user is on the Assistant tab.
+        const tabBadge = document.getElementById('ncTabBadge');
+        if (tabBadge) {
+            tabBadge.textContent   = label;
+            tabBadge.style.display = show ? 'inline-flex' : 'none';
         }
     }
 
