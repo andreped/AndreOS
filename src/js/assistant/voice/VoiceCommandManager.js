@@ -297,11 +297,13 @@ export class VoiceCommandManager {
                 // gated to CPU only. Eval suites call routeIntent/parseCommand
                 // directly, so their scores are unaffected.
                 const skipRouting = window.OSAssistant.isCpuBackend && !_looksLikeOSCommand(text);
+                if (!skipRouting) this._thinkingUpdate?.setStatus?.('Understanding your request…');
                 const route = skipRouting ? 'direct' : await window.OSAssistant.routeIntent(text, this._history);
                 if (this._aborted) { if (fromVoice) this._setState('ready'); return; }
 
                 if (route !== null) {
                     if (route === 'command') {
+                        this._thinkingUpdate?.setStatus?.('Planning the steps…');
                         const actions = await window.OSAssistant.parseCommand(text, this._history);
                         if (this._aborted) { if (fromVoice) this._setState('ready'); return; }
                         if (actions?.length) {
@@ -411,6 +413,7 @@ export class VoiceCommandManager {
             update('The AI model is still loading — please try again in a moment.');
             return;
         }
+        update.setStatus?.('Generating response…');
         await window.OSAssistant.querySidebar(text, update, (full) => {
             const reply = full || 'No response.';
             update(reply);
@@ -444,6 +447,7 @@ export class VoiceCommandManager {
                 update = this._onStreamMessage('assistant');
             }
             if (update) {
+                update.setStatus?.('Generating response…');
                 await window.OSAssistant.querySidebar(text, update, update);
             } else {
                 await window.OSAssistant.querySidebar(
@@ -466,6 +470,7 @@ export class VoiceCommandManager {
         window.OSAssistant?.markBusy?.(true);
         this._thinkingUpdate  = this._onStreamMessage ? this._onStreamMessage('assistant') : null;
         this._thinkingClaimed = false;
+        this._thinkingUpdate?.setStatus?.('Thinking…');
     }
 
     /** Drop the thinking bubble (e.g. a plan is about to replace it). */

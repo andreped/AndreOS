@@ -183,6 +183,11 @@ export class AssistantSidebar {
         this._timedBubble = bubble; // stamped with its inference runtime on generation-end
         this._activeStreamBubble = bubble; // tracked so an unused "thinking" bubble can be discarded
 
+        // One-line working status (e.g. "Generating response…") shown before the
+        // first token; removed automatically once real content streams in.
+        const status = document.createElement('div');
+        status.className = 'asst-status';
+        status.style.display = 'none';
         const think = document.createElement('details');
         think.className = 'asst-think';
         think.style.display = 'none';
@@ -190,11 +195,12 @@ export class AssistantSidebar {
         const answer = document.createElement('div');
         answer.className = 'asst-answer';
         answer.textContent = '▋';
-        bubble.append(think, answer);
+        bubble.append(status, think, answer);
         const thinkBody = think.querySelector('.asst-think-body');
 
-        return (text) => {
+        const update = (text) => {
             const { reasoning, answer: ans } = this._splitThink(text || '');
+            if (ans.trim() || reasoning.trim()) status.style.display = 'none'; // tokens arrived
             if (reasoning.trim()) {
                 think.style.display = '';
                 thinkBody.textContent = reasoning;
@@ -206,6 +212,16 @@ export class AssistantSidebar {
             bubble._answerText = ans; // clean answer for retry/history
             this._scroll();
         };
+        // Set the working-status line in place; a falsy label hides it.
+        update.setStatus = (label) => {
+            if (!label) { status.style.display = 'none'; return; }
+            status.style.display = '';
+            status.innerHTML = '<span class="asst-status-spinner"></span><span class="asst-status-label"></span>';
+            status.querySelector('.asst-status-label').textContent = label;
+            answer.textContent = ''; // hide the bare cursor while the status shows
+            this._scroll();
+        };
+        return update;
     }
 
     /** Split a Qwen-style `<think>…</think>` reasoning block from the answer. */
