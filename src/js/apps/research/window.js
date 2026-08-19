@@ -18,6 +18,12 @@ import { ensureLoaded } from './data.js';
 /** PDF url for the in-app reader: prefer our same-origin R2 copy (no CORS), else the external one. */
 const resolvePdfUrl = (p) => p.localPdf || p.pdfUrl || null;
 
+/**
+ * Same-origin URL pdf.js can actually fetch: the R2 copy when stored, else the
+ * server-side proxy (/api/pdf) which bypasses the publisher CORS wall.
+ */
+const readerUrl = (p) => p.localPdf || (p.pdfUrl ? `/api/pdf?u=${encodeURIComponent(p.pdfUrl)}` : null);
+
 // ── PDF full-text extraction (best-effort) ────────────────────────────────────
 // Cross-origin PDFs are frequently CORS-blocked; when extraction fails we simply
 // keep the abstract as the assistant's context. pdf.js is loaded from CDN on
@@ -208,15 +214,16 @@ function selectPaper(winEl, paper) {
     const title    = (paper.title ?? 'Untitled').replace(/\s+/g, ' ').trim();
     const scholar  = paper.scholarUrl || null;
     const pubUrl   = paper.publisherUrl || null;
-    const pdfUrl   = resolvePdfUrl(paper);
+    const extUrl   = paper.pdfUrl || pubUrl || scholar;   // real publisher link ("Open ↗")
+    const readerSrc = readerUrl(paper);                   // same-origin url pdf.js can read
     const abstract = paper.abstract ?? '';
     const venue    = paper.venue ?? '';
 
     if (titleEl) titleEl.textContent = title;
     // Repurpose the two action links: publisher landing page + Scholar page.
     if (doiLink) { const link = pubUrl || scholar; doiLink.hidden = !link; if (link) doiLink.href = link; doiLink.textContent = pubUrl ? 'Publisher ↗' : 'Scholar ↗'; }
-    if (newtab)  { const link = pdfUrl || pubUrl || scholar; newtab.hidden = !link; newtab.href = link || '#'; }
-    if (blockA && pdfUrl) blockA.href = pdfUrl;
+    if (newtab)  { newtab.hidden = !extUrl; newtab.href = extUrl || '#'; }
+    if (blockA && extUrl) blockA.href = extUrl;
 
     // Abstract tab content
     if (absMeta) {
@@ -229,14 +236,14 @@ function selectPaper(winEl, paper) {
     if (absText) absText.textContent = abstract || 'No abstract is available for this publication.';
 
     // Register active context immediately (abstract-based); full text fills in later
-    researchContext.setPaper({ title, abstract, year: paper.year, url: pdfUrl ?? pubUrl ?? scholar ?? paper.id });
+    researchContext.setPaper({ title, abstract, year: paper.year, url: extUrl ?? paper.id });
 
     // Reset viewer; a monotonic token guards against out-of-order renders
     if (canvas) canvas.innerHTML = '';
     const token = (winEl._pdfToken = (winEl._pdfToken ?? 0) + 1);
     const isCurrent = () => winEl._pdfToken === token;
 
-    if (pdfUrl && canvas) {
+    if (readerSrc && canvas) {
         winEl._pdfState   = 'loading';
         winEl._detailView = 'pdf';
         winEl._pdfScale   = 1;
@@ -245,7 +252,7 @@ function selectPaper(winEl, paper) {
         updateZoomLabel(winEl);
 
         // Load once, then render pages (zoom re-renders from the cached doc).
-        loadPdfDoc(pdfUrl)
+        loadPdfDoc(readerSrc)
             .then(async (doc) => {
                 if (!isCurrent()) return;
                 winEl._pdfDoc = doc;
@@ -255,7 +262,7 @@ function selectPaper(winEl, paper) {
                 applyDetailView(winEl);
                 try {
                     const txt = await extractPdfText(doc);
-                    if (txt && isCurrent()) researchContext.setFullText(pdfUrl, txt);
+                    if (txt && isCurrent()) researchContext.setFullText(extUrl, txt);
                 } catch {}
             })
             .catch(() => {

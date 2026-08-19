@@ -10,7 +10,7 @@ on:
       - .github/workflows/scholar-pdfs.yml
 
 permissions:
-  contents: write          # commit the updated PDF manifest
+  contents: read
 
 concurrency:
   group: scholar-pdfs
@@ -41,9 +41,22 @@ jobs:
           echo "KV GET → HTTP $code"
           if [ "$code" != "200" ]; then cp public/scholar/publications.json feed.json; fi
 
+      - name: Load current PDF manifest from KV
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_KV_NAMESPACE_ID: ${{ secrets.CF_SCHOLAR_KV_NAMESPACE_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          code=$(curl -sS -o manifest.json -w '%{http_code}' \
+            "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/pdf-manifest" \
+            -H "Authorization: Bearer ${CF_API_TOKEN}") || true
+          echo "KV GET (pdf-manifest) → HTTP $code"
+          if [ "$code" != "200" ]; then echo '{"updatedAt":null,"totalBytes":0,"papers":{}}' > manifest.json; fi
+
       - name: Download + upload new open-access PDFs
         env:
           FEED_PATH: feed.json
+          MANIFEST_PATH: manifest.json
           SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
@@ -62,10 +75,17 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      - name: Commit updated manifest
+      - name: Upload PDF manifest to KV
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_KV_NAMESPACE_ID: ${{ secrets.CF_SCHOLAR_KV_NAMESPACE_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
         run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/scholar/pdf-manifest.json
-          git diff --cached --quiet || git commit -m "chore: update Scholar PDF manifest [skip ci]"
-          git push
+          resp=$(curl -sS -X PUT \
+            "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/pdf-manifest" \
+            -H "Authorization: Bearer ${CF_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            --data-binary @manifest.json)
+          echo "$resp"
+          echo "$resp" | grep -q '"success":true' || { echo "✖ manifest KV upload failed"; exit 1; }
+          echo "✓ Uploaded PDF manifest to KV"

@@ -6,7 +6,7 @@
  * KV-backed Pages Function, then the static dev fallback.
  */
 const SOURCES = ['/api/scholar-feed', '/scholar/publications.json'];
-const PDF_MANIFEST = '/scholar/pdf-manifest.json';
+const PDF_MANIFEST_SOURCES = ['/api/scholar-pdf-manifest', '/scholar/pdf-manifest.json'];
 
 let _profile = null;
 let _papers = [];
@@ -26,13 +26,17 @@ const pdfKey = (id) => id.replace(/[^\w.-]/g, '_');
 
 /** Mark papers whose PDF we rehost in R2 with a same-origin `localPdf` url. */
 async function applyLocalPdfs() {
-    try {
-        const res = await fetch(PDF_MANIFEST, { headers: { accept: 'application/json' } });
-        if (!res.ok) return;
-        const stored = new Set(Object.keys((await res.json())?.papers || {}));
-        if (!stored.size) return;
-        _papers = _papers.map((p) => (stored.has(p.id) ? { ...p, localPdf: `/scholar-pdf/${pdfKey(p.id)}` } : p));
-    } catch { /* manifest optional — external links still work */ }
+    for (const url of PDF_MANIFEST_SOURCES) {
+        try {
+            const res = await fetch(url, { headers: { accept: 'application/json' } });
+            if (!res.ok) continue;
+            const stored = new Set(Object.keys((await res.json())?.papers || {}));
+            if (!stored.size) continue;
+            _papers = _papers.map((p) => (stored.has(p.id) ? { ...p, localPdf: `/scholar-pdf/${pdfKey(p.id)}` } : p));
+            return;
+        } catch { /* try next source */ }
+    }
+    // manifest optional — external links still work
 }
 
 /** Fetch + cache the feed once. Safe to call repeatedly (dedupes in-flight). */

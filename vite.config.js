@@ -110,8 +110,73 @@ function evalsSavePlugin() {
     };
 }
 
+/**
+ * Dev-only mirror of functions/api/pdf.js: GET `/api/pdf?u=<url>` fetches the
+ * publisher PDF server-side (no CORS) and streams it back, so the Research app's
+ * reader works under `vite dev`. SSRF-guarded: only https URLs present in the
+ * static feed (public/scholar/publications.json) are proxied.
+ */
+function pdfProxyPlugin() {
+    const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
+    const FEED = path.resolve(__dirname, 'public/scholar/publications.json');
+    // Mirrors scripts/fetch-scholar-pdfs.mjs: turn OA landing pages into direct-PDF URLs.
+    const directPdfUrl = (url) => {
+        try {
+            const u = new URL(url);
+            const h = u.hostname;
+            if (h.endsWith('frontiersin.org')) return url.replace(/\/full\/?$/, '/pdf');
+            if (h.endsWith('journals.plos.org') && /\/article$/.test(u.pathname)) {
+                const id = u.searchParams.get('id');
+                if (id) return `${u.origin}${u.pathname}/file?id=${id}&type=printable`;
+            }
+            if (h.endsWith('mdpi.com') && !/\/pdf$/.test(u.pathname)) return url.replace(/\/?$/, '/pdf');
+        } catch { /* fall through */ }
+        return url;
+    };
+    return {
+        name: 'pdf-proxy',
+        apply: 'serve',
+        configureServer(server) {
+            server.middlewares.use('/api/pdf', async (req, res, next) => {
+                if (req.method !== 'GET') return next();
+                const u = new URL(req.url, 'http://localhost').searchParams.get('u');
+                const fail = (code, msg) => { res.statusCode = code; res.end(msg); };
+                if (!u) return fail(400, 'missing ?u');
+
+                let target;
+                try { target = new URL(u); } catch { return fail(400, 'bad url'); }
+                if (target.protocol !== 'https:') return fail(400, 'https only');
+
+                let allowed = false;
+                try {
+                    const feed = JSON.parse(fs.readFileSync(FEED, 'utf8'));
+                    allowed = (feed.papers || []).some((p) => p.pdfUrl === u || p.publisherUrl === u);
+                } catch { /* no feed → deny */ }
+                if (!allowed) return fail(403, 'not in feed');
+
+                try {
+                    const upstream = await fetch(directPdfUrl(target.href), {
+                        headers: { 'user-agent': UA, accept: 'application/pdf,*/*' },
+                        redirect: 'follow',
+                        signal: AbortSignal.timeout(30_000),
+                    });
+                    if (!upstream.ok) return fail(502, `upstream ${upstream.status}`);
+                    const buf = Buffer.from(await upstream.arrayBuffer());
+                    if (buf.subarray(0, 5).toString('latin1') !== '%PDF-') return fail(415, 'not a pdf');
+                    res.statusCode = 200;
+                    res.setHeader('content-type', 'application/pdf');
+                    res.setHeader('cache-control', 'public, max-age=86400');
+                    res.end(buf);
+                } catch (err) {
+                    fail(502, `upstream fetch failed: ${err.message}`);
+                }
+            });
+        },
+    };
+}
+
 export default defineConfig({
-    plugins: [evalsSavePlugin()],
+    plugins: [evalsSavePlugin(), pdfProxyPlugin()],
     // Prevent Vite from pre-bundling @xenova/transformers.
     // The library uses import.meta.url internally to resolve ONNX WASM file
     // paths; pre-bundling rewrites those URLs and breaks the lookup.
