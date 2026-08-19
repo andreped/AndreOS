@@ -5,9 +5,11 @@
 
 export const SETTINGS_KEY     = 'andreos_settings';
 export const DEFAULT_MODEL_ID = 'Qwen3.5-2B-q4f16_1-MLC';
-// Lighter default on phones/tablets — the 2B (~1.4 GB) OOM-crashes mobile Safari;
-// Qwen2.5 1.5B (~1 GB, Norwegian ✓) has a chance of loading on modern phones.
-export const MOBILE_DEFAULT_MODEL_ID = 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC';
+// Mobile can't use WebGPU: iOS Safari's WebGPU buffer/GPU-process limits abort the
+// tab regardless of device RAM (an iPhone 17 still crashes). Default phones/tablets
+// to the CPU (wllama/WASM) model instead — the same WASM path that transcription
+// uses, which runs fine on mobile.
+export const MOBILE_DEFAULT_MODEL_ID = 'Qwen3.5-2B-GGUF-CPU';
 
 export const MODELS = [
     { id: 'SmolLM2-135M-Instruct-q0f16-MLC',   name: 'SmolLM2 135M',  size: '~265 MB', desc: 'Fastest load · English only',                            badge: null },
