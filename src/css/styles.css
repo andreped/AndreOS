@@ -1689,7 +1689,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     width: 120px;
     height: 110px;
     cursor: pointer;
@@ -6286,4 +6286,128 @@ a.strava-card:hover {
 @keyframes strava-shimmer {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SYSTEM MONITOR
+   ────────────────────────────────────────────────────────────────────────── */
+.monitor-app {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    color: var(--text);
+    font-size: 14px;
+}
+
+.monitor-gauges {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.monitor-gauge {
+    background: var(--surface-raised);
+    border: 1px solid var(--border-soft);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.monitor-gauge-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.monitor-gauge-title {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.monitor-gauge-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--surface-sunken);
+    color: var(--text-muted);
+    text-transform: capitalize;
+}
+
+.monitor-gauge-value {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-strong);
+    font-variant-numeric: tabular-nums;
+}
+
+.monitor-gauge-value small {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-left: 2px;
+}
+
+.monitor-spark {
+    width: 100%;
+    height: 56px;
+    display: block;
+}
+
+.monitor-gauge-note {
+    font-size: 11px;
+    color: var(--text-faint);
+    line-height: 1.4;
+}
+
+.monitor-gauge-note code {
+    background: var(--surface-sunken);
+    padding: 0 4px;
+    border-radius: 4px;
+    font-size: 10.5px;
+}
+
+.monitor-tiles {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.monitor-tile {
+    background: var(--surface-raised);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.monitor-tile--wide { grid-column: 1 / -1; }
+
+.monitor-tile-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.monitor-tile-value {
+    font-weight: 600;
+    color: var(--text-strong);
+    font-variant-numeric: tabular-nums;
+}
+
+.monitor-disclaimer {
+    margin: 0;
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--text-faint);
+    border-top: 1px solid var(--border-soft);
+    padding-top: 12px;
 }
