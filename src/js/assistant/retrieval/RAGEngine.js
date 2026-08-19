@@ -1,30 +1,18 @@
 /**
  * RAGEngine
  *
- * Builds a BM25 index over André's publications (titles + abstracts) fetched
- * from OpenAlex, then exposes a query() method that returns a formatted
+ * Builds a BM25 index over André's publications (titles + abstracts) from the
+ * Google Scholar feed, then exposes a query() method that returns a formatted
  * context string ready to inject into the chat system prompt.
  *
- * - Reads the existing ResearchWindow cache (localStorage) when available.
- * - Falls back to a lightweight OpenAlex fetch when the cache is cold.
- * - Never overwrites the shared ResearchWindow cache.
+ * Papers come from the shared research feed store (KV-backed Pages Function with
+ * a static dev fallback), so the index reuses whatever the Research window loaded.
  */
 
 import { BM25 } from './BM25.js';
+import { ensureLoaded } from '../../apps/research/data.js';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-
-const SHARED_CACHE_KEY = 'andreOS_research_v2';    // written by ResearchWindow
-const RAG_CACHE_KEY    = 'andreOS_rag_v1';         // own lightweight cache
-const CACHE_TTL        = 24 * 60 * 60 * 1000;      // 24 h
-
-const AUTHOR_ID = 'A5090654106';
-const WORKS_URL =
-    `https://api.openalex.org/works` +
-    `?filter=author.id:${AUTHOR_ID}` +
-    `&sort=publication_date:desc` +
-    `&per_page=50` +
-    `&select=id,title,publication_year,cited_by_count,doi,type,abstract_inverted_index`;
 
 // Chars of abstract snippet included per paper in the LLM context block.
 // Keep short — SmolLM2-135M has a limited context window.
@@ -35,59 +23,7 @@ const MIN_SCORE = 0.3;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function reconstructAbstract(invertedIndex) {
-    if (!invertedIndex || typeof invertedIndex !== 'object') return null;
-    const positions = [];
-    for (const [word, idxList] of Object.entries(invertedIndex)) {
-        for (const pos of idxList) positions[pos] = word;
-    }
-    const text = positions.filter(Boolean).join(' ').trim();
-    return text.length > 0 ? text : null;
-}
-
-/** Try to get raw paper array from any available cache, null if nothing valid. */
-function readCache() {
-    // 1. Prefer the shared ResearchWindow cache (likely already warm)
-    try {
-        const raw = localStorage.getItem(SHARED_CACHE_KEY);
-        if (raw) {
-            const { ts, data } = JSON.parse(raw);
-            if (Date.now() - ts < CACHE_TTL && Array.isArray(data?.papers)) {
-                return data.papers;
-            }
-        }
-    } catch {}
-
-    // 2. Fall back to own RAG cache
-    try {
-        const raw = localStorage.getItem(RAG_CACHE_KEY);
-        if (raw) {
-            const { ts, papers } = JSON.parse(raw);
-            if (Date.now() - ts < CACHE_TTL && Array.isArray(papers)) {
-                return papers;
-            }
-        }
-    } catch {}
-
-    return null;
-}
-
-async function fetchPapers() {
-    const cached = readCache();
-    if (cached) return cached;
-
-    const res = await fetch(WORKS_URL);
-    if (!res.ok) throw new Error(`OpenAlex fetch failed (${res.status})`);
-    const json = await res.json();
-    const papers = json.results ?? [];
-
-    // Persist to own cache so we don't fetch again within 24 h
-    try {
-        localStorage.setItem(RAG_CACHE_KEY, JSON.stringify({ ts: Date.now(), papers }));
-    } catch {}
-
-    return papers;
-}
+// Paper loading is handled by the shared research feed store (data.js).
 
 // ── RAGEngine class ───────────────────────────────────────────────────────────
 
@@ -108,15 +44,15 @@ export class RAGEngine {
         if (this._ready || this._loading) return;
         this._loading = true;
         try {
-            const rawPapers = await fetchPapers();
+            const { papers: rawPapers } = await ensureLoaded();
             const bm25      = new BM25();
             const enriched  = [];
 
             for (const p of rawPapers) {
                 const title    = (p.title ?? '').replace(/\s+/g, ' ').trim();
-                const abstract = reconstructAbstract(p.abstract_inverted_index) ?? '';
+                const abstract = p.abstract ?? '';
                 bm25.addDocument(p.id, `${title}. ${abstract}`);
-                enriched.push({ id: p.id, title, abstract, year: p.publication_year, doi: p.doi });
+                enriched.push({ id: p.id, title, abstract, year: p.year, doi: p.publisherUrl || p.scholarUrl || null });
             }
 
             bm25.build();

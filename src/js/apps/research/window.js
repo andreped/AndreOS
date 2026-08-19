@@ -1,49 +1,22 @@
 /**
  * ResearchWindow
  *
- * Fetches André's publications from OpenAlex (free, open scholarly API),
- * caches the result in localStorage for 24 hours, then renders a searchable,
+ * Loads André's publications from the Google Scholar feed (KV-backed Pages
+ * Function with a static dev fallback — see data.js), then renders a searchable,
  * sortable Finder-style master-detail view: a list of papers on the left and
  * an embedded PDF reader on the right.
  *
- * Selecting a paper loads its open-access PDF (when available) and registers it
- * as the "active paper" so the assistant can answer questions about it.
+ * Selecting a paper loads its PDF (when available) and registers it as the
+ * "active paper" so the assistant can answer questions about it.
  *
- * OpenAlex author ID: A5090654106  (André Pedersen, SINTEF / NTNU)
- * Scholar profile:  https://scholar.google.com/citations?user=U20zUHQAAAAJ
+ * Scholar profile: https://scholar.google.com/citations?user=U20zUHQAAAAJ
  */
 
 import { researchContext } from './context.js';
+import { ensureLoaded } from './data.js';
 
-const AUTHOR_ID = 'A5090654106';
-const CACHE_KEY = 'andreOS_research_v3'; // v3: added best_oa_location to the query
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
-
-const AUTHOR_URL = `https://api.openalex.org/authors/${AUTHOR_ID}?select=works_count,cited_by_count,summary_stats`;
-const WORKS_URL  =
-    `https://api.openalex.org/works` +
-    `?filter=author.id:${AUTHOR_ID}` +
-    `&sort=publication_date:desc` +
-    `&per_page=50` +
-    `&select=id,title,publication_year,cited_by_count,doi,primary_location,best_oa_location,type,open_access,abstract_inverted_index`;
-
-/**
- * Resolve the best *direct* PDF URL for a work. OpenAlex spreads this across
- * several fields — the direct file often lives in best_oa_location.pdf_url even
- * when open_access.oa_url is null (or points at a landing page).
- * @param {object} p
- * @returns {string|null}
- */
-function resolvePdfUrl(p) {
-    const url = p.best_oa_location?.pdf_url
-        || p.primary_location?.pdf_url
-        || p.open_access?.oa_url
-        || null;
-    // Upgrade http→https so the fetch isn't blocked as mixed content in prod,
-    // and prefer the canonical arxiv.org host over the export mirror.
-    if (!url) return null;
-    return url.replace(/^http:\/\//i, 'https://').replace('://export.arxiv.org/', '://arxiv.org/');
-}
+/** PDF url for the in-app reader: prefer our same-origin R2 copy (no CORS), else the external one. */
+const resolvePdfUrl = (p) => p.localPdf || p.pdfUrl || null;
 
 // ── PDF full-text extraction (best-effort) ────────────────────────────────────
 // Cross-origin PDFs are frequently CORS-blocked; when extraction fails we simply
@@ -147,80 +120,33 @@ function updateZoomLabel(winEl) {
 // ── Data fetching ─────────────────────────────────────────────────────────────
 
 async function loadData() {
-    const raw = localStorage.getItem(CACHE_KEY);
-    if (raw) {
-        try {
-            const { ts, data } = JSON.parse(raw);
-            if (Date.now() - ts < CACHE_TTL) return data;
-        } catch {
-            // corrupt cache — refetch
-        }
-    }
-
-    const [aRes, wRes] = await Promise.all([
-        fetch(AUTHOR_URL),
-        fetch(WORKS_URL),
-    ]);
-
-    if (!aRes.ok) throw new Error(`Author fetch failed (${aRes.status})`);
-    if (!wRes.ok) throw new Error(`Works fetch failed (${wRes.status})`);
-
-    const [author, works] = await Promise.all([aRes.json(), wRes.json()]);
-
-    const data = {
-        worksCount: author.works_count   ?? 0,
-        citations:  author.cited_by_count ?? 0,
-        hIndex:     author.summary_stats?.h_index ?? '–',
-        papers:     works.results ?? [],
+    const { profile, papers } = await ensureLoaded();
+    if (!papers.length) throw new Error('Scholar feed is empty');
+    return {
+        worksCount: papers.length,
+        citations:  profile?.citations ?? 0,
+        hIndex:     profile?.hIndex ?? '–',
+        i10Index:   profile?.i10Index ?? '–',
+        papers,
     };
-
-    localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
-    return data;
-}
-
-// ── Abstract reconstruction ─────────────────────────────────────────────────
-
-function reconstructAbstract(invertedIndex) {
-    if (!invertedIndex || typeof invertedIndex !== 'object') return null;
-    const positions = [];
-    for (const [word, idxList] of Object.entries(invertedIndex)) {
-        for (const pos of idxList) {
-            positions[pos] = word;
-        }
-    }
-    const text = positions.filter(Boolean).join(' ').trim();
-    return text.length > 0 ? text : null;
 }
 
 // ── Rendering helpers ─────────────────────────────────────────────────────────
 
-function typeLabel(type) {
-    switch (type) {
-        case 'journal-article':     return 'Journal';
-        case 'proceedings-article': return 'Conference';
-        case 'book-chapter':        return 'Book Chapter';
-        case 'preprint':            return 'Preprint';
-        case 'dataset':             return 'Dataset';
-        default:                    return type ?? '';
-    }
-}
-
 function renderPaper(p) {
-    const venue = p.primary_location?.source?.display_name ?? '';
-    const type  = typeLabel(p.type);
-    const cite  = p.cited_by_count ?? 0;
+    const venue = p.venue ?? '';
+    const cite  = p.citations ?? 0;
     const title = (p.title ?? 'Untitled').replace(/\s+/g, ' ').trim();
-    const hasOa = !!resolvePdfUrl(p);
+    const hasPdf = !!resolvePdfUrl(p);
 
     return `
-        <div class="research-paper" data-id="${p.id}" data-year="${p.publication_year ?? 0}" data-citations="${cite}">
+        <div class="research-paper" data-id="${p.id}" data-year="${p.year ?? 0}" data-citations="${cite}">
             <div class="paper-row-title">${title}</div>
             <div class="paper-meta">
-                <span class="paper-year">${p.publication_year ?? '?'}</span>
+                <span class="paper-year">${p.year ?? '?'}</span>
                 ${venue ? `<span class="paper-venue" title="${venue}">${venue}</span>` : ''}
-                ${type  ? `<span class="paper-type">${type}</span>` : ''}
                 <span class="paper-cites">${cite} cite${cite !== 1 ? 's' : ''}</span>
-                ${hasOa ? `<span class="paper-oa-dot" title="Open-access PDF available">OA</span>` : ''}
+                ${hasPdf ? `<span class="paper-oa-dot" title="PDF available">PDF</span>` : ''}
             </div>
         </div>`;
 }
@@ -280,29 +206,30 @@ function selectPaper(winEl, paper) {
     if (detail) detail.hidden = false;
 
     const title    = (paper.title ?? 'Untitled').replace(/\s+/g, ' ').trim();
-    const doi      = paper.doi ? (paper.doi.startsWith('http') ? paper.doi : `https://doi.org/${paper.doi}`) : null;
+    const scholar  = paper.scholarUrl || null;
+    const pubUrl   = paper.publisherUrl || null;
     const pdfUrl   = resolvePdfUrl(paper);
-    const abstract = reconstructAbstract(paper.abstract_inverted_index) ?? '';
-    const venue    = paper.primary_location?.source?.display_name ?? '';
+    const abstract = paper.abstract ?? '';
+    const venue    = paper.venue ?? '';
 
     if (titleEl) titleEl.textContent = title;
-    if (doiLink) { doiLink.hidden = !doi; if (doi) doiLink.href = doi; }
-    if (newtab)  { newtab.hidden = !(pdfUrl || doi); newtab.href = pdfUrl || doi || '#'; }
+    // Repurpose the two action links: publisher landing page + Scholar page.
+    if (doiLink) { const link = pubUrl || scholar; doiLink.hidden = !link; if (link) doiLink.href = link; doiLink.textContent = pubUrl ? 'Publisher ↗' : 'Scholar ↗'; }
+    if (newtab)  { const link = pdfUrl || pubUrl || scholar; newtab.hidden = !link; newtab.href = link || '#'; }
     if (blockA && pdfUrl) blockA.href = pdfUrl;
 
     // Abstract tab content
     if (absMeta) {
         absMeta.innerHTML = [
-            paper.publication_year,
+            paper.year,
             venue,
-            typeLabel(paper.type),
-            `${paper.cited_by_count ?? 0} citations`,
+            `${paper.citations ?? 0} citations`,
         ].filter(Boolean).map(s => `<span>${s}</span>`).join('');
     }
     if (absText) absText.textContent = abstract || 'No abstract is available for this publication.';
 
     // Register active context immediately (abstract-based); full text fills in later
-    researchContext.setPaper({ title, abstract, year: paper.publication_year, url: pdfUrl ?? doi ?? paper.id });
+    researchContext.setPaper({ title, abstract, year: paper.year, url: pdfUrl ?? pubUrl ?? scholar ?? paper.id });
 
     // Reset viewer; a monotonic token guards against out-of-order renders
     if (canvas) canvas.innerHTML = '';
@@ -352,16 +279,13 @@ function applyFilters(listEl, papers, query, sort, typeFilter = 'all', selectedI
     let filtered = q
         ? papers.filter(p =>
             (p.title ?? '').toLowerCase().includes(q) ||
-            (p.primary_location?.source?.display_name ?? '').toLowerCase().includes(q))
+            (p.venue ?? '').toLowerCase().includes(q) ||
+            (p.authors ?? '').toLowerCase().includes(q))
         : [...papers];
 
-    if (typeFilter !== 'all') {
-        filtered = filtered.filter(p => (p.type ?? '') === typeFilter);
-    }
-
-    if      (sort === 'cited') filtered.sort((a, b) => (b.cited_by_count ?? 0) - (a.cited_by_count ?? 0));
-    else if (sort === 'asc')   filtered.sort((a, b) => (a.publication_year ?? 0) - (b.publication_year ?? 0));
-    // 'date' (default) is already sorted desc by the API
+    if      (sort === 'cited') filtered.sort((a, b) => (b.citations ?? 0) - (a.citations ?? 0));
+    else if (sort === 'asc')   filtered.sort((a, b) => (a.year ?? 0) - (b.year ?? 0));
+    else                       filtered.sort((a, b) => (b.year ?? 0) - (a.year ?? 0)); // 'date' → newest first
 
     listEl.innerHTML = filtered.length
         ? filtered.map(renderPaper).join('')
@@ -400,41 +324,19 @@ export function setupResearchWindow(winEl) {
                     <span class="stat-pill"><strong>${data.citations}</strong> citations</span>
                     <span class="stat-dot">·</span>
                     <span class="stat-pill">h-index <strong>${data.hIndex}</strong></span>
+                    <span class="stat-dot">·</span>
+                    <span class="stat-pill">i10 <strong>${data.i10Index}</strong></span>
                 </div>
                 <div class="stats-row stats-row--right">
-                    <span class="stats-source">via OpenAlex (undercounts vs. Scholar)</span>
+                    <span class="stats-source">via Google Scholar</span>
                     <a href="https://scholar.google.com/citations?user=U20zUHQAAAAJ"
                        target="_blank" rel="noopener noreferrer" class="scholar-link">
                         Google Scholar ↗
                     </a>
                 </div>`;
 
-            // Build type-filter pills from the actual data
-            let activeType = 'all';
-            const typeCounts = {};
-            for (const p of data.papers) {
-                const t = p.type ?? '';
-                if (t) typeCounts[t] = (typeCounts[t] ?? 0) + 1;
-            }
-            const typeOrder = ['journal-article','proceedings-article','preprint','book-chapter','dissertation','dataset'];
-            const presentTypes = typeOrder.filter(t => typeCounts[t]);
-
-            if (filtersEl && presentTypes.length > 1) {
-                const allBtn = `<button class="type-pill active" data-type="all">All <span class="type-pill-count">${data.papers.length}</span></button>`;
-                const typeBtns = presentTypes.map(t =>
-                    `<button class="type-pill" data-type="${t}">${typeLabel(t)} <span class="type-pill-count">${typeCounts[t]}</span></button>`
-                ).join('');
-                filtersEl.innerHTML = allBtn + typeBtns;
-
-                filtersEl.addEventListener('click', (e) => {
-                    const btn = e.target.closest('.type-pill');
-                    if (!btn) return;
-                    filtersEl.querySelectorAll('.type-pill').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    activeType = btn.dataset.type;
-                    applyFilters(listEl, data.papers, searchEl.value, sortEl.value, activeType, selectedId);
-                });
-            }
+            // Scholar exposes no publication type, so the type-filter pills are omitted.
+            const activeType = 'all';
 
             applyFilters(listEl, data.papers, '', 'cited', 'all', selectedId);
             statusEl.style.display = 'none';
@@ -535,7 +437,6 @@ export function setupResearchWindow(winEl) {
                     <button class="research-retry">Retry</button>
                 </div>`;
             statusEl.querySelector('.research-retry')?.addEventListener('click', () => {
-                localStorage.removeItem(CACHE_KEY);
                 statusEl.innerHTML = `
                     <div class="research-loading">
                         <div class="research-spinner"></div>

@@ -1,0 +1,71 @@
+name: Update Scholar PDFs
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'   # weekly, Mondays at 08:00 UTC (after the metadata feed)
+  workflow_dispatch:
+  push:
+    paths:
+      - scripts/fetch-scholar-pdfs.mjs
+      - .github/workflows/scholar-pdfs.yml
+
+permissions:
+  contents: write          # commit the updated PDF manifest
+
+concurrency:
+  group: scholar-pdfs
+  cancel-in-progress: true
+
+env:
+  R2_BUCKET: andreos-scholar-pdfs   # must match the R2 bucket + Pages binding SCHOLAR_PDFS
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Load current feed from KV
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_KV_NAMESPACE_ID: ${{ secrets.CF_SCHOLAR_KV_NAMESPACE_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          code=$(curl -sS -o feed.json -w '%{http_code}' \
+            "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/publications" \
+            -H "Authorization: Bearer ${CF_API_TOKEN}") || true
+          echo "KV GET → HTTP $code"
+          if [ "$code" != "200" ]; then cp public/scholar/publications.json feed.json; fi
+
+      - name: Download new open-access PDFs
+        env:
+          FEED_PATH: feed.json
+          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
+        run: node scripts/fetch-scholar-pdfs.mjs
+
+      - name: Upload PDFs to R2
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          shopt -s nullglob
+          count=0
+          for f in pdfs_out/*.pdf; do
+            key=$(basename "$f")
+            echo "→ $key"
+            npx --yes wrangler@3 r2 object put "${R2_BUCKET}/${key}" --file="$f" --content-type=application/pdf --remote
+            count=$((count + 1))
+          done
+          echo "✓ uploaded $count PDFs to R2"
+
+      - name: Commit updated manifest
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/scholar/pdf-manifest.json
+          git diff --cached --quiet || git commit -m "chore: update Scholar PDF manifest [skip ci]"
+          git push
