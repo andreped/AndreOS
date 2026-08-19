@@ -79,6 +79,25 @@ const mmss = (sec) => {
     return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
 };
 
+/**
+ * Rewrite a known OA landing-page URL to its direct-PDF endpoint. Scholar's pdfUrl is
+ * often the HTML article page (Frontiers /full, PLOS article?id=, MDPI landing), which
+ * fails the %PDF check — these transforms point at the actual file. Unknown hosts pass through.
+ */
+function directPdfUrl(url) {
+    try {
+        const u = new URL(url);
+        const h = u.hostname;
+        if (h.endsWith('frontiersin.org')) return url.replace(/\/full\/?$/, '/pdf');
+        if (h.endsWith('journals.plos.org') && /\/article$/.test(u.pathname)) {
+            const id = u.searchParams.get('id');
+            if (id) return `${u.origin}${u.pathname}/file?id=${id}&type=printable`;
+        }
+        if (h.endsWith('mdpi.com') && !/\/pdf$/.test(u.pathname)) return url.replace(/\/?$/, '/pdf');
+    } catch { /* fall through */ }
+    return url;
+}
+
 /** Fetch a URL as bytes; returns a Buffer or null. Tries direct, then proxy. */
 async function download(url) {
     for (const target of PROXY_KEY ? [url, proxied(url)] : [url]) {
@@ -129,7 +148,7 @@ async function main() {
         const eta = i > 0 ? mmss(((Date.now() - start) / 1000 / i) * (candidates.length - i)) : '?';
         process.stderr.write(`[${i + 1}/${candidates.length}] ETA ${eta}  ${p.title.slice(0, 50)}\n`);
 
-        const buf = await download(p.pdfUrl);
+        const buf = await download(directPdfUrl(p.pdfUrl));
         await sleep(DELAY_MS);
         if (!buf) { skipped++; continue; }
 
