@@ -35,8 +35,22 @@ const OUT       = path.resolve('public/scholar/publications.json');
 const BASE      = 'https://scholar.google.com';
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 
+// Optional residential proxy (ScraperAPI). When SCRAPERAPI_KEY is set, requests are
+// routed through it so Google sees a residential IP instead of a blocked datacenter/CI
+// one. SCRAPERAPI_PARAMS lets you add options like `ultra_premium=true` (Google often
+// needs it) or `country_code=us`. Unset = direct fetch (no-op), so local/residential runs
+// are unaffected.
+const PROXY_KEY    = process.env.SCRAPERAPI_KEY || '';
+const PROXY_PARAMS = process.env.SCRAPERAPI_PARAMS || '';
+
 const listUrl   = (cstart) => `${BASE}/citations?hl=en&user=${USER}&cstart=${cstart}&pagesize=${PAGE_SIZE}`;
 const detailUrl = (citeId) => `${BASE}/citations?view_op=view_citation&hl=en&user=${USER}&citation_for_view=${citeId}`;
+
+/** Route a URL through ScraperAPI when a key is set; otherwise return it unchanged. */
+const proxied = (url) =>
+    PROXY_KEY
+        ? `https://api.scraperapi.com/?api_key=${PROXY_KEY}&url=${encodeURIComponent(url)}${PROXY_PARAMS ? `&${PROXY_PARAMS}` : ''}`
+        : url;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -95,12 +109,14 @@ const clean = (html = '') => decode(html.replace(/<[^>]+>/g, ' ')).replace(/\s+/
 /** GET a Scholar page as text, retrying 429/CAPTCHA with exponential backoff. */
 async function getHtml(url) {
     for (let attempt = 0; ; attempt++) {
-        const res = await fetch(url, {
+        const res = await fetch(proxied(url), {
             headers: {
                 'user-agent': UA,
                 accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                 'accept-language': 'en-US,en;q=0.9',
             },
+            // ScraperAPI can take a while (proxy hop + optional render); allow 90s.
+            signal: AbortSignal.timeout(PROXY_KEY ? 90_000 : 30_000),
         });
         const html = await res.text();
         const blocked = res.status === 429 || /unusual traffic|not a robot|\/sorry\/index/i.test(html);
@@ -113,6 +129,11 @@ async function getHtml(url) {
             process.stderr.write(`\n  ⚠ rate-limited, backing off ${mmss(wait / 1000)} (retry ${attempt + 1}/${RETRIES})…\n`);
             await sleep(wait);
             continue;
+        }
+        // 403/401 = Google refusing this IP outright (typical for datacenter/CI IP ranges
+        // such as GitHub-hosted runners). Backoff won't help — the IP itself is blocked.
+        if (res.status === 403 || res.status === 401) {
+            throw new Error(`Scholar returned HTTP ${res.status} — this IP is blocked (common for datacenter/CI IPs). Run from a residential IP or route through a proxy.`);
         }
         if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
         return html;

@@ -47,6 +47,9 @@ jobs:
         env:
           EXISTING_PATH: existing.json
           SCHOLAR_FULL: ${{ (github.event.inputs.full == 'true') && '1' || '' }}
+          # Residential proxy — required: GitHub runner IPs are 403-blocked by Scholar.
+          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
+          SCRAPERAPI_PARAMS: ${{ vars.SCRAPERAPI_PARAMS }}
         run: node scripts/fetch-scholar.mjs
 
       - name: Upload feed to Cloudflare KV

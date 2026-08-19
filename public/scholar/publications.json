@@ -6,7 +6,7 @@
     "hIndex": 15,
     "i10Index": 18
   },
-  "updatedAt": "2026-08-19T11:25:39.332Z",
+  "updatedAt": "2026-08-19T12:07:52.799Z",
   "papers": [
     {
       "id": "U20zUHQAAAAJ:5nxA0vEk-isC",
@@ -18,7 +18,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:5nxA0vEk-isC",
       "pdfUrl": "https://www.frontiersin.org/journals/neurology/articles/10.3389/fneur.2022.932219/full",
       "publisherUrl": "https://www.frontiersin.org/journals/neurology/articles/10.3389/fneur.2022.932219/full",
-      "abstract": null
+      "abstract": "For patients suffering from brain tumor, prognosis estimation and treatment decisions are made by a multidisciplinary team based on a set of preoperative MR scans. Currently, the lack of standardized and automatic methods for tumor detection and generation of clinical reports, incorporating a wide range of tumor characteristics, represents a major hurdle. In this study, we investigate the most occurring brain tumor types: glioblastomas, lower grade gliomas, meningiomas, and metastases, through four cohorts of up to 4,000 patients. Tumor segmentation models were trained using the AGU-Net architecture with different preprocessing steps and protocols. Segmentation performances were assessed in-depth using a wide-range of voxel and patient-wise metrics covering volume, distance, and probabilistic aspects. Finally, two software solutions have been developed, enabling an easy use of the trained models and standardized generation of clinical reports: Raidionics and Raidionics-Slicer. Segmentation performances were quite homogeneous across the four different brain tumor types, with an average true positive Dice ranging between 80 and 90%, patient-wise recall between 88 and 98%, and patient-wise precision around 95%. In conjunction to Dice, the identified most relevant other metrics were the relative absolute volume difference, the variation of information, and the Hausdorff, Mahalanobis, and object average symmetric surface distances. With our Raidionics software, running on a desktop computer with CPU support, tumor segmentation can be performed in 16–54 s depending on the dimensions of the MRI volume. For the generation …"
     },
     {
       "id": "U20zUHQAAAAJ:Tyk-4Ss8FVUC",
@@ -30,7 +30,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:Tyk-4Ss8FVUC",
       "pdfUrl": "https://www.sciencedirect.com/science/article/pii/S0301562921000041",
       "publisherUrl": "https://www.sciencedirect.com/science/article/pii/S0301562921000041",
-      "abstract": null
+      "abstract": "Sofie Snipstad, Ýrr Mørch, Einar Sulheim, Andreas Åslund, André Pedersen, Catharina de Lange Davies, Rune Hansen, Sigrid Berg"
     },
     {
       "id": "U20zUHQAAAAJ:4DMP91E08xMC",
@@ -42,7 +42,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:4DMP91E08xMC",
       "pdfUrl": "https://www.nature.com/articles/s41598-023-45456-x",
       "publisherUrl": "https://www.nature.com/articles/s41598-023-45456-x",
-      "abstract": null
+      "abstract": "Extent of resection after surgery is one of the main prognostic factors for patients diagnosed with glioblastoma. To achieve this, accurate segmentation and classification of residual tumor from post-operative MR images is essential. The current standard method for estimating it is subject to high inter- and intra-rater variability, and an automated method for segmentation of residual tumor in early post-operative MRI could lead to a more accurate estimation of extent of resection. In this study, two state-of-the-art neural network architectures for pre-operative segmentation were trained for the task. The models were extensively validated on a multicenter dataset with nearly 1000 patients, from 12 hospitals in Europe and the United States. The best performance achieved was a 61% Dice score, and the best classification performance was about 80% balanced accuracy, with a demonstrated ability to generalize across …"
     },
     {
       "id": "U20zUHQAAAAJ:zYLM7Y9cAGgC",
@@ -54,7 +54,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:zYLM7Y9cAGgC",
       "pdfUrl": "https://www.tandfonline.com/doi/pdf/10.1080/21681163.2022.2043778",
       "publisherUrl": "https://www.tandfonline.com/doi/abs/10.1080/21681163.2022.2043778",
-      "abstract": null
+      "abstract": "As lung cancer evolves, the presence of potentially malignant lymph nodes must be assessed to properly estimate disease progression and select the best treatment strategy. A method for accurate and automatic segmentation is hence decisive for quantitatively describing lymph nodes. In this study, the use of 3D convolutional neural networks, either through slab-wise schemes or the leveraging of downsampled entire volumes, is investigated. As lymph nodes have similar attenuation values to nearby anatomical structures, we use the knowledge of other organs as prior information to guide the segmentation. To assess the performances, a 5-fold cross-validation strategy was followed over a dataset of 120 contrast-enhanced CT volumes. For the 1178 lymph nodes with a short-axis diameter mm, our best-performing approach reached a patient-wise recall of 92%, a false positive per patient ratio of 5 and a …"
     },
     {
       "id": "U20zUHQAAAAJ:IjCSPb-OGe4C",
@@ -66,7 +66,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:IjCSPb-OGe4C",
       "pdfUrl": "https://www.frontiersin.org/journals/radiology/articles/10.3389/fradi.2021.711514/full",
       "publisherUrl": "https://www.frontiersin.org/journals/radiology/articles/10.3389/fradi.2021.711514/full",
-      "abstract": null
+      "abstract": "Purpose: Meningiomas are the most common type of primary brain tumor, accounting for ~30% of all brain tumors. A substantial number of these tumors are never surgically removed but rather monitored over time. Automatic and precise meningioma segmentation is, therefore, beneficial to enable reliable growth estimation and patient-specific treatment planning."
     },
     {
       "id": "U20zUHQAAAAJ:u5HHmVD_uO8C",
@@ -78,7 +78,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:u5HHmVD_uO8C",
       "pdfUrl": "https://ieeexplore.ieee.org/iel7/6287639/8600701/08844665.pdf",
       "publisherUrl": "https://ieeexplore.ieee.org/abstract/document/8844665/",
-      "abstract": null
+      "abstract": "High performance neural network inference, streaming, and visualization of medical images using FAST"
     },
     {
       "id": "U20zUHQAAAAJ:mVmsd5A6BfQC",
@@ -90,7 +90,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:mVmsd5A6BfQC",
       "pdfUrl": "https://www.nature.com/articles/s41598-023-42048-7",
       "publisherUrl": "https://www.nature.com/articles/s41598-023-42048-7",
-      "abstract": null
+      "abstract": "For patients suffering from central nervous system tumors, prognosis estimation, treatment decisions, and postoperative assessments are made from the analysis of a set of magnetic resonance (MR) scans. Currently, the lack of open tools for standardized and automatic tumor segmentation and generation of clinical reports, incorporating relevant tumor characteristics, leads to potential risks from inherent decisions’ subjectivity. To tackle this problem, the proposed Raidionics open-source software has been developed, offering both a user-friendly graphical user interface and stable processing backend. The software includes preoperative segmentation models for each of the most common tumor types (i.e., glioblastomas, lower grade gliomas, meningiomas, and metastases), together with one early postoperative glioblastoma segmentation model. Preoperative segmentation performances were quite homogeneous …"
     },
     {
       "id": "U20zUHQAAAAJ:d1gkVwhDpl0C",
@@ -102,7 +102,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:d1gkVwhDpl0C",
       "pdfUrl": "https://ieeexplore.ieee.org/iel7/6287639/9312710/09399433.pdf",
       "publisherUrl": "https://ieeexplore.ieee.org/document/9399433/",
-      "abstract": null
+      "abstract": "FastPathology: an open-source platform for deep learning-based research and decision support in digital pathology"
     },
     {
       "id": "U20zUHQAAAAJ:WF5omc3nYNoC",
@@ -114,7 +114,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:WF5omc3nYNoC",
       "pdfUrl": "https://www.frontiersin.org/journals/medicine/articles/10.3389/fmed.2021.816281/full",
       "publisherUrl": "https://www.frontiersin.org/journals/medicine/articles/10.3389/fmed.2021.816281/full",
-      "abstract": null
+      "abstract": "Application of deep learning on histopathological whole slide images (WSIs) holds promise of improving diagnostic efficiency and reproducibility but is largely dependent on the ability to write computer code or purchase commercial solutions. We present a code-free pipeline utilizing free-to-use, open-source software (QuPath, DeepMIB, and FastPathology) for creating and deploying deep learning-based segmentation models for computational pathology. We demonstrate the pipeline on a use case of separating epithelium from stroma in colonic mucosa. A dataset of 251 annotated WSIs, comprising 140 hematoxylin-eosin (HE)-stained and 111 CD3 immunostained colon biopsy WSIs, were developed through active learning using the pipeline. On a hold-out test set of 36 HE and 21 CD3-stained WSIs a mean intersection over union score of 95.5 and 95.3% was achieved on epithelium segmentation. We demonstrate pathologist-level segmentation accuracy and clinical acceptable runtime performance and show that pathologists without programming experience can create near state-of-the-art segmentation solutions for histopathological WSIs using only free-to-use software. The study further demonstrates the strength of open-source solutions in its ability to create generalizable, open pipelines, of which trained models and predictions can seamlessly be exported in open formats and thereby used in external solutions. All scripts, trained models, a video tutorial, and the full dataset of 251 WSIs with ~31 k epithelium annotations are made openly available at https://github.com/andreped/NoCodeSeg to accelerate research in the field."
     },
     {
       "id": "U20zUHQAAAAJ:9yKSN-GCB0IC",
@@ -126,7 +126,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:9yKSN-GCB0IC",
       "pdfUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7995198/pdf/JMI-008-024002.pdf",
       "publisherUrl": "https://www.spiedigitallibrary.org/journals/journal-of-medical-imaging/volume-8/issue-2/024002/Fast-meningioma-segmentation-in-T1-weighted-magnetic-resonance-imaging-volumes/10.1117/1.JMI.8.2.024002.short",
-      "abstract": null
+      "abstract": "Purpose: Automatic and consistent meningioma segmentation in T1-weighted magnetic resonance (MR) imaging volumes and corresponding volumetric assessment is of use for diagnosis, treatment planning, and tumor growth evaluation. We optimized the segmentation and processing speed performances using a large number of both surgically treated meningiomas and untreated meningiomas followed at the outpatient clinic."
     },
     {
       "id": "U20zUHQAAAAJ:dhFuZR0502QC",
@@ -138,7 +138,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:dhFuZR0502QC",
       "pdfUrl": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0311416",
       "publisherUrl": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0311416",
-      "abstract": null
+      "abstract": "To improve the prognosis of patients suffering from pulmonary diseases, such as lung cancer, early diagnosis and treatment are crucial. The analysis of CT images is invaluable for diagnosis, whereas high quality segmentation of the airway tree are required for intervention planning and live guidance during bronchoscopy. Recently, the Multi-domain Airway Tree Modeling (ATM’22) challenge released a large dataset, both enabling training of deep-learning based models and bringing substantial improvement of the state-of-the-art for the airway segmentation task. The ATM’22 dataset includes a large group of COVID’19 patients and a range of other lung diseases, however, relatively few patients with severe pathologies affecting the airway tree anatomy was found. In this study, we introduce a new public benchmark dataset (AeroPath), consisting of 27 CT images from patients with pathologies ranging from emphysema to large tumors, with corresponding trachea and bronchi annotations. Second, we present a multiscale fusion design for automatic airway segmentation. Models were trained on the ATM’22 dataset, tested on the AeroPath dataset, and further evaluated against competitive open-source methods. The same performance metrics as used in the ATM’22 challenge were used to benchmark the different considered approaches. Lastly, an open web application is developed, to easily test the proposed model on new data. The results demonstrated that our proposed architecture predicted topologically correct segmentations for all the patients included in the AeroPath dataset. The proposed method is robust and able to handle various …"
     },
     {
       "id": "U20zUHQAAAAJ:YsMSGLbcyi4C",
@@ -150,7 +150,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:YsMSGLbcyi4C",
       "pdfUrl": "https://www.mdpi.com/2072-6694/13/18/4674",
       "publisherUrl": "https://www.mdpi.com/2072-6694/13/18/4674",
-      "abstract": null
+      "abstract": "Neurosurgical decisions for patients with glioblastoma depend on visual inspection of a preoperative MR scan to determine the tumor characteristics. To avoid subjective estimates and manual tumor delineation, automatic methods and standard reporting are necessary. We compared and extensively assessed the performances of two deep learning architectures on the task of automatic tumor segmentation. A total of 1887 patients from 14 institutions, manually delineated by a human rater, were compared to automated segmentations generated by neural networks. The automated segmentations were in excellent agreement with the manual segmentations, and external validity, as well as generalizability were demonstrated. Together with automatic tumor feature computation and standardized reporting, our Glioblastoma Surgery Imaging Reporting And Data System (GSI-RADS) exhibited the potential for more accurate data-driven clinical decisions. The trained models and software are open-source and open-access, enabling comparisons among surgical cohorts, multicenter trials, and patient registries."
     },
     {
       "id": "U20zUHQAAAAJ:W7OEmFMy1HYC",
@@ -162,7 +162,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:W7OEmFMy1HYC",
       "pdfUrl": "https://www.mdpi.com/2072-6694/13/12/2854",
       "publisherUrl": "https://www.mdpi.com/2072-6694/13/12/2854",
-      "abstract": null
+      "abstract": "Neurosurgical decisions for patients with glioblastoma depend on tumor characteristics in the preoperative MR scan. Currently, this is based on subjective estimates or manual tumor delineation in the absence of a standard for reporting. We compared tumor features of 1596 patients from 13 institutions extracted from manual segmentations by a human rater and from automated segmentations generated by a machine learning model. The automated segmentations were in excellent agreement with manual segmentations and are practically equivalent regarding tumor features that are potentially relevant for neurosurgical purposes. Standard reports can be generated by open access software, enabling comparison between surgical cohorts, multicenter trials, and patient registries."
     },
     {
       "id": "U20zUHQAAAAJ:0EnyYjriUFMC",
@@ -174,7 +174,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:0EnyYjriUFMC",
       "pdfUrl": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0266147",
       "publisherUrl": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0266147",
-      "abstract": null
+      "abstract": "Cancer is among the leading causes of death in the developed world, and lung cancer is the most lethal type. Early detection is crucial for better prognosis, but can be resource intensive to achieve. Automating tasks such as lung tumor localization and segmentation in radiological images can free valuable time for radiologists and other clinical personnel. Convolutional neural networks may be suited for such tasks, but require substantial amounts of labeled data to train. Obtaining labeled data is a challenge, especially in the medical domain."
     },
     {
       "id": "U20zUHQAAAAJ:kNdYIx-mwKoC",
@@ -186,7 +186,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:kNdYIx-mwKoC",
       "pdfUrl": "https://www.frontiersin.org/journals/medicine/articles/10.3389/fmed.2022.971873/full",
       "publisherUrl": "https://www.frontiersin.org/journals/medicine/articles/10.3389/fmed.2022.971873/full",
-      "abstract": null
+      "abstract": "Over the past decades, histopathological cancer diagnostics has become more complex, and the increasing number of biopsies is a challenge for most pathology laboratories. Thus, development of automatic methods for evaluation of histopathological cancer sections would be of value. In this study, we used 624 whole slide images (WSIs) of breast cancer from a Norwegian cohort. We propose a cascaded convolutional neural network design, called H2G-Net, for segmentation of breast cancer region from gigapixel histopathological images. The design involves a detection stage using a patch-wise method, and a refinement stage using a convolutional autoencoder. To validate the design, we conducted an ablation study to assess the impact of selected components in the pipeline on tumor segmentation. Guiding segmentation, using hierarchical sampling and deep heatmap refinement, proved to be beneficial when segmenting the histopathological images. We found a significant improvement when using a refinement network for post-processing the generated tumor segmentation heatmaps. The overall best design achieved a Dice similarity coefficient of 0.933±0.069 on an independent test set of 90 WSIs. The design outperformed single-resolution approaches, such as cluster-guided, patch-wise high-resolution classification using MobileNetV2 (0.872±0.092) and a low-resolution U-Net (0.874±0.128). In addition, the design performed consistently on WSIs across all histological grades and segmentation on a representative × 400 WSI took ~ 58 s, using only the central processing unit. The findings demonstrate the potential of utilizing a …"
     },
     {
       "id": "U20zUHQAAAAJ:ZeXyd9-uunAC",
@@ -198,7 +198,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:ZeXyd9-uunAC",
       "pdfUrl": "https://academic.oup.com/noa/article/6/1/vdad157/7484549",
       "publisherUrl": "https://academic.oup.com/noa/article-abstract/6/1/vdad157/7484549",
-      "abstract": null
+      "abstract": "Knowledge about meningioma growth characteristics is needed for developing biologically rational follow-up routines. In this study of untreated meningiomas followed with repeated magnetic resonance imaging (MRI) scans, we studied growth dynamics and explored potential factors associated with tumor growth."
     },
     {
       "id": "U20zUHQAAAAJ:YOwf2qJgpHMC",
@@ -210,7 +210,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:YOwf2qJgpHMC",
       "pdfUrl": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0282110",
       "publisherUrl": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0282110",
-      "abstract": null
+      "abstract": "This study aims to explore training strategies to improve convolutional neural network-based image-to-image deformable registration for abdominal imaging."
     },
     {
       "id": "U20zUHQAAAAJ:isC4tDSrTZIC",
@@ -222,7 +222,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:isC4tDSrTZIC",
       "pdfUrl": "https://thejns.org/view/journals/j-neurosurg/aop/article-10.3171-2024.8.JNS24415/article-10.3171-2024.8.JNS24415.pdf",
       "publisherUrl": "https://thejns.org/view/journals/j-neurosurg/142/5/article-p1298.xml",
-      "abstract": null
+      "abstract": "The extent of resection (EOR) and postoperative residual tumor (RT) volume are prognostic factors in glioblastoma. Calculations of EOR and RT rely on accurate tumor segmentations. Raidionics is an open-access software that enables automatic segmentation of preoperative and early postoperative glioblastoma using pretrained deep learning models. The aim of this study was to compare the prognostic value of manually versus automatically assessed volumetric measurements in glioblastoma patients."
     },
     {
       "id": "U20zUHQAAAAJ:YFjsv_pBGBYC",
@@ -234,7 +234,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:YFjsv_pBGBYC",
       "pdfUrl": null,
       "publisherUrl": "https://ui.adsabs.harvard.edu/abs/2022zndo...6979540B/abstract",
-      "abstract": null
+      "abstract": "Summary of changes: Add proper support for multiple backends (numpy, torch, tensorflow) Provide backend install option for pip: torchstain [torch] and torchstain [tf] Bugfixes What's Changed Minor clipping bug fix by@ andreped in https://github. com/EIDOSLAB/torchstain/pull/2 added GPU support by@ andreped in https://github. com/EIDOSLAB/torchstain/pull/4 Tensorflow backend support by@ andreped in https://github. com/EIDOSLAB/torchstain/pull/5 Removed whitespace by@ andreped in https://github. com/EIDOSLAB/torchstain/pull/6 Normalizer unit tests, bug fixes, and badges by@ andreped in https://github. com/EIDOSLAB/torchstain/pull/8 Proper backend support by@ andreped in https://github. com/EIDOSLAB/torchstain/pull/13 Simplified imports and refactored by@ andreped in https://github. com/EIDOSLAB/torchstain/pull/14 Backends by@ carloalbertobarbano in https://github. com/EIDOSLAB/torchstain …"
     },
     {
       "id": "U20zUHQAAAAJ:k_IJM867U9cC",
@@ -246,7 +246,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:k_IJM867U9cC",
       "pdfUrl": "https://www.frontiersin.org/journals/medicine/articles/10.3389/fmed.2025.1593143/full",
       "publisherUrl": "https://www.frontiersin.org/journals/medicine/articles/10.3389/fmed.2025.1593143/full",
-      "abstract": null
+      "abstract": "The estrogen receptor (ER) is routinely assessed by immunohistochemistry (IHC) in breast cancer to stratify patients into therapeutic and prognostic groups. Pathology laboratories are burdened by an increased number of biopsies, and costly and resource-demanding molecular pathology analyses. Automatic, artificial intelligence-based prediction of biological properties from hematoxylin and eosin (HE)-stained slides could increase efficiency and potentially reduce costs at laboratories. The aim of this study was to develop a model for prediction of ER status from HE-stained tissue microarrays (TMAs). Our methodology can be used as proof-of-concept for the prediction of more complex and costly molecular analyses in cancer."
     },
     {
       "id": "U20zUHQAAAAJ:hFOr9nPyWt4C",
@@ -258,7 +258,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:hFOr9nPyWt4C",
       "pdfUrl": "https://www.mdpi.com/2313-433X/11/5/166",
       "publisherUrl": "https://www.mdpi.com/2313-433X/11/5/166",
-      "abstract": null
+      "abstract": "The increased workload in pathology laboratories today means automated tools such as artificial intelligence models can be useful, helping pathologists with their tasks. In this paper, we propose a segmentation model (DRU-Net) that can provide a delineation of human non-small cell lung carcinomas and an augmentation method that can improve classification results. The proposed model is a fused combination of truncated pre-trained DenseNet201 and ResNet101V2 as a patch-wise classifier, followed by a lightweight U-Net as a refinement model. Two datasets (Norwegian Lung Cancer Biobank and Haukeland University Lung Cancer cohort) were used to develop the model. The DRU-Net model achieved an average of 0.91 Dice similarity coefficient. The proposed spatial augmentation method (multi-lens distortion) improved the Dice similarity coefficient from 0.88 to 0.91. Our findings show that selecting image patches that specifically include regions of interest leads to better results for the patch-wise classifier compared to other sampling methods. A qualitative analysis by pathology experts showed that the DRU-Net model was generally successful in tumor detection. Results in the test set showed some areas of false-positive and false-negative segmentation in the periphery, particularly in tumors with inflammatory and reactive changes. In summary, the presented DRU-Net model demonstrated the best performance on the segmentation task, and the proposed augmentation technique proved to improve the results."
     },
     {
       "id": "U20zUHQAAAAJ:Se3iqnhoufwC",
@@ -270,7 +270,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:Se3iqnhoufwC",
       "pdfUrl": null,
       "publisherUrl": "https://ieeexplore.ieee.org/abstract/document/9669410/",
-      "abstract": null
+      "abstract": "Preliminary processing and analysis of an adverse event dataset for detecting sepsis-related events"
     },
     {
       "id": "U20zUHQAAAAJ:JV2RwH3_ST0C",
@@ -282,7 +282,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:JV2RwH3_ST0C",
       "pdfUrl": "https://academic.oup.com/noa/article/7/1/vdaf154/8222216",
       "publisherUrl": "https://academic.oup.com/noa/article-abstract/7/1/vdaf154/8222216",
-      "abstract": null
+      "abstract": "Accurate prognosis of glioblastoma is crucial for better-informed treatment decisions, potentially leading to improved disease management. We investigated whether clinical variables, tumor size, and location, can serve as prognostic factors."
     },
     {
       "id": "U20zUHQAAAAJ:_FxGoFyzp5QC",
@@ -294,7 +294,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:_FxGoFyzp5QC",
       "pdfUrl": "https://arxiv.org/pdf/2112.03455",
       "publisherUrl": "https://arxiv.org/abs/2112.03455",
-      "abstract": null
+      "abstract": "André Pedersen, Erik Smistad, Tor V Rise, Vibeke G Dale, Henrik S Pettersen, Tor-Arne S Nordmo, David Bouget, Ingerid Reinertsen, Marit Valla"
     },
     {
       "id": "U20zUHQAAAAJ:bEWYMUwI8FkC",
@@ -306,7 +306,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:bEWYMUwI8FkC",
       "pdfUrl": null,
       "publisherUrl": "https://link.springer.com/chapter/10.1007/978-3-031-76163-8_2",
-      "abstract": null
+      "abstract": "For patients suffering from brain tumors, prognosis estimation and treatment decisions are made by a multidisciplinary team of medical doctors based on a set of MR scans. Currently, the lack of automatic, standardized, and robust methods for tumor characterization represents a major hurdle for use in clinical practice. This paper describes our contribution to the BraTS 2023 Continuous Evaluation challenge for the segmentation of all tumor types, using our single-stage AGU-Net architecture and various training strategies. Performance over the training sets were reported using our custom pixel-wise, patient-wise, and lesion-wise metrics. For the tumor core, an average lesion-wise Dice score of 85% was obtained over the glioma challenges, 80% for the meningioma challenge, and 73% for the metastasis challenge. Performance reported over the validation and test sets were officially computed by the challenge team …"
     },
     {
       "id": "U20zUHQAAAAJ:KlAtU1dfN6UC",
@@ -318,7 +318,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:KlAtU1dfN6UC",
       "pdfUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9443356/",
       "publisherUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9443356/",
-      "abstract": null
+      "abstract": "IO Kommers, RS Eijgelaar, F Barkhof, D Bouget, A Pedersen, H Ardon, L Bello, MS Berger, W Bouwknegt, M Conti Nibali, J Furtner, SJ Han, S Hervey-Jumper, AJS Idema, B Kiesel, A Kloet, R Nandoe Tewarie, E Mandonnet, I Reinertsen, PA Robe, M Rossi, T Sciortino, O Solheim, WA van den Brink, PW Vandertop, M Wagemakers, G Widhalm, MG Witte, AH Zwinderman, PC De Witt Hamer"
     },
     {
       "id": "U20zUHQAAAAJ:hqOjcs7Dif8C",
@@ -330,7 +330,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:hqOjcs7Dif8C",
       "pdfUrl": null,
       "publisherUrl": "https://scholar.google.com/scholar?cluster=14268057278945853598&hl=en&oi=scholarr",
-      "abstract": null
+      "abstract": "Meningioma segmentation in T1-weighted MRI leveraging global context and attention mechanisms. arXiv 2021"
     },
     {
       "id": "U20zUHQAAAAJ:7PzlFSSx8tAC",
@@ -342,7 +342,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:7PzlFSSx8tAC",
       "pdfUrl": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0328033",
       "publisherUrl": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0328033",
-      "abstract": null
+      "abstract": "Digital pathology enables automatic analysis of histopathological sections using artificial intelligence. Automatic evaluation could improve diagnostic efficiency and find associations between morphological features and clinical outcome. For development of such prediction models in breast cancer, identifying invasive epithelial cells, and separating these from benign epithelial cells and in situ lesions would be important. In this study, we trained an attention gated U-Net for segmentation of epithelial cells in hematoxylin and eosin stained breast cancer sections. We generated epithelial ground truths by immunohistochemistry, restaining hematoxylin and eosin sections with cytokeratin AE1/AE3, combined with pathologists’ annotations. Tissue microarrays from 839 patients, and whole slide images from two patients, were used for training and evaluation of the models. The sections were derived from four breast cancer cohorts. Tissue microarray cores from a fifth cohort of 21 patients was used as a second test set. In quantitative evaluation, mean Dice scores of 0.70, 0.79, and 0.75 were achieved for invasive epithelial cells, benign epithelial cells, and in situ lesions, respectively. In qualitative scoring (0-5) by pathologists, the best results were reached for all epithelium and invasive epithelium, with scores of 4.7 and 4.4, respectively. Scores for benign epithelium and in situ lesions were 3.7 and 2.0, respectively. The proposed model segmented epithelial cells well, but further work is needed for accurate subclassification into benign, in situ , and invasive cells."
     },
     {
       "id": "U20zUHQAAAAJ:maZDTaKrznsC",
@@ -354,7 +354,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:maZDTaKrznsC",
       "pdfUrl": "https://www.mdpi.com/2306-5354/12/7/733",
       "publisherUrl": "https://www.mdpi.com/2306-5354/12/7/733",
-      "abstract": null
+      "abstract": "Classification of lung cancer subtypes is a critical clinical step; however, relying solely on H&E-stained histopathology images can pose challenges, and additional immunohistochemical analysis is sometimes required for definitive subtyping. Digital pathology facilitates the use of artificial intelligence for automatic classification of digital tissue slides. Automatic classification of Whole Slide Images (WSIs) typically involves extracting features from patches obtained from them. The aim of this study was to develop a WSI classification framework utilizing an optimizable kernel to encode features from each patch from a WSI into a desirable and adjustable latent space using an evolutionary algorithm. The encoded data can then be used for classification and segmentation while being computationally more efficient. Our proposed framework is compared with a state-of-the-art model, Vim4Path, on an internal and external dataset of lung cancer WSIs. The proposed model outperforms Vim-S16 in accuracy and F 1 score at both ×2.5 and ×10 magnification levels on the internal test set, with the highest accuracy (0.833) and F 1 score (0.721) at ×2.5. On the external test set, Vim-S16 at ×10 achieves the highest accuracy (0.732), whereas OKEN-DenseNet121 at ×2.5 has the best F 1 score (0.772). In future work, finding a dynamic way to tune the output dimensions of the evolutionary algorithm would be of value."
     },
     {
       "id": "U20zUHQAAAAJ:O3NaXMp0MMsC",
@@ -366,7 +366,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:O3NaXMp0MMsC",
       "pdfUrl": null,
       "publisherUrl": "https://scholar.google.com/scholar?cluster=13858011178778403078&hl=en&oi=scholarr",
-      "abstract": null
+      "abstract": "To improve the prognosis of patients suffering from pulmonary diseases, such as lung cancer, early diagnosis and treatment are crucial. The analysis of CT images is invaluable for diagnosis, whereas high quality segmentation of the airway tree are required for intervention planning and live guidance during bronchoscopy. Recently, the Multi-domain Airway Tree Modeling (ATM'22) challenge released a large dataset, both enabling training of deep-learning based models and bringing substantial improvement of the state-of-the-art for the airway segmentation task. The ATM'22 dataset includes a large group of COVID'19 patients and a range of other lung diseases, however, relatively few patients with severe pathologies affecting the airway tree anatomy was found. In this study, we introduce a new public benchmark dataset (AeroPath), consisting of 27 CT images from patients with pathologies ranging from …"
     },
     {
       "id": "U20zUHQAAAAJ:qUcmZB5y_30C",
@@ -378,7 +378,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:qUcmZB5y_30C",
       "pdfUrl": null,
       "publisherUrl": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0298978",
-      "abstract": null
+      "abstract": "1. Fredriksen V, Sevle SOM, Pedersen A, Langø T, Kiss G, Lindseth F (2022) Teacher-student approach for lung tumor segmentation from mixed-supervised datasets. PLoS ONE 17 (4): e0266147. pmid: 35381046"
     },
     {
       "id": "U20zUHQAAAAJ:8k81kl-MbHgC",
@@ -390,7 +390,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:8k81kl-MbHgC",
       "pdfUrl": null,
       "publisherUrl": "https://link.springer.com/chapter/10.1007/978-3-030-98950-7_21",
-      "abstract": null
+      "abstract": "With the introduction of digital pathology and artificial intelligence (AI)-based methods, we may be facing a new era in cancer diagnostics and prognostication. AI can assist pathologists in labour-intensive tasks and potentially discover new features currently not detected and characterized in routine diagnostics. As entire digital histopathological sections can be included in the analysis, AI can be used both to study the epithelial component of a tumour and the microenvironment. Most state-of-the-art AI approaches used for image analysis utilize multi-step pipelines. AI-based methods have shown promising results in a wide range of clinically relevant tasks. It is, however, important to be aware of some challenges and limitations, such as the lack of generalizability of AI-based models, and the importance of understanding the reason behind a conclusion."
     },
     {
       "id": "U20zUHQAAAAJ:LkGwnXOMwfcC",
@@ -402,7 +402,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:LkGwnXOMwfcC",
       "pdfUrl": "https://arxiv.org/pdf/2112.11541",
       "publisherUrl": "https://arxiv.org/abs/2112.11541",
-      "abstract": null
+      "abstract": "Vemund Fredriksen, Svein Ole M Svele, André Pedersen, Thomas Langø, Gabriel Kiss, Frank Lindseth"
     },
     {
       "id": "U20zUHQAAAAJ:-f6ydRqryjwC",
@@ -414,7 +414,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:-f6ydRqryjwC",
       "pdfUrl": "https://www.researchgate.net/profile/Andre-Pedersen/publication/354658116_Glioblastoma_Surgery_Imaging-Reporting_and_Data_System_Validation_and_Performance_of_the_Automated_Segmentation_Task/links/6144b318519a1a381f68f48b/Glioblastoma-Surgery-Imaging-Reporting-and-Data-System-Validation-and-Performance-of-the-Automated-Segmentation-Task.pdf",
       "publisherUrl": "https://www.researchgate.net/profile/Andre-Pedersen/publication/354658116_Glioblastoma_Surgery_Imaging-Reporting_and_Data_System_Validation_and_Performance_of_the_Automated_Segmentation_Task/links/6144b318519a1a381f68f48b/Glioblastoma-Surgery-Imaging-Reporting-and-Data-System-Validation-and-Performance-of-the-Automated-Segmentation-Task.pdf",
-      "abstract": null
+      "abstract": "For patients with presumed glioblastoma, essential tumor characteristics are determined from preoperative MR images to optimize the treatment strategy. This procedure is time-consuming and subjective, if performed by crude eyeballing or manually. The standardized GSI-RADS aims to provide neurosurgeons with automatic tumor segmentations to extract tumor features rapidly and objectively. In this study, we improved automatic tumor segmentation and compared the agreement with manual raters, describe the technical details of the different components of GSIRADS, and determined their speed. Two recent neural network architectures were considered for the segmentation task: nnU-Net and AGU-Net. Two preprocessing schemes were introduced to investigate the tradeoff between performance and processing speed. A summarized description of the tumor feature extraction and standardized reporting process is included. The trained architectures for automatic segmentation and the code for computing the standardized report are distributed as open-source and as open-access software. Validation studies were performed on a dataset of 1594 gadolinium-enhanced T1-weighted MRI volumes from 13 hospitals and 293 T1-weighted MRI volumes from the BraTS challenge. The glioblastoma tumor core segmentation reached a Dice score slightly below 90%, a patientwise F1-score close to 99%, and a 95th percentile Hausdorff distance slightly below 4.0 mm on average with either architecture and the heavy preprocessing scheme. A patient MRI volume can be segmented in less than one minute, and a standardized report can be generated in …"
     },
     {
       "id": "U20zUHQAAAAJ:GnPB-g6toBAC",
@@ -426,7 +426,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:GnPB-g6toBAC",
       "pdfUrl": "https://www.mdpi.com/1999-4893/18/12/769",
       "publisherUrl": "https://www.mdpi.com/1999-4893/18/12/769",
-      "abstract": null
+      "abstract": "Whole slide imaging has transformed the field of pathology by enabling high-resolution digitization of histopathological slides. However, the large image size and variability in morphology, tissue processing, and imaging can pose challenges for robust computational analysis. When working with specific tasks in digital pathology, conventional feature extractors pretrained on general images may not provide features as relevant as those trained on histopathological images. To address this, foundation models pretrained on histopathological images have been developed. Yet, their large size and computational demands might limit widespread adoptions to specific tasks. To facilitate the low-cost adoption of these models, we utilized low-rank adaptation for finetuning the model and developed evolving prototype-based multiple instance learning (EP-MIL). Our method’s capabilities were demonstrated by applying it to the classification of two histological subtypes of lung cancer. The results show that our approach achieves competitive performance when benchmarked against a state-of-the-art technique (CLAM), while offering improvements in efficiency. Specifically, our proposed method requires 8.3 times less training runtime compared with CLAM, uses less than 200.0 MB of memory during training, and enables 73.8 times faster inference runtime. These efficiency gains, combined with competitive performance, suggest that utilizing evolving prototypes with LoRA-tuned foundation models offers a more efficient and practical approach for broader use of foundation models in resource-constrained clinical settings."
     },
     {
       "id": "U20zUHQAAAAJ:hC7cP41nSMkC",
@@ -438,7 +438,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:hC7cP41nSMkC",
       "pdfUrl": null,
       "publisherUrl": "https://scholar.google.com/scholar?cluster=13389046316322188549&hl=en&oi=scholarr",
-      "abstract": null
+      "abstract": "Teacher-student approach for lung tumor segmentation from mixed-supervised datasets (vol 19, e0298978, 2024)"
     },
     {
       "id": "U20zUHQAAAAJ:iH-uZ7U-co4C",
@@ -450,7 +450,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:iH-uZ7U-co4C",
       "pdfUrl": null,
       "publisherUrl": "https://cir.nii.ac.jp/crid/1883398392899787264",
-      "abstract": null
+      "abstract": "LyNoS: Mediastinal lymph nodes segmentation using 3D convolutional neural network ensembles and anatomical prior guiding"
     },
     {
       "id": "U20zUHQAAAAJ:IWHjjKOFINEC",
@@ -462,7 +462,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:IWHjjKOFINEC",
       "pdfUrl": "https://www.researchgate.net/profile/Andre-Pedersen/publication/376717967_Growth_dynamics_of_untreated_meningiomas/links/659e50543c472d2e8ec220ca/Growth-dynamics-of-untreated-meningiomas.pdf",
       "publisherUrl": "https://www.researchgate.net/profile/Andre-Pedersen/publication/376717967_Growth_dynamics_of_untreated_meningiomas/links/659e50543c472d2e8ec220ca/Growth-dynamics-of-untreated-meningiomas.pdf",
-      "abstract": null
+      "abstract": "Background. Knowledge about meningioma growth characteristics is needed for developing biologically rational follow-up routines. In this study of untreated meningiomas followed with repeated magnetic resonance imaging (MRI) scans, we studied growth dynamics and explored potential factors associated with tumor growth. Methods. In a single-center cohort study, we included 235 adult patients with radiologically suspected intracranial meningioma and at least 3 MRI scans during follow-up. Tumors were segmented using an automatic algorithm from contrast-enhanced T1 series, and, if needed, manually corrected. Potential meningioma growth curves were statistically compared: linear, exponential, linear radial, or Gompertzian. Factors associated with growth were explored."
     },
     {
       "id": "U20zUHQAAAAJ:Zph67rFs4hoC",
@@ -474,7 +474,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:Zph67rFs4hoC",
       "pdfUrl": "https://www.researchgate.net/profile/Andre-Pedersen/publication/365850355_Train_smarter_not_harder_learning_deep_abdominal_CT_registration_on_scarce_data/links/63871e2b148d2362a4b1afb2/Train-smarter-not-harder-learning-deep-abdominal-CT-registration-on-scarce-data.pdf",
       "publisherUrl": "https://www.researchgate.net/profile/Andre-Pedersen/publication/365850355_Train_smarter_not_harder_learning_deep_abdominal_CT_registration_on_scarce_data/links/63871e2b148d2362a4b1afb2/Train-smarter-not-harder-learning-deep-abdominal-CT-registration-on-scarce-data.pdf",
-      "abstract": null
+      "abstract": "Purpose: This study aims to explore training strategies to improve convolutional neural network-based image-to-image registration for abdominal imaging."
     },
     {
       "id": "U20zUHQAAAAJ:ufrVoPGSRksC",
@@ -486,7 +486,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:ufrVoPGSRksC",
       "pdfUrl": null,
       "publisherUrl": "https://ui.adsabs.harvard.edu/abs/2021arXiv211108430S/abstract",
-      "abstract": null
+      "abstract": "Application of deep learning on histopathological whole slide images (WSIs) holds promise of improving diagnostic efficiency and reproducibility but is largely dependent on the ability to write computer code or purchase commercial solutions. We present a code-free pipeline utilizing free-to-use, open-source software (QuPath, DeepMIB, and FastPathology) for creating and deploying deep learning-based segmentation models for computational pathology. We demonstrate the pipeline on a use case of separating epithelium from stroma in colonic mucosa. A dataset of 251 annotated WSIs, comprising 140 hematoxylin-eosin (HE)-stained and 111 CD3 immunostained colon biopsy WSIs, were developed through active learning using the pipeline. On a hold-out test set of 36 HE and 21 CD3-stained WSIs a mean intersection over union score of 96.6% and 95.3% was achieved on epithelium segmentation. We …"
     },
     {
       "id": "U20zUHQAAAAJ:QIV2ME_5wuYC",
@@ -498,7 +498,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:QIV2ME_5wuYC",
       "pdfUrl": "https://www.researchgate.net/profile/Andre-Pedersen/publication/372241164_FastPathology_An_open-source_platform_for_artificial_intelligence-based_digital_pathology_Long_Abstract/links/64ac14c195bbbe0c6e2563d3/FastPathology-An-open-source-platform-for-artificial-intelligence-based-digital-pathology-Long-Abstract.pdf",
       "publisherUrl": "https://www.researchgate.net/profile/Andre-Pedersen/publication/372241164_FastPathology_An_open-source_platform_for_artificial_intelligence-based_digital_pathology_Long_Abstract/links/64ac14c195bbbe0c6e2563d3/FastPathology-An-open-source-platform-for-artificial-intelligence-based-digital-pathology-Long-Abstract.pdf",
-      "abstract": null
+      "abstract": "1 Purpose"
     },
     {
       "id": "U20zUHQAAAAJ:2osOgNQ5qMEC",
@@ -522,7 +522,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:NaGl4SEjCO4C",
       "pdfUrl": "https://air.unimi.it/retrieve/dbecf1e8-0cf7-47fc-a031-6f2854df76d2/fneur-13-932219.pdf",
       "publisherUrl": "https://air.unimi.it/retrieve/dbecf1e8-0cf7-47fc-a031-6f2854df76d2/fneur-13-932219.pdf",
-      "abstract": null
+      "abstract": "Bouget et al. Preoperative Brain Tumor Imaging volume, distance, and probabilistic aspects. Finally, two software solutions have been developed, enabling an easy use of the trained models and standardized generation of clinical reports: Raidionics and Raidionics-Slicer. Segmentation performances were quite homogeneous across the four different brain tumor types, with an average true positive Dice ranging between 80 and 90%, patient-wise recall between 88 and 98%, and patient-wise precision around 95%. In conjunction to Dice, the identified most relevant other metrics were the relative absolute volume difference, the variation of information, and the Hausdorff, Mahalanobis, and object average symmetric surface distances. With our Raidionics software, running on a desktop computer with CPU support, tumor segmentation can be performed in 16–54 s depending on the dimensions of the MRI volume. For the generation of a standardized clinical report, including the tumor segmentation and features computation, 5–15 min are necessary. All trained models have been made open-access together with the source code for both software solutions and validation metrics computation. In the future, a method to convert results from a set of metrics into a final single score would be highly desirable for easier ranking across trained models. In addition, an automatic classification of the brain tumor type would be necessary to replace manual user input. Finally, the inclusion of postoperative segmentation in both software solutions will be key for generating complete post-operative standardized clinical reports."
     },
     {
       "id": "U20zUHQAAAAJ:BqipwSGYUEgC",
@@ -534,7 +534,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:BqipwSGYUEgC",
       "pdfUrl": null,
       "publisherUrl": "https://ui.adsabs.harvard.edu/abs/2021zndo...5812222P/abstract",
-      "abstract": null
+      "abstract": "Minor bug fixes mostly relevant for macOSX, but fixed a critical bug related to the vessel model. Changes: Included yaml-file as dependency, as it was not included before Updated path to yaml-file to work across operating systems Changed multiprocessing start method to\" spawn\" to work with macOSX Livermask now works without having CuPy installed and without needing to specify\"--cpu\" flag Full Changelog: https://github. com/andreped/livermask/compare/v1. 3.0... v1. 3.1"
     },
     {
       "id": "U20zUHQAAAAJ:NMxIlDl6LWMC",
@@ -546,7 +546,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:NMxIlDl6LWMC",
       "pdfUrl": null,
       "publisherUrl": "https://ui.adsabs.harvard.edu/abs/2023zndo...6615018P/abstract",
-      "abstract": null
+      "abstract": "The main feature of this patch release is that AccumBN can now be used as drop-in replacement for any BatchNormalization layer, even for pretrained networks. Old weights are sufficiently transferred and documentations have been updated to include how to do this. What's Changed Docs: Support tf 2.2-2.12 by@ andreped in https://github. com/andreped/GradientAccumulator/pull/100 Allow poorer approximation for older tf versions in model test by@ andreped in https://github. com/andreped/GradientAccumulator/pull/101 Fixed typo in setup. cfg by@ andreped in https://github. com/andreped/GradientAccumulator/pull/104 Ignore. pyc [no ci] by@ andreped in https://github. com/andreped/GradientAccumulator/pull/106 Delete redundant. pyc file [no ci] by@ andreped in https://github. com/andreped/GradientAccumulator/pull/107 Added Applications to README by@ andreped in https://github. com/andreped …"
     },
     {
       "id": "U20zUHQAAAAJ:hMod-77fHWUC",
@@ -558,7 +558,7 @@
       "scholarUrl": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=U20zUHQAAAAJ&citation_for_view=U20zUHQAAAAJ:hMod-77fHWUC",
       "pdfUrl": null,
       "publisherUrl": "https://ui.adsabs.harvard.edu/abs/2023zndo...7692014B/abstract",
-      "abstract": null
+      "abstract": "What's Changed Add reinhard color normalization support by@ andreped in https://github. com/EIDOSLAB/torchstain/pull/25 Fixed RGB/LAB unit test by@ andreped in https://github. com/EIDOSLAB/torchstain/pull/26 Add torch reinhard support by@ andreped in https://github. com/EIDOSLAB/torchstain/pull/27 Add modified reinhard support by@ andreped in https://github. com/EIDOSLAB/torchstain/pull/30 Removed deprecated torch. lstsq, replaced by torch. linalg. lstsq by@ raphaelattias in https://github. com/EIDOSLAB/torchstain/pull/33 Draft release v1. 3.0 rc1 by@ carloalbertobarbano in https://github. com/EIDOSLAB/torchstain/pull/34 New Contributors@ raphaelattias made their first contribution in https://github. com/EIDOSLAB/torchstain/pull/33 Full Changelog: https://github. com/EIDOSLAB/torchstain/compare/v1. 2.0-stable... v1. 3.0-stable"
     }
   ]
 }
