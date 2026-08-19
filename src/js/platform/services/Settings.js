@@ -5,6 +5,9 @@
 
 export const SETTINGS_KEY     = 'andreos_settings';
 export const DEFAULT_MODEL_ID = 'Qwen3.5-2B-q4f16_1-MLC';
+// Lighter default on phones/tablets — the 2B (~1.4 GB) OOM-crashes mobile Safari;
+// Qwen2.5 1.5B (~1 GB, Norwegian ✓) has a chance of loading on modern phones.
+export const MOBILE_DEFAULT_MODEL_ID = 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC';
 
 export const MODELS = [
     { id: 'SmolLM2-135M-Instruct-q0f16-MLC',   name: 'SmolLM2 135M',  size: '~265 MB', desc: 'Fastest load · English only',                            badge: null },
@@ -147,7 +150,15 @@ export function saveSettings(partial) {
     return next;
 }
 
-export function getModelId()        { return getSettings().chatModel      || DEFAULT_MODEL_ID; }
+// Node-safe (window may be absent in the eval harness): defaults desktop → 2B,
+// phones/tablets → the lighter 1.5B. Only applies when no model was chosen.
+function defaultModelId() {
+    const mobile = typeof window !== 'undefined'
+        && window.matchMedia?.('(max-width: 768px), (pointer: coarse)').matches;
+    return mobile ? MOBILE_DEFAULT_MODEL_ID : DEFAULT_MODEL_ID;
+}
+
+export function getModelId()        { return getSettings().chatModel      || defaultModelId(); }
 
 /** True when the selected (or given) model runs on CPU via wllama. */
 export function isCpuModel(id = getModelId()) { return CPU_MODELS.some(m => m.id === id); }

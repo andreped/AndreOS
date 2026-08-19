@@ -553,6 +553,9 @@ window.OSAssistant = {
 
         registeredWindows.add(winEl);
         applyProgress(winEl, lastProgress.text, lastProgress.pct);
+        // On mobile the page-load eager load is skipped, so start it now that the
+        // user has explicitly opened the assistant (no-op if already loading/ready).
+        if (engineState === 'idle') loadEngine();
 
         const input    = winEl.querySelector('.chat-input');
         const sendBtn  = winEl.querySelector('.chat-send');
@@ -911,7 +914,14 @@ Message: "${text.replace(/"/g, "'")}"`;
 };
 
 // ── Start loading on page load ────────────────────────────────────────────────
-if (navigator.gpu || isCpuModel()) {
+// Skip the eager multi-GB model load on phones/tablets: downloading + compiling
+// it reliably OOM-crashes mobile Safari on every page load. There the engine
+// loads on demand instead — when the user opens the chat (setupWindow) or sends
+// an assistant query (querySidebar).
+const deferModelLoad = window.matchMedia?.('(max-width: 768px), (pointer: coarse)').matches;
+if (deferModelLoad) {
+    console.log('[OSAssistant] Mobile detected — deferring model load until the assistant is opened.');
+} else if (navigator.gpu || isCpuModel()) {
     loadEngine();
 } else {
     console.warn('[OSAssistant] WebGPU not available — model will not load.');
