@@ -114,7 +114,7 @@ The URL is cleaned up after the windows open, so refreshing the page returns to 
 <details>
 <summary><strong>RAG over research papers</strong> — chat answers draw from André's actual publications</summary>
 
-A BM25 index is built over ~50 publications (titles + abstracts) fetched from [OpenAlex](https://openalex.org/) on page load. When a question is actually about André's research, the top matching papers are injected into the chat context — no extra model needed, zero RAM overhead. (Retrieval is skipped for unrelated questions to keep the prompt small.)
+A BM25 index is built over ~50 publications (titles + abstracts) from André's [Google Scholar profile](https://scholar.google.com/citations?user=U20zUHQAAAAJ) on page load. When a question is actually about André's research, the top matching papers are injected into the chat context — no extra model needed, zero RAM overhead. (Retrieval is skipped for unrelated questions to keep the prompt small.)
 
 </details>
 
@@ -239,4 +239,4 @@ Short design docs for the trickier subsystems:
 - **[Justinianus2001 (Hoang Le Ngoc)](https://github.com/Justinianus2001/my-portfolio)** — the original desktop portfolio template this project is based on. The core window management, taskbar, audio system, and visual design all originate from his work.
 - **[MLC AI / web-llm](https://github.com/mlc-ai/web-llm)** — WebGPU-powered in-browser LLM runtime powering the OS Assistant.
 - **[wllama](https://github.com/ngxson/wllama)** — llama.cpp compiled to WebAssembly, powering the CPU inference backend.
-- **[OpenAlex](https://openalex.org/)** — open scholarly API used for the Research window and RAG index.
+- **[Google Scholar](https://scholar.google.com/citations?user=U20zUHQAAAAJ)** — scraped weekly (via a proxy) into Cloudflare KV; powers the Research window and RAG index.

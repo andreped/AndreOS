@@ -1,0 +1,68 @@
+name: Update Scholar feed
+
+on:
+  schedule:
+    - cron: '0 7 * * 1'   # weekly, Mondays at 07:00 UTC
+  workflow_dispatch:       # allow manual runs from the Actions tab
+    inputs:
+      full:
+        description: 'Full re-fetch (ignore existing feed)'
+        type: boolean
+        default: false
+  push:                    # TEMP: run on push while wiring things up, to test
+    paths:
+      - scripts/fetch-scholar.mjs
+      - .github/workflows/scholar-feed.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scholar-feed
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Load current feed from KV
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_KV_NAMESPACE_ID: ${{ secrets.CF_SCHOLAR_KV_NAMESPACE_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          code=$(curl -sS -o existing.json -w '%{http_code}' \
+            "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/publications" \
+            -H "Authorization: Bearer ${CF_API_TOKEN}") || true
+          echo "KV GET → HTTP $code"
+          if [ "$code" != "200" ]; then echo '{"papers":[]}' > existing.json; fi
+
+      - name: Fetch Scholar publications
+        env:
+          EXISTING_PATH: existing.json
+          SCHOLAR_FULL: ${{ (github.event.inputs.full == 'true') && '1' || '' }}
+          # Residential proxy — required: GitHub runner IPs are 403-blocked by Scholar.
+          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
+          SCRAPERAPI_PARAMS: ${{ vars.SCRAPERAPI_PARAMS }}
+        run: node scripts/fetch-scholar.mjs
+
+      - name: Upload feed to Cloudflare KV
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_KV_NAMESPACE_ID: ${{ secrets.CF_SCHOLAR_KV_NAMESPACE_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          resp=$(curl -sS -X PUT \
+            "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/publications" \
+            -H "Authorization: Bearer ${CF_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            --data-binary @public/scholar/publications.json)
+          echo "$resp"
+          echo "$resp" | grep -q '"success":true' || { echo "✖ KV upload failed"; exit 1; }
+          echo "✓ Uploaded feed to Cloudflare KV"

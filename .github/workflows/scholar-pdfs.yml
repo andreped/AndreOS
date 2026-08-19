@@ -1,0 +1,91 @@
+name: Update Scholar PDFs
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'   # weekly, Mondays at 08:00 UTC (after the metadata feed)
+  workflow_dispatch:
+  push:
+    paths:
+      - scripts/fetch-scholar-pdfs.mjs
+      - .github/workflows/scholar-pdfs.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scholar-pdfs
+  cancel-in-progress: true
+
+env:
+  R2_BUCKET: andreos-scholar-pdfs   # must match the R2 bucket + Pages binding SCHOLAR_PDFS
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Load current feed from KV
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_KV_NAMESPACE_ID: ${{ secrets.CF_SCHOLAR_KV_NAMESPACE_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          code=$(curl -sS -o feed.json -w '%{http_code}' \
+            "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/publications" \
+            -H "Authorization: Bearer ${CF_API_TOKEN}") || true
+          echo "KV GET → HTTP $code"
+          if [ "$code" != "200" ]; then cp public/scholar/publications.json feed.json; fi
+
+      - name: Load current PDF manifest from KV
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_KV_NAMESPACE_ID: ${{ secrets.CF_SCHOLAR_KV_NAMESPACE_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          code=$(curl -sS -o manifest.json -w '%{http_code}' \
+            "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/pdf-manifest" \
+            -H "Authorization: Bearer ${CF_API_TOKEN}") || true
+          echo "KV GET (pdf-manifest) → HTTP $code"
+          if [ "$code" != "200" ]; then echo '{"updatedAt":null,"totalBytes":0,"papers":{}}' > manifest.json; fi
+
+      - name: Download + upload new open-access PDFs
+        env:
+          FEED_PATH: feed.json
+          MANIFEST_PATH: manifest.json
+          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          set -o pipefail
+          node scripts/fetch-scholar-pdfs.mjs 2>&1 | tee pdf-run.log
+
+      - name: Upload logs artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scholar-pdfs-logs
+          path: |
+            pdf-run.log
+            ~/.config/.wrangler/logs/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload PDF manifest to KV
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_KV_NAMESPACE_ID: ${{ secrets.CF_SCHOLAR_KV_NAMESPACE_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          resp=$(curl -sS -X PUT \
+            "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/pdf-manifest" \
+            -H "Authorization: Bearer ${CF_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            --data-binary @manifest.json)
+          echo "$resp"
+          echo "$resp" | grep -q '"success":true' || { echo "✖ manifest KV upload failed"; exit 1; }
+          echo "✓ Uploaded PDF manifest to KV"
