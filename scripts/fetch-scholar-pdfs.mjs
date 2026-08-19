@@ -11,16 +11,18 @@
  *    list the bucket (a Class A op) and never re-download — only new PDFs are fetched.
  *  - Content is validated as a real PDF (%PDF magic) before staging, so we don't store HTML.
  *
- * The workflow uploads OUT_DIR/*.pdf to R2 and commits the updated manifest; the app
- * reads the manifest to know which papers have a same-origin PDF.
+ * The workflow runs this script (which uploads each PDF to R2 as it goes) and commits
+ * the updated manifest; the app reads the manifest to know which papers have a
+ * same-origin PDF.
  *
- * Run locally (writes to OUT_DIR, no upload):
+ * Run locally (writes to OUT_DIR only, no upload — leave R2_BUCKET unset):
  *   node --env-file=.env scripts/fetch-scholar-pdfs.mjs
  *
  * tl;dr: best-effort — many publisher "pdf" links are actually HTML landing pages or
  * bot-walled, so coverage is partial; those stay external "Open ↗" links in the app.
  */
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 
 const FEED_PATH     = process.env.FEED_PATH || 'public/scholar/publications.json';
@@ -30,6 +32,7 @@ const MAX_PDF_MB    = Number(process.env.MAX_PDF_MB || 25);    // per-file cap
 const MAX_TOTAL_MB  = Number(process.env.MAX_TOTAL_MB || 8000); // hard budget < 10 GB free
 const DELAY_MS      = Number(process.env.PDF_DELAY_MS || 1000);
 const PROXY_KEY     = process.env.SCRAPERAPI_KEY || '';
+const R2_BUCKET     = process.env.R2_BUCKET || ''; // set in CI → upload each PDF; unset locally → stage only
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 
 // Hosts we consider safe to rehost: fully open-access publishers/repositories.
@@ -48,6 +51,19 @@ const proxied = (url) => (PROXY_KEY ? `https://api.scraperapi.com/?api_key=${PRO
 
 /** R2 object key base for a citation id — filesystem/URL-safe, matches the app + Function. */
 const keyFor = (id) => id.replace(/[^\w.-]/g, '_');
+
+/**
+ * Upload one file to R2 via wrangler. Remote is the default for `r2 object put`;
+ * this wrangler major rejects an explicit `--remote`, so we don't pass it.
+ * Returns true on success.
+ */
+function uploadToR2(objectKey, filePath) {
+    const res = spawnSync('npx', [
+        '--yes', 'wrangler@3', 'r2', 'object', 'put',
+        `${R2_BUCKET}/${objectKey}`, `--file=${filePath}`, '--content-type=application/pdf',
+    ], { stdio: 'inherit', env: process.env });
+    return res.status === 0;
+}
 
 const isOaHost = (url) => {
     try {
@@ -129,7 +145,20 @@ async function main() {
         }
 
         const key = keyFor(p.id);
-        await writeFile(path.join(OUT_DIR, `${key}.pdf`), buf);
+        const file = path.join(OUT_DIR, `${key}.pdf`);
+        await writeFile(file, buf);
+
+        // Upload immediately so the manifest only ever records PDFs that truly reached R2 —
+        // a failed upload otherwise leaves the app pointing at a same-origin 404.
+        if (R2_BUCKET) {
+            if (!uploadToR2(`${key}.pdf`, file)) {
+                console.warn('  ⚠ R2 upload failed — not recorded, will retry next run');
+                skipped++;
+                continue;
+            }
+            await rm(file, { force: true }); // bound disk: the copy now lives in R2
+        }
+
         manifest.papers[p.id] = buf.length;
         manifest.totalBytes += buf.length;
         stored++;
