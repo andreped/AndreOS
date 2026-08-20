@@ -250,6 +250,17 @@ export class VoiceCommandManager {
         this._onMessage('user', text);
         this._addHistory('user', text);
 
+        // Ring the composer for the whole working window (routing, planning,
+        // command execution, streaming) — not just token streaming.
+        window.OSAssistant?.markBusy?.(true);
+        try {
+            await this._routeTranscript(text, { fromVoice });
+        } finally {
+            window.OSAssistant?.markBusy?.(false);
+        }
+    }
+
+    async _routeTranscript(text, { fromVoice = true } = {}) {
         const heard = text.length > 45 ? text.slice(0, 43) + '…' : text;
 
         // 0. Context-aware commands (active window) — fast, no LLM needed.
