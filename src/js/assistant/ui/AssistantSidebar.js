@@ -76,6 +76,11 @@ export class AssistantSidebar {
 
     get activeTab() { return this._activeTab; }
 
+    /** Pre-fill the input with example text (does not submit). */
+    setDraft(text = '') {
+        if (this._input) this._input.value = text;
+    }
+
     /** Switch the visible tab pane. */
     showTab(tab) {
         if (tab !== 'assistant' && tab !== 'notifications') return;

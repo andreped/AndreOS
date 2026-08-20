@@ -14,6 +14,13 @@
 export function resolveResearchIntent(rawText) {
     const t = rawText.toLowerCase().replace(/[.,!?]/g, ' ');
 
+    // If the request pairs an open-paper action with a question/task (e.g.
+    // "open paper 35 and summarize it"), return null so the LLM planner handles
+    // the full compound sequence instead of dropping the chat step.
+    const hasOpenPaper = /(?:open|show|see|view|read|select|expand|check|pull\s+up|bring\s+up|load|go\s+to|jump\s+to)\s+(?:the\s+)?\w+\s+(?:paper|article|publication|item|result|one)|(?:open|show|select|expand)\s+(?:number|item|paper|article|publication)?\s*\d+/.test(t);
+    const hasChatPart  = /summar[iy]|summarise|explain|describe|analys[ei]|tell\s+me\s+about|what\s+is|what\s+does|how\s+does|why\s+is|compare|discuss|abstract|conclusion|gist|overview/.test(t);
+    if (hasOpenPaper && hasChatPart) return null;
+
     // ── Open the Nth paper ──────────────────────────────────────────────────
     const ORDINALS = { first: 1, second: 2, third: 3, fourth: 4, fifth: 5,
                        sixth: 6, seventh: 7, eighth: 8, ninth: 9, tenth: 10 };
@@ -59,7 +66,7 @@ export function resolveResearchIntent(rawText) {
         return { intent: 'research_categories', args: {}, label: 'List categories' };
 
     // ── Search within research ────────────────────────────────────────────────
-    const searchMatch = rawText.match(/(?:search|find|look)\s+(?:for\s+)?(.+)/i);
+    const searchMatch = rawText.match(/\b(?:search|find|look)\s+(?:for\s+)?(.+)/i);
     if (searchMatch) {
         const query = searchMatch[1].trim();
         if (query.length > 2)
@@ -69,7 +76,7 @@ export function resolveResearchIntent(rawText) {
     // ── Research question (conversational) — route to sidebar chat ────────────
     // Caught before the LLM action parser so it can't hallucinate OS commands
     // from natural-language research questions.
-    if (/summarize|explain|describe|analys[ei]|tell\s+me\s+about|what\s+is|what\s+does|how\s+does|why\s+is|compare|discuss|abstract|conclusion/.test(t) ||
+    if (/summar[iy]|summarise|explain|describe|analys[ei]|tell\s+me\s+about|what\s+is|what\s+does|how\s+does|why\s+is|compare|discuss|abstract|conclusion|gist|overview/.test(t) ||
         /(?:next|previous|prev|last|this|the\s+selected)\s+paper/.test(t)) {
         return { intent: 'research_question', args: { query: rawText }, label: 'Ask about paper' };
     }

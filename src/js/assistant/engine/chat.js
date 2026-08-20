@@ -800,6 +800,7 @@ Rules:
 - External websites are ALWAYS {"a":"browse"} (never {"a":"open"}). If the user gives an explicit URL or domain (e.g. "github.com", "example.org/x"), browse it VERBATIM — never rewrite it. Only a bare service name maps to André's profile: github → github.com/andreped, linkedin → linkedin.com/in/andré-pedersen, scholar → his Google Scholar. Also "search/look/google … on the web" → {"a":"browse"} with the query. Only use {"a":"search"} to search AndreOS itself.
 - "his research", "his publications", "his papers" mean the Research app → {"a":"open","t":"research"}. Never web-browse for these; only github/linkedin/scholar/personal sites are {"a":"browse"}.
 - A bare question, follow-up, or task about André ("summarise it", "what is it about?", "tell me about his experience", "what's his background") → a single {"a":"chat","t":"…"}. Rewrite pronouns from the conversation so the message stands alone. Do NOT return an empty array for these.
+- COMPOUND requests that pair an action with a question/task (joined by "and", "then", "&", a comma, etc. — e.g. "open the 2nd paper AND summarise it", "open research and tell me about it") MUST output BOTH: the OS action(s) FOLLOWED by a trailing {"a":"chat"}. Never stop after the open — dropping the final chat is the most common mistake. Phrases like "summarise/summary of it", "give me a summary", "explain it", "what is it about", "the gist of it" are the chat step.
 - Add a trailing {"a":"chat"} ONLY when the request itself asks a question or task. A plain "open X" has no chat.
 - Plan the LATEST request only. Any earlier conversation is context for resolving references ("it", "that paper", "the 3rd one") — never skip an action or return an empty array just because something was already opened earlier.
 Examples:
@@ -810,6 +811,8 @@ Examples:
 "ok show the desktop" → [{"a":"desktop"}]
 "open the 3rd paper" → [{"a":"open_paper","n":3}]
 "summarise it for me" → [{"a":"chat","t":"summarise this paper"}]
+"open the ninth paper and give me a summary of the paper" → [{"a":"open_paper","n":9},{"a":"chat","t":"summarise this paper"}]
+"open the second paper and summarise it" → [{"a":"open_paper","n":2},{"a":"chat","t":"summarise this paper"}]
 "what is it about?" → [{"a":"chat","t":"what is this about"}]
 "pop open his github page" → [{"a":"browse","t":"github.com/andreped"}]
 "go to github.com" → [{"a":"browse","t":"github.com"}]

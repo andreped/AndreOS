@@ -174,3 +174,4 @@ export function isVoiceAIEnabled()  { return getSettings().voiceAI !== false; }
 export function getReasoningEffort(){ return getSettings().reasoningEffort || 'none'; }     // none | low | medium | high
 export function getTheme()          { return getSettings().theme          || 'light'; }     // default Light
 export function getBackground()     { return getSettings().background     || 'light'; }     // match | light | dark — default Bright
+export function isOnboardingEnabled() { return getSettings().onboardingEnabled === true; }  // opt-in; off by default
