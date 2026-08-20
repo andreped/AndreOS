@@ -126,4 +126,10 @@ export function setupSettingsWindow(winEl) {
             refreshBackgroundCards();
         });
     });
+
+    // Welcome tour replay — the tour lives in the shell, so just signal it.
+    const tourBtn = winEl.querySelector('#tour-replay-btn');
+    tourBtn?.addEventListener('click', () => {
+        document.dispatchEvent(new CustomEvent('andreos:start-onboarding'));
+    });
 }

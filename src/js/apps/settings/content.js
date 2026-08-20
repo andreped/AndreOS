@@ -161,6 +161,13 @@ export function render() {
                     <div class="theme-cards" id="background-cards">
                         ${backgroundCards}
                     </div>
+
+                    <h3 class="settings-subsection-title">Welcome tour</h3>
+                    <p class="settings-section-desc">Replay the short intro that points out where to learn about André and how to ask the private in-browser assistant.</p>
+                    <div class="settings-apply-row">
+                        <span class="settings-apply-status" id="tour-replay-status"></span>
+                        <button class="settings-apply-btn" id="tour-replay-btn">Show intro again</button>
+                    </div>
                 </div>
 
             </div>

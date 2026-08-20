@@ -10,6 +10,7 @@ import { VoiceCommandManager }  from './assistant/voice/VoiceCommandManager.js';
 import { VoiceMicButton }       from './assistant/voice/VoiceMicButton.js';
 import { LangButton }           from './platform/shell/LangButton.js';
 import { AssistantSidebar }     from './assistant/ui/AssistantSidebar.js';
+import { OnboardingTour }       from './platform/shell/OnboardingTour.js';
 
 class DesktopPortfolio {
     constructor() {
@@ -60,6 +61,30 @@ class DesktopPortfolio {
             onPlan:          (steps)      => this.sidebar.startPlan(steps),
             isSidebarOpen:   ()           => this.sidebar.isOpen,
             openSidebar:     ()           => this.sidebar.open(),
+        });
+
+        this.tour = new OnboardingTour({
+            openApp: (appType) => {
+                this.windowManager.openFile(appType);
+                return this.windowManager.windows.find(w => w.appType === appType)?.element ?? null;
+            },
+            closeApp: (appType) => {
+                const win = this.windowManager.windows.find(w => w.appType === appType);
+                if (win) this.windowManager.closeWindow(win.id);
+            },
+            prefillAssistant: (text) => {
+                this.sidebar.open();
+                this.sidebar.setDraft(text);
+                return document.getElementById('assistantSidebar');
+            },
+            runLiveQuery: (query) => this._runAssistantQuery(query),
+        });
+        // Replay from Settings → “Show intro again”. Close any open windows
+        // first so the tour's targets (desktop icons) aren't hidden behind them.
+        document.addEventListener('andreos:start-onboarding', () => {
+            const open = this.windowManager.windows.map(w => w.id);
+            open.forEach(id => this.windowManager.closeWindow(id));
+            setTimeout(() => this.tour.start(), open.length ? 350 : 0);
         });
 
         this.startMenuOpen = false;
@@ -393,7 +418,10 @@ class DesktopPortfolio {
                 this.desktop.setupIconListeners();
                 window.__desktopReady = true;
                 document.dispatchEvent(new CustomEvent('andreos:desktop-ready'));
-                this._handleDeepLink();
+                const deepLinked = this._handleDeepLink();
+                // First-visit tour, once the icons have settled — but not when a
+                // deep link already sent the visitor somewhere specific.
+                if (!deepLinked) setTimeout(() => this.tour.maybeStart(), 600);
             }, 300);
             // Only start music if it wasn't already restored by _applySettings
             // (which sets musicPlaying = true on refresh). Calling startMusic()
@@ -441,6 +469,30 @@ class DesktopPortfolio {
         }, 3200);
     }
 
+    // ── Assistant query runner ────────────────────────────────────────────────
+    // Opens the sidebar and submits a query through the LLM. Waits for the model
+    // to be ready first so the two-step routing path runs (not the keyword-only
+    // fallback). Shared by the ?ask= deep link and the onboarding live demo.
+    // `focusApp` (optional) is re-focused right before submit so its on-screen
+    // context is the active one — the sidebar isn't a window, so opening it
+    // doesn't set the active app.
+    _runAssistantQuery(query, focusApp) {
+        this.sidebar.open();
+        this.sidebar.setDraft('');
+        document.getElementById('asstTrayBtn')?.classList.add('asst-tray-active');
+        const submit = () => {
+            if (focusApp) this.windowManager.openFile(focusApp);
+            this.voice.submitText(query);
+        };
+        if (window.OSAssistant?.whenReady) {
+            window.OSAssistant.whenReady()
+                .then(submit)
+                .catch(submit); // timed out or no WebGPU — keyword fallback handles it
+        } else {
+            setTimeout(submit, 300);
+        }
+    }
+
     // ── Deep-link / URL navigation support ───────────────────────────────────
     // Supported params:
     //   ?app=<fileType>   — open a specific app window on load
@@ -457,7 +509,7 @@ class DesktopPortfolio {
         const withChat = params.get('chat');
         const askQuery = params.get('ask');
 
-        if (!appKey && !withChat && !askQuery) return;
+        if (!appKey && !withChat && !askQuery) return false;
 
         // Open the requested app first (if any)
         if (appKey) {
@@ -478,19 +530,13 @@ class DesktopPortfolio {
         // If the LLM is loading, wait for it so the two-step routing path is
         // used instead of the keyword-only fallback.
         if (askQuery) {
-            const submit = () => this.voice.submitText(askQuery);
-            if (window.OSAssistant?.whenReady) {
-                window.OSAssistant.whenReady()
-                    .then(submit)
-                    .catch(submit); // timed out or no WebGPU — keyword fallback handles it
-            } else {
-                setTimeout(submit, 300);
-            }
+            this._runAssistantQuery(askQuery);
         }
 
         // Replace the URL so a page-refresh doesn't re-open/re-submit
         const cleanUrl = window.location.pathname;
         window.history.replaceState(null, '', cleanUrl);
+        return true;
     }
 }
 
