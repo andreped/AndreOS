@@ -50,6 +50,16 @@ export const researchContext = {
     getContextBlock(query = '') {
         if (!_paper) return '';
 
+        // Only inject paper context when the query is plausibly about the open paper.
+        // This prevents the full abstract/excerpts from polluting unrelated questions
+        // (e.g. "what's André's background?") while Research happens to be focused.
+        const q = query.toLowerCase();
+        const isAboutPaper =
+            /\b(this|the)\s+(paper|article|publication|research|study|work)\b/.test(q) ||
+            /\b(it|its)\b/.test(q) ||
+            /summarize|summarise|explain|describe|abstract|conclusion|what\s+does|how\s+does|tell\s+me\s+about|analys[ei]|discuss|overview|gist/.test(q);
+        if (!isAboutPaper) return '';
+
         let body  = '';
         let label = '';
 

@@ -60,6 +60,9 @@ export function render() {
                 <div class="settings-nav-item" data-section="appearance">
                     <span class="settings-nav-icon">🎨</span><span>Appearance</span>
                 </div>
+                <div class="settings-nav-item" data-section="help">
+                    <span class="settings-nav-icon">❓</span><span>Help</span>
+                </div>
             </nav>
             <div class="settings-content-panel">
 
@@ -162,10 +165,27 @@ export function render() {
                         ${backgroundCards}
                     </div>
 
-                    <h3 class="settings-subsection-title">Welcome tour</h3>
-                    <p class="settings-section-desc">Replay the short intro that points out where to learn about André and how to ask the private in-browser assistant.</p>
+                </div>
+
+                <div class="settings-section" data-section="help">
+                    <h2 class="settings-section-title">Help</h2>
+                    <p class="settings-section-desc">Intro tour and onboarding options.</p>
+
+                    <h3 class="settings-subsection-title">Intro tour</h3>
+                    <p class="settings-section-desc">A short walkthrough of the desktop, the assistant, and the Research app.</p>
+
+                    <div class="settings-option">
+                        <div class="settings-option-info">
+                            <div class="settings-option-label">Show tour on first visit</div>
+                            <div class="settings-option-desc">Automatically run the intro tour the first time someone opens the site.</div>
+                        </div>
+                        <label class="settings-switch">
+                            <input type="checkbox" id="onboarding-enabled-toggle">
+                            <span class="settings-switch-track"></span>
+                        </label>
+                    </div>
+
                     <div class="settings-apply-row">
-                        <span class="settings-apply-status" id="tour-replay-status"></span>
                         <button class="settings-apply-btn" id="tour-replay-btn">Show intro again</button>
                     </div>
                 </div>

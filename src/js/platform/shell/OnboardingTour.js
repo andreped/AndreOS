@@ -15,7 +15,7 @@
  */
 const SEEN_KEY = 'andreos:onboarded';
 
-const LIVE_QUERY = 'Open the second paper, and give me a summary of the paper';
+const LIVE_QUERY = 'open ninth paper, summarize abstract';
 
 const STEPS = [
     {
@@ -45,7 +45,7 @@ const STEPS = [
         query:   LIVE_QUERY,
         prefill: LIVE_QUERY,
         title:   'See it for real',
-        body:    'Run a live query end to end. This downloads the private in-browser model once (nothing leaves your device), then opens the second paper and summarises it.',
+        body:    'Run a live query end to end. This downloads the private in-browser model once (nothing leaves your device), then opens the ninth paper and summarises the abstract.',
         cta:     'Run it live',
     },
 ];
@@ -90,8 +90,14 @@ export class OnboardingTour {
         this._targetEl = null;                  // element being spotlighted
         this._settle = null;                    // reposition timer after open animations
         this._timers = [];                      // pending scripted-animation timers
+        this._busy     = false;
         this._onResize = () => this._position();
-        this._onKey = (e) => { if (e.key === 'Escape') this._end(); };
+        this._onKey = (e) => {
+            if (e.key === 'Escape') { e.preventDefault(); this._end(); return; }
+            const tag = document.activeElement?.tagName ?? '';
+            const editable = tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement?.isContentEditable;
+            if (!editable && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); this._advance(); }
+        };
     }
 
     /** Run the tour only if the visitor hasn't seen it before. */
@@ -167,6 +173,7 @@ export class OnboardingTour {
 
         if (step.closeBefore) this._actions.closeApp?.(step.closeBefore);
         this._hideCursor();
+        this._setBusy(true);
 
         if (step.kind === 'app') {
             this._demoOpenApp(step);
@@ -174,6 +181,10 @@ export class OnboardingTour {
             // context / live — open the sidebar with the example question drafted.
             this._targetEl = this._actions.prefillAssistant?.(step.prefill) ?? null;
             this._reposition();
+            // sidebar.open() schedules input.focus() after 50 ms; wait longer so
+            // Next button wins the focus race and the prefilled query can't be
+            // accidentally submitted with the same keypress that advanced the tour.
+            this._timer(() => this._setBusy(false), 100);
         }
     }
 
@@ -183,6 +194,7 @@ export class OnboardingTour {
         if (!iconEl) {
             this._targetEl = this._actions.openApp?.(step.app) ?? null;
             this._reposition();
+            this._setBusy(false);
             return;
         }
         this._targetEl = iconEl;                // spotlight the icon while the cursor approaches
@@ -194,6 +206,7 @@ export class OnboardingTour {
                 this._hideCursor();
                 this._targetEl = this._actions.openApp?.(step.app) ?? iconEl;
                 this._reposition();
+                this._setBusy(false);
             });
         });
     }
@@ -251,7 +264,16 @@ export class OnboardingTour {
         card.style.left = `${left}px`;
     }
 
+    _setBusy(busy) {
+        this._busy = busy;
+        if (!this._els) return;
+        const btn = this._els.card.querySelector('.tour-next');
+        btn.disabled = busy;
+        if (!busy) btn.focus();
+    }
+
     _advance() {
+        if (this._busy) return;
         if (this._step < STEPS.length - 1) {
             this._step++;
             this._render();
@@ -264,6 +286,7 @@ export class OnboardingTour {
     }
 
     _end() {
+        this._busy = false;
         try { localStorage.setItem(SEEN_KEY, '1'); } catch { /* private mode */ }
         clearTimeout(this._settle);
         this._timers.forEach(clearTimeout);

@@ -1,4 +1,4 @@
-import { getModelId, getSettings, saveSettings, getWhisperModel, getTranscribeLang, getLLMLanguage, getReasoningEffort, getTheme, getBackground } from '../../platform/services/Settings.js';
+import { getModelId, getSettings, saveSettings, getWhisperModel, getTranscribeLang, getLLMLanguage, getReasoningEffort, getTheme, getBackground, isOnboardingEnabled } from '../../platform/services/Settings.js';
 import { setTheme, setBackground } from '../../platform/services/ThemeManager.js';
 
 export function setupSettingsWindow(winEl) {
@@ -127,7 +127,14 @@ export function setupSettingsWindow(winEl) {
         });
     });
 
-    // Welcome tour replay — the tour lives in the shell, so just signal it.
+    // Help / onboarding toggle
+    const onboardingToggle = winEl.querySelector('#onboarding-enabled-toggle');
+    if (onboardingToggle) {
+        onboardingToggle.checked = isOnboardingEnabled();
+        onboardingToggle.addEventListener('change', () => saveSettings({ onboardingEnabled: onboardingToggle.checked }));
+    }
+
+    // Tour replay — lives in the shell, so just signal it.
     const tourBtn = winEl.querySelector('#tour-replay-btn');
     tourBtn?.addEventListener('click', () => {
         document.dispatchEvent(new CustomEvent('andreos:start-onboarding'));

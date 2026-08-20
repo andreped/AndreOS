@@ -11,6 +11,7 @@ import { VoiceMicButton }       from './assistant/voice/VoiceMicButton.js';
 import { LangButton }           from './platform/shell/LangButton.js';
 import { AssistantSidebar }     from './assistant/ui/AssistantSidebar.js';
 import { OnboardingTour }       from './platform/shell/OnboardingTour.js';
+import { isOnboardingEnabled }  from './platform/services/Settings.js';
 
 class DesktopPortfolio {
     constructor() {
@@ -419,9 +420,8 @@ class DesktopPortfolio {
                 window.__desktopReady = true;
                 document.dispatchEvent(new CustomEvent('andreos:desktop-ready'));
                 const deepLinked = this._handleDeepLink();
-                // First-visit tour, once the icons have settled — but not when a
-                // deep link already sent the visitor somewhere specific.
-                if (!deepLinked) setTimeout(() => this.tour.maybeStart(), 600);
+                // First-visit tour: only when the user has opted in via Settings → Help.
+                if (!deepLinked && isOnboardingEnabled()) setTimeout(() => this.tour.maybeStart(), 600);
             }, 300);
             // Only start music if it wasn't already restored by _applySettings
             // (which sets musicPlaying = true on refresh). Calling startMusic()
