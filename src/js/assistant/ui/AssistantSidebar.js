@@ -372,6 +372,15 @@ export class AssistantSidebar {
         if (!this._panel) return;
         this._input  = this._panel.querySelector('.asst-input');
         this._micBtn = this._panel.querySelector('.asst-mic-btn');
+        this._inputRow = this._panel.querySelector('.asst-input-row');
+        if (this._inputRow && !this._inputRow.querySelector('.asst-ring')) {
+            // Compositor-animated status ring; toggled via [data-busy] in CSS.
+            const ring = document.createElement('div');
+            ring.className = 'asst-ring';
+            ring.setAttribute('aria-hidden', 'true');
+            ring.innerHTML = '<div class="asst-ring-spin"></div>';
+            this._inputRow.prepend(ring);
+        }
         this._listeningEl = this._panel.querySelector('.asst-listening');
         this._tabs   = Array.from(this._panel.querySelectorAll('.asst-tab'));
         this._panes  = Array.from(this._panel.querySelectorAll('.asst-pane'));
@@ -423,10 +432,22 @@ export class AssistantSidebar {
         }).observe(this._panel, { attributes: true, attributeFilter: ['class'] });
     }
 
+    /**
+     * Flow-animate the composer border, VSCode-Copilot style.
+     * @param {'working'|'waiting'|null} state blue while replying, amber while
+     *        awaiting confirmation, off when idle.
+     */
+    setComposerState(state) {
+        if (!this._inputRow) return;
+        if (state === 'working' || state === 'waiting') this._inputRow.dataset.busy = state;
+        else delete this._inputRow.dataset.busy;
+    }
+
     /** Toggle the send button between ↑ (send) and ■ (stop generating). */
     _setStreaming(on) {
         this._streaming = on;
         this._messages?.classList.toggle('asst-streaming', on);
+        this.setComposerState(on ? 'working' : null);
         if (!this._sendBtn) return;
         this._sendBtn.classList.toggle('asst-send-stop', on);
         this._sendBtn.textContent = on ? '■' : '↑';

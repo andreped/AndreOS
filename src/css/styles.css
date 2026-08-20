@@ -5876,6 +5876,74 @@ body {
     padding: 10px 12px;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     flex-shrink: 0;
+    position: relative;
+}
+
+/* VSCode-Copilot-style status border around the composer.
+   A persistent faint-blue outline is always shown; while busy a bright
+   conic-gradient comet rotates over it (transform-composited, so it stays
+   smooth while the main thread streams tokens). The box is wider than it is
+   tall, so the fixed angular arc projects to a long, fast strip around the
+   left/right ends and a short one across the top/bottom middle — the Copilot
+   look. [data-busy]: "working" (blue) / "waiting" (amber). */
+.asst-ring {
+    position: absolute;
+    inset: 0;
+    padding: 1.5px; /* border thickness */
+    overflow: hidden;
+    pointer-events: none;
+    background: rgba(104, 126, 234, 0.18); /* persistent faint hint, always on */
+    /* Show only the border: subtract the interior from the filled box. */
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite: exclude;
+}
+.asst-ring-spin {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 250%;
+    aspect-ratio: 1; /* square large enough to cover the box at any rotation */
+    transform: translate(-50%, -50%);
+    display: none;
+    background: conic-gradient(from 0deg,
+        transparent 0deg,
+        transparent 144deg,
+        var(--asst-ring) 162deg,
+        var(--asst-ring-hi) 180deg,
+        var(--asst-ring) 198deg,
+        transparent 216deg,
+        transparent 360deg);
+    will-change: transform;
+    animation: asstRingSpin 2.6s linear infinite;
+}
+.asst-input-row[data-busy] .asst-ring-spin { display: block; }
+.asst-input-row[data-busy="working"] {
+    --asst-ring:    rgba(104, 126, 234, 0.9);
+    --asst-ring-hi: rgba(169, 182, 255, 1);
+}
+.asst-input-row[data-busy="waiting"] {
+    --asst-ring:    rgba(240, 170, 60, 0.9);
+    --asst-ring-hi: rgba(255, 217, 138, 1);
+}
+@keyframes asstRingSpin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .asst-ring-spin { animation: none; }
+}
+/* Focus: overlay a stronger blue that peaks at the left/right ends (90°/270°). */
+.asst-input-row:focus-within:not([data-busy]) .asst-ring-spin {
+    display: block;
+    animation: none;
+    background: conic-gradient(from 0deg,
+        rgba(104, 126, 234, 0.15) 0deg,
+        rgba(104, 126, 234, 0.7) 90deg,
+        rgba(104, 126, 234, 0.15) 180deg,
+        rgba(104, 126, 234, 0.7) 270deg,
+        rgba(104, 126, 234, 0.15) 360deg);
 }
 .asst-mic-btn {
     background: rgba(255, 255, 255, 0.07);
