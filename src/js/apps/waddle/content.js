@@ -9,7 +9,7 @@ export function render() {
             <iframe class="game-iframe waddle-iframe"
                 src="https://waddle.andrped94.workers.dev/"
                 credentialless
-                allow="accelerometer; autoplay; clipboard-write; fullscreen; gamepad; pointer-lock"
+                allow="accelerometer; autoplay; clipboard-write; fullscreen; gamepad; pointer-lock; cross-origin-isolated"
                 referrerpolicy="no-referrer"></iframe>
             <div class="browser-blocked game-blocked">
                 <div class="blocked-icon">&#128683;</div>
