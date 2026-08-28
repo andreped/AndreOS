@@ -27,6 +27,7 @@ import * as social   from './social/index.js';
 import * as strava   from './strava/index.js';
 import * as browser  from './browser/index.js';
 import * as game     from './game/index.js';
+import * as waddle   from './waddle/index.js';
 import * as research from './research/index.js';
 import * as settings from './settings/index.js';
 import * as ironflow from './ironflow/index.js';
@@ -37,7 +38,7 @@ import * as monitor  from './monitor/index.js';
 /** Registration order = natural app order. */
 const apps = [
     about, resume, projects, skills, contact, social, strava,
-    browser, game, research, settings, ironflow, evals, histolite, monitor,
+    browser, game, waddle, research, settings, ironflow, evals, histolite, monitor,
 ];
 
 for (const app of apps) {
