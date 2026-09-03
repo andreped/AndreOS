@@ -5,10 +5,15 @@ import * as webllm from "@mlc-ai/web-llm";
 import { buildProfileContext } from "./andre-profile.js";
 import { RAGEngine }   from "../retrieval/RAGEngine.js";
 import { ActiveContext } from "../retrieval/ActiveContext.js";
-import { getModelId, MODELS, getLLMLanguage, CUSTOM_MODELS, getReasoningEffort, REASONING_LEVELS, isCpuModel, getCpuModel } from "../../platform/services/Settings.js";
+import { getModelId, MODELS, getLLMLanguage, CUSTOM_MODELS, getReasoningEffort, REASONING_LEVELS, isCpuModel, getCpuModel, isMobile } from "../../platform/services/Settings.js";
 import { appRegistry } from "../../apps/index.js";
 
 const MODEL_ID = getModelId(); // resolved from Settings at load time — re-read on retry()
+
+// Phones/tablets OOM-reload the tab when the chat LLM loads (even the CPU model),
+// so we never load it there. Transcription (whisper) is unaffected and still runs.
+const IS_MOBILE = isMobile();
+const MOBILE_NOTICE = "The local AI chat needs more memory than a mobile browser allows — on iOS/Android it reloads the tab before it can answer. Please open AndreOS on a computer (Windows, macOS, or Linux) to chat with the assistant. Voice transcription still works here on mobile.";
 
 // ── RAG ───────────────────────────────────────────────────────────────────────
 const ragEngine = new RAGEngine();
@@ -382,6 +387,7 @@ async function assertGPULimits() {
 
 // ── Engine loader ─────────────────────────────────────────────────────────────
 async function loadEngine() {
+    if (IS_MOBILE) return; // never load the chat LLM on mobile — it reloads the tab
     if (engineState === 'loading' || engineState === 'ready') return;
     engineState = 'loading';
     const cpuModel = getCpuModel();
@@ -530,6 +536,15 @@ async function unloadEngine() {
 // ── Public API ────────────────────────────────────────────────────────────────
 window.OSAssistant = {
     setupWindow(winEl) {
+        if (IS_MOBILE) {
+            const overlay = winEl.querySelector('.chat-load-overlay');
+            if (overlay) overlay.innerHTML = `
+                <div class="chat-load-icon">💻</div>
+                <div class="chat-load-title">Chat needs a computer</div>
+                <div class="chat-load-subtitle">${MOBILE_NOTICE}</div>
+            `;
+            return;
+        }
         if (!navigator.gpu && !isCpuModel()) {
             const overlay = winEl.querySelector('.chat-load-overlay');
             if (overlay) overlay.innerHTML = `
@@ -656,6 +671,7 @@ window.OSAssistant = {
      * @param {(full: string) => void}     onDone   — called with final text when stream ends
      */
     async querySidebar(text, onChunk, onDone) {
+        if (IS_MOBILE) { onDone?.(MOBILE_NOTICE); return; }
         if (engineState !== 'ready') {
             if (!navigator.gpu && !isCpuModel()) {
                 onDone?.('This browser has no WebGPU support, so the local AI model can\'t run. Try Chrome/Edge 113+ or Safari 18+, or pick a CPU model in Settings.');
@@ -917,13 +933,11 @@ Message: "${text.replace(/"/g, "'")}"`;
 };
 
 // ── Start loading on page load ────────────────────────────────────────────────
-// Skip the eager multi-GB model load on phones/tablets: downloading + compiling
-// it reliably OOM-crashes mobile Safari on every page load. There the engine
-// loads on demand instead — when the user opens the chat (setupWindow) or sends
-// an assistant query (querySidebar).
-const deferModelLoad = window.matchMedia?.('(max-width: 768px), (pointer: coarse)').matches;
-if (deferModelLoad) {
-    console.log('[OSAssistant] Mobile detected — deferring model load until the assistant is opened.');
+// Never load the chat LLM on phones/tablets: even the CPU model OOM-reloads the
+// tab. loadEngine() already hard-guards on IS_MOBILE; we skip calling it here too
+// so no NC card / progress UI ever appears. Transcription (whisper) is separate.
+if (IS_MOBILE) {
+    console.log('[OSAssistant] Mobile detected — chat LLM disabled (transcription still works).');
 } else if (navigator.gpu || isCpuModel()) {
     loadEngine();
 } else {
