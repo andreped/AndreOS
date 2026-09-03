@@ -152,12 +152,19 @@ export function saveSettings(partial) {
     return next;
 }
 
+// Phones/tablets can't run the local chat LLM at all: even the CPU (wllama/WASM)
+// model OOM-reloads the tab on iOS Safari regardless of device RAM. Only the chat
+// LLM is gated on mobile — whisper transcription is far smaller and runs fine.
+// Node-safe (window may be absent in the eval harness).
+export function isMobile() {
+    return typeof window !== 'undefined'
+        && !!window.matchMedia?.('(max-width: 768px), (pointer: coarse)').matches;
+}
+
 // Node-safe (window may be absent in the eval harness): defaults desktop → 2B,
 // phones/tablets → the lighter 1.5B. Only applies when no model was chosen.
 function defaultModelId() {
-    const mobile = typeof window !== 'undefined'
-        && window.matchMedia?.('(max-width: 768px), (pointer: coarse)').matches;
-    return mobile ? MOBILE_DEFAULT_MODEL_ID : DEFAULT_MODEL_ID;
+    return isMobile() ? MOBILE_DEFAULT_MODEL_ID : DEFAULT_MODEL_ID;
 }
 
 export function getModelId()        { return getSettings().chatModel      || defaultModelId(); }
