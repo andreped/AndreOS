@@ -1,39 +1,46 @@
 /**
  * VoiceEngine
  *
- * Owns the Whisper Web Worker lifecycle, microphone access (MediaRecorder),
- * and audio decoding/resampling to 16 kHz Float32Array. This is a pure
- * data-pipeline layer — no knowledge of app commands or UI state.
+ * Owns the speech Web Worker lifecycle and microphone capture. Mic audio is
+ * downsampled to 16 kHz mono and streamed to the worker while recording, so
+ * streaming models (Nemotron) report partial transcripts as you speak.
  *
  * Callbacks (all optional):
  *   onReady()                            — model loaded and ready
  *   onProgress({ file, progress })       — download progress per file (0–100)
- *   onTranscript(text: string)           — transcription result
+ *   onPartial(text: string)              — running transcript while recording
+ *   onTranscript(text: string)           — final transcription result
  *   onError(message: string)             — any failure
  */
+
+// Taps raw mic samples off the audio thread.
+const TAP_WORKLET = `registerProcessor('pcm-tap', class extends AudioWorkletProcessor {
+    process([input]) { if (input[0]) this.port.postMessage(input[0].slice()); return true; }
+});`;
+
 export class VoiceEngine {
     /**
      * @param {{
      *   onReady?:      () => void,
      *   onProgress?:   (p: { file: string, progress: number }) => void,
+     *   onPartial?:    (text: string) => void,
      *   onTranscript?: (text: string) => void,
      *   onError?:      (message: string) => void,
      * }} opts
      */
-    constructor({ onReady, onProgress, onTranscript, onError, model } = {}) {
+    constructor({ onReady, onProgress, onPartial, onTranscript, onError, model } = {}) {
         this._onReady      = onReady      ?? (() => {});
         this._onProgress   = onProgress   ?? (() => {});
+        this._onPartial    = onPartial    ?? (() => {});
         this._onTranscript = onTranscript ?? (() => {});
         this._onError      = onError      ?? (() => {});
         this._model         = model ?? 'Xenova/whisper-base';
-        this._currentLang   = null;
 
         this._worker        = null;
         this._ready         = false;
         this._recording     = false;
-        this._mediaRecorder = null;
-        this._audioChunks   = [];
         this._stream        = null;
+        this._ctx           = null;
     }
 
     // ── Public read-only state ─────────────────────────────────────────────────
@@ -75,10 +82,9 @@ export class VoiceEngine {
 
     /**
      * Request mic access and begin recording.
-     * @param {{ language?: string }} opts
+     * @param {{ language?: string, realtime?: boolean }} opts  realtime=false buffers until stop
      */
-    async startRecording({ language } = {}) {
-        this._currentLang = language ?? null;
+    async startRecording({ language, realtime = true } = {}) {
         if (this._recording || !this._ready) return;
 
         try {
@@ -94,27 +100,74 @@ export class VoiceEngine {
             return;
         }
 
-        this._audioChunks   = [];
-        this._mediaRecorder = new MediaRecorder(this._stream);
+        try {
+            // Native-rate context: Firefox can't feed a mic stream into a 16 kHz one.
+            this._ctx = new AudioContext();
+            const url = URL.createObjectURL(new Blob([TAP_WORKLET], { type: 'text/javascript' }));
+            await this._ctx.audioWorklet.addModule(url);
+            URL.revokeObjectURL(url);
+            const tap = new AudioWorkletNode(this._ctx, 'pcm-tap');
+            const down = this._downsampler(this._ctx.sampleRate);
+            let buf = [];
+            tap.port.onmessage = ({ data }) => {
+                buf.push(...down(data));
+                if (realtime && buf.length >= 1600) { this._send(buf); buf = []; } // ~100 ms per message
+            };
+            this._flush = () => { if (buf.length) this._send(buf); buf = []; };
+            this._ctx.createMediaStreamSource(this._stream).connect(tap);
+        } catch (err) {
+            this._releaseMic();
+            this._onError(`Audio capture failed: ${err.message}`);
+            return;
+        }
 
-        this._mediaRecorder.addEventListener('dataavailable', (e) => {
-            if (e.data.size > 0) this._audioChunks.push(e.data);
-        });
-
-        this._mediaRecorder.addEventListener('stop', () => this._processAudio());
-
-        this._mediaRecorder.start();
+        this._worker.postMessage({ type: 'start', language: language ?? null });
+        this._cancelled = false;
         this._recording = true;
     }
 
-    /** Stop recording and trigger transcription. */
+    /** Stop recording and trigger the final transcription. */
     stopRecording() {
         if (!this._recording) return;
         this._recording = false;
-        this._mediaRecorder?.stop();
+        this._flush?.();
+        this._releaseMic();
+        this._worker?.postMessage({ type: 'end' });
+    }
+
+    /** Stop recording (or a pending transcription) and drop its result. */
+    cancelRecording() {
+        this._recording = false;
+        this._cancelled = true;
+        this._releaseMic();
+        this._worker?.postMessage({ type: 'cancel' });
+    }
+
+    _send(samples) {
+        const audio = Float32Array.from(samples);
+        this._worker?.postMessage({ type: 'chunk', audio }, [audio.buffer]);
+    }
+
+    _releaseMic() {
         this._stream?.getTracks().forEach(t => t.stop());
-        this._stream        = null;
-        this._mediaRecorder = null;
+        this._ctx?.close();
+        this._stream = null;
+        this._ctx    = null;
+        this._flush  = null;
+    }
+
+    /** Box-filter downsampler to 16 kHz that carries its phase across chunks. */
+    _downsampler(rate) {
+        const r = rate / 16_000;
+        let acc = 0, n = 0, pos = 0;
+        return (x) => {
+            const out = [];
+            for (let i = 0; i < x.length; i++) {
+                acc += x[i]; n++;
+                if (++pos >= r) { out.push(acc / n); acc = 0; n = 0; pos -= r; }
+            }
+            return out;
+        };
     }
 
     // ── Private ────────────────────────────────────────────────────────────────
@@ -131,43 +184,15 @@ export class VoiceEngine {
                     this._onProgress({ file: data.file, progress: data.progress ?? 0 });
                 }
                 break;
+            case 'partial':
+                if (!this._cancelled) this._onPartial(data.text);
+                break;
             case 'result':
-                this._onTranscript(data.text);
+                if (!this._cancelled) this._onTranscript(data.text);
                 break;
             case 'error':
                 this._onError(data.message);
                 break;
-        }
-    }
-
-    /**
-     * Decode the recorded blob, resample to 16 kHz mono Float32Array,
-     * and transfer it to the worker for transcription (zero-copy).
-     */
-    async _processAudio() {
-        if (this._audioChunks.length === 0) return;
-
-        const mimeType = this._mediaRecorder?.mimeType ?? 'audio/webm';
-        const blob     = new Blob(this._audioChunks, { type: mimeType });
-        this._audioChunks = [];
-
-        try {
-            const arrayBuffer = await blob.arrayBuffer();
-
-            // AudioContext with sampleRate:16000 auto-resamples the decoded audio
-            const audioCtx = new AudioContext({ sampleRate: 16_000 });
-            const decoded  = await audioCtx.decodeAudioData(arrayBuffer);
-            audioCtx.close();
-
-            // .slice() produces an owned copy so we can transfer the buffer
-            const samples = decoded.getChannelData(0).slice();
-
-            this._worker.postMessage(
-                { type: 'transcribe', audio: samples, language: this._currentLang },
-                [samples.buffer]            // zero-copy transfer to worker
-            );
-        } catch (err) {
-            this._onError(`Audio processing failed: ${err.message}`);
         }
     }
 }

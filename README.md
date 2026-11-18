@@ -11,8 +11,8 @@ Demo is available at https://andreped.dev.
 - **AI chat (GPU):** [@mlc-ai/web-llm](https://github.com/mlc-ai/web-llm) — user-selectable LLM on WebGPU (default: Qwen3.5-2B), run in a Web Worker
 - **AI chat (CPU):** [@wllama/wllama](https://github.com/ngxson/wllama) — llama.cpp/WASM backend for a no-GPU option (same Qwen3.5-2B, GGUF Q4_K_M)
 - **Routing & planning (optional):** [onnxruntime-web](https://onnxruntime.ai/docs/tutorials/web/) — a 150M decision model ([Vela 3.1 pico](https://huggingface.co/vllm-sr/vela3.1-pico-150m), our [browser export](https://huggingface.co/andreped/vela3.1-onnx)) on WebGPU or WASM
-- **Voice commands:** [@xenova/transformers](https://github.com/xenova/transformers.js) + ONNX Runtime Web — Whisper in a Web Worker; model and language configurable
-- **Browser requirement:** Chrome 113+, Edge 113+, or Safari 18+ (macOS Sequoia / iOS 18) for GPU AI chat (WebGPU). The CPU model needs no WebGPU; voice works in any browser with `MediaRecorder` + WASM support
+- **Voice commands:** [@xenova/transformers](https://github.com/xenova/transformers.js) + ONNX Runtime Web — Whisper in a Web Worker (default: Whisper Base); optional **realtime dictation** with [Nemotron 3.5 ASR Streaming](https://huggingface.co/nvidia/nemotron-3.5-asr-streaming-0.6b) on onnxruntime-web
+- **Browser requirement:** Chrome 113+, Edge 113+, or Safari 18+ (macOS Sequoia / iOS 18) for GPU AI chat (WebGPU). The CPU model needs no WebGPU; voice works in any browser with `AudioWorklet` + WASM support
 
 ---
 
@@ -83,7 +83,13 @@ See [docs/architecture/decision-models.md](docs/architecture/decision-models.md)
 | Multi-step | `"open chat and ask which day is it"` | — |
 | Help | `"help"` | `"hjelp"` |
 
-Compound commands are parsed by the LLM when loaded. Whisper model and language are configurable in Settings → Speech.
+Compound commands are parsed by the LLM when loaded. Speech model, language and mode are configurable in Settings → Speech.
+
+**Realtime dictation (experimental):** pick **Nemotron 3.5 ASR** in Settings → Speech and your words appear in the
+chat field *as you speak*; press Send mid-sentence to send what's there and stop listening. It runs fully in the
+browser (onnxruntime-web, WebGPU or CPU, ~790 MB, cached). English is good; Norwegian is weak, so Whisper Base stays
+the default. See [docs/architecture/speech-transcription.md](docs/architecture/speech-transcription.md) and
+[ADR 0002](docs/adr/0002-streaming-speech-nemotron.md).
 
 </details>
 
@@ -153,7 +159,7 @@ The 🔍 search uses a pure-JS BM25 engine with prefix matching. It searches app
 All preferences persist in `localStorage`. Configure via the ⚙️ Settings app or the **EN / NO** taskbar button (updates both transcription and LLM language at once).
 
 - **AI Engine:** LLM model selector · reasoning effort (None / Low / Medium / High) · command planner (Chat model / Decision model) · response language (Auto / EN / NO)
-- **Speech:** Whisper Tiny / Base / Small · transcription language · AI command parsing toggle
+- **Speech:** Whisper Tiny / Base / Small · Nemotron 3.5 ASR (experimental, streaming) · transcription language · transcription mode (Realtime / Full audio) · AI command parsing toggle
 
 </details>
 

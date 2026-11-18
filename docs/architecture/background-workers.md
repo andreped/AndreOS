@@ -7,6 +7,9 @@ Keep heavy work off the UI thread so the OS stays responsive.
   tokenization + per-dispatch WebGPU command submission (the batch-1 bottleneck) stays off
   the main thread.
 - wllama spawns its own worker pool (see [cpu-inference](./cpu-inference.md)).
+- Speech runs in [`whisper.worker.js`](../../src/js/assistant/voice/whisper.worker.js) (Whisper or Nemotron);
+  mic samples are tapped by an `AudioWorklet` on the audio thread and streamed to it in ~100 ms chunks
+  (see [speech-transcription](./speech-transcription.md)).
 - Net: the page keeps painting while the model runs.
 
 ## Evals that don't block the user

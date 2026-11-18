@@ -56,6 +56,7 @@ class DesktopPortfolio {
                 this.voiceMicBtn.setState(state);
                 this.sidebar.setMicState(state);
             },
+            onPartial:       (text) => this.sidebar.setDraft(text),
             onMessage:       (role, text, source) => this.sidebar.appendMessage(role, text, source),
             onStreamMessage: (role)       => this.sidebar.startStreamMessage(role),
             onDiscardStream: ()           => this.sidebar.discardStream(),

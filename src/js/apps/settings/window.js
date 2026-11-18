@@ -1,4 +1,4 @@
-import { getModelId, getSettings, saveSettings, getWhisperModel, getTranscribeLang, getLLMLanguage, getReasoningEffort, getPlanner, getTheme, getBackground, isOnboardingEnabled } from '../../platform/services/Settings.js';
+import { getModelId, getSettings, saveSettings, getWhisperModel, getTranscribeLang, getTranscribeMode, getLLMLanguage, getReasoningEffort, getPlanner, getTheme, getBackground, isOnboardingEnabled } from '../../platform/services/Settings.js';
 import { setTheme, setBackground } from '../../platform/services/ThemeManager.js';
 
 export function setupSettingsWindow(winEl) {
@@ -91,6 +91,7 @@ export function setupSettingsWindow(winEl) {
     });
 
     initLangPills('transcribe-lang-pills', getTranscribeLang, 'transcribeLang');
+    initLangPills('transcribe-mode-pills', getTranscribeMode, 'transcribeMode');
 
     if (voiceApplyBtn) {
         voiceApplyBtn.addEventListener('click', () => {

@@ -15,7 +15,7 @@
  *   await vcm.toggleRecording();   // first call loads the model; subsequent calls toggle mic
  */
 import { VoiceEngine }       from './VoiceEngine.js';
-import { isVoiceAIEnabled, getWhisperModel, getTranscribeLang, getPlanner } from '../../platform/services/Settings.js';
+import { isVoiceAIEnabled, getWhisperModel, getTranscribeLang, getTranscribeMode, getPlanner, WHISPER_MODELS } from '../../platform/services/Settings.js';
 import { appRegistry }       from '../../apps/registry/AppRegistry.js';
 import { assistantRegistry } from '../registry/AssistantRegistry.js';
 
@@ -97,6 +97,7 @@ export class VoiceCommandManager {
      *   windowManager:    import('../../platform/windowing/WindowManager.js').WindowManager,
      *   notifications:    import('../../platform/services/NotificationManager.js').NotificationManager,
      *   onStateChange?:   (state: 'idle'|'loading'|'ready'|'recording'|'processing'|'error') => void,
+     *   onPartial?:       (text: string) => void,
      *   onMessage?:       (role: 'user'|'assistant'|'system', text: string) => void,
      *   onStreamMessage?: (role: 'assistant') => (text: string) => void,
      *   onPlan?:          (steps: string[]) => object,
@@ -104,10 +105,11 @@ export class VoiceCommandManager {
  *   openSidebar?:     () => void,
      * }} opts
      */
-    constructor({ windowManager, notifications, onStateChange, onMessage, onStreamMessage, onPlan, isSidebarOpen, openSidebar, onDiscardStream }) {
+    constructor({ windowManager, notifications, onStateChange, onPartial, onMessage, onStreamMessage, onPlan, isSidebarOpen, openSidebar, onDiscardStream }) {
         this._windowManager   = windowManager;
         this._notifications   = notifications;
         this._onStateChange   = onStateChange   ?? (() => {});
+        this._onPartial       = onPartial       ?? (() => {});
         this._onMessage       = onMessage       ?? (() => {});
         this._onStreamMessage = onStreamMessage ?? null;
         this._onDiscardStream = onDiscardStream ?? (() => {});
@@ -143,6 +145,7 @@ export class VoiceCommandManager {
         return new VoiceEngine({
             onReady:      ()    => this._onModelReady(),
             onProgress:   (p)   => this._onModelProgress(p),
+            onPartial:    (t)   => this._onPartial(t),
             onTranscript: (t)   => this._onTranscript(t),
             onError:      (msg) => this._onEngineError(msg),
             model:        getWhisperModel(),
@@ -162,10 +165,11 @@ export class VoiceCommandManager {
         if (this._loadStarted) return;
         this._loadStarted = true;
         this._setState('loading');
+        const m = WHISPER_MODELS.find(x => x.id === getWhisperModel());
         this._notifications.createLive(
             this._liveCardId,
             'Voice Commands',
-            'Downloading Whisper base model (~74 MB) — cached after first use',
+            `Downloading ${m?.name ?? 'speech model'} (${m?.size ?? '?'}) — cached after first use`,
             MIC_ICON
         );
         await this._engine.init();
@@ -192,7 +196,7 @@ export class VoiceCommandManager {
             this._engine.stopRecording();
         } else if (this._state === 'ready') {
             this._setState('recording');
-            await this._engine.startRecording({ language: getTranscribeLang() });
+            await this._engine.startRecording({ language: getTranscribeLang(), realtime: getTranscribeMode() === 'realtime' });
         }
     }
 
@@ -208,7 +212,11 @@ export class VoiceCommandManager {
      */
     async submitText(text) {
         if (!text?.trim()) return;
-        if (this._state === 'recording' || this._state === 'processing') return;
+        // Sending mid-dictation sends what's been heard so far and stops the mic.
+        if (this._state === 'recording' || this._state === 'processing') {
+            this._engine.cancelRecording();
+            this._setState('ready');
+        }
         await this._onTranscript(text, { fromVoice: false });
     }
 
@@ -227,7 +235,7 @@ export class VoiceCommandManager {
         this._notifications.completeLive(
             this._liveCardId,
             'Voice Commands',
-            'Whisper ready — click the mic and speak a command',
+            'Speech model ready — click the mic and speak a command',
             MIC_ICON,
             'success'
         );
@@ -248,6 +256,7 @@ export class VoiceCommandManager {
     }
 
     async _onTranscript(text, { fromVoice = true } = {}) {
+        if (fromVoice) this._onPartial(''); // the dictated draft becomes the sent message
         if (!text) {
             if (fromVoice) this._setState('ready');
             return;

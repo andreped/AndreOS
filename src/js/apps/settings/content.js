@@ -131,6 +131,13 @@ export function render() {
                                 <div class="model-desc">Best accuracy · Multilingual · Slower load</div>
                             </div>
                         </div>
+                        <div class="model-card" data-whisper-model-id="onnx-community/nemotron-3.5-asr-streaming-0.6b-onnx-int4">
+                            <div class="model-card-radio"><span class="model-radio-dot"></span></div>
+                            <div class="model-card-info">
+                                <div class="model-card-header"><span class="model-name">Nemotron 3.5 ASR</span><span class="model-badge">Experimental</span><span class="model-size">~790 MB</span></div>
+                                <div class="model-desc">Realtime streaming · Strong English · Weak Norwegian</div>
+                            </div>
+                        </div>
                     </div>
 
                     <h3 class="settings-subsection-title">Transcription Language</h3>
@@ -138,6 +145,12 @@ export function render() {
                         <button class="lang-pill" data-lang="auto">Auto-detect</button>
                         <button class="lang-pill" data-lang="english">English</button>
                         <button class="lang-pill" data-lang="norwegian">Norwegian</button>
+                    </div>
+
+                    <h3 class="settings-subsection-title">Transcription Mode</h3>
+                    <div class="lang-pills" id="transcribe-mode-pills">
+                        <button class="lang-pill" data-lang="realtime" title="Text appears in the chat field as you speak (Nemotron only; Whisper always transcribes when you stop)">Realtime</button>
+                        <button class="lang-pill" data-lang="full" title="Transcribe the whole recording when you stop">Full audio</button>
                     </div>
 
                     <div class="settings-option">

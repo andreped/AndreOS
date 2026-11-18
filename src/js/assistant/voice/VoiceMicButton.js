@@ -34,8 +34,8 @@ export class VoiceMicButton {
         this._el.dataset.voiceState = state;
 
         const TITLES = {
-            idle:       'Voice Commands — click to load Whisper model',
-            loading:    'Voice Commands — loading Whisper model…',
+            idle:       'Voice Commands — click to load speech model',
+            loading:    'Voice Commands — loading speech model…',
             ready:      'Voice Commands — click mic to speak',
             recording:  'Voice Commands — listening… click to stop',
             processing: 'Voice Commands — processing…',
@@ -54,7 +54,7 @@ export class VoiceMicButton {
         const el = document.createElement('div');
         el.className          = 'voice-mic-btn';
         el.dataset.voiceState = 'idle';
-        el.title              = 'Voice Commands — click to load Whisper model';
+        el.title              = 'Voice Commands — click to load speech model';
         el.setAttribute('role',       'button');
         el.setAttribute('aria-label', 'Voice Commands');
 
