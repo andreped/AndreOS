@@ -56,10 +56,10 @@ class DesktopPortfolio {
                 this.voiceMicBtn.setState(state);
                 this.sidebar.setMicState(state);
             },
-            onMessage:       (role, text) => this.sidebar.appendMessage(role, text),
+            onMessage:       (role, text, source) => this.sidebar.appendMessage(role, text, source),
             onStreamMessage: (role)       => this.sidebar.startStreamMessage(role),
             onDiscardStream: ()           => this.sidebar.discardStream(),
-            onPlan:          (steps)      => this.sidebar.startPlan(steps),
+            onPlan:          (steps, source) => this.sidebar.startPlan(steps, source),
             isSidebarOpen:   ()           => this.sidebar.isOpen,
             openSidebar:     ()           => this.sidebar.open(),
         });

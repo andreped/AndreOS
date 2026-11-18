@@ -1,0 +1,3822 @@
+[
+  {
+    "generatedAt": "2026-11-18T13:26:57.796Z",
+    "source": "decision-planner",
+    "config": {
+      "model": null,
+      "planner": "vllm-sr/vela3.1-pico-150m",
+      "backend": "decision·cpu",
+      "reasoning": "none",
+      "language": "en",
+      "repeats": 1
+    },
+    "configKey": "no-chat·planner:vllm-sr/vela3.1-pico-150m·decision·cpu·r:none·en",
+    "runtimeMs": 4405.801541,
+    "suites": {
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 1,
+        "actionF1": 1,
+        "precision": 1,
+        "recall": 1,
+        "targetAccuracy": 1,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [],
+        "latency": {
+          "n": 36,
+          "meanMs": 122.34044666666667,
+          "p50Ms": 102.63175000000001,
+          "p95Ms": 204.679083,
+          "minMs": 95.55279100000007,
+          "maxMs": 297.6875829999999
+        },
+        "model": "vllm-sr/vela3.1-pico-150m"
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.6666666666666666,
+        "turnExactMatch": 0.8181818181818182,
+        "turnF1": 0.8181818181818182,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.6666666666666666
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 1
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 0.8
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.25
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 1
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.5
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "search:show me the projects"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "resume-then-ask-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:resume"
+                ],
+                "predicted": [
+                  "open:resume"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "open:resume"
+                ],
+                "exact": false
+              }
+            ]
+          },
+          {
+            "id": "projects-to-skills-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 122.34044666666667,
+          "p50Ms": 102.63175000000001,
+          "p95Ms": 204.679083,
+          "minMs": 95.55279100000007,
+          "maxMs": 297.6875829999999
+        },
+        "model": "vllm-sr/vela3.1-pico-150m"
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-18T13:27:53.732Z",
+    "source": "decision-planner",
+    "config": {
+      "model": null,
+      "planner": "vllm-sr/vela3.1-pico-380m",
+      "backend": "decision·cpu",
+      "reasoning": "none",
+      "language": "en",
+      "repeats": 1
+    },
+    "configKey": "no-chat·planner:vllm-sr/vela3.1-pico-380m·decision·cpu·r:none·en",
+    "runtimeMs": 10406.550709,
+    "suites": {
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 1,
+        "actionF1": 1,
+        "precision": 1,
+        "recall": 1,
+        "targetAccuracy": 1,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [],
+        "latency": {
+          "n": 36,
+          "meanMs": 289.0293159722223,
+          "p50Ms": 242.87145800000053,
+          "p95Ms": 499.4046669999998,
+          "minMs": 220.686334,
+          "maxMs": 687.39975
+        },
+        "model": "vllm-sr/vela3.1-pico-380m"
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.6666666666666666,
+        "turnExactMatch": 0.8636363636363636,
+        "turnF1": 0.8636363636363636,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.6666666666666666
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 0.6666666666666666
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 0.6
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.5
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 1
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.5
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "search:show me the projects"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "research-drilldown-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:research"
+                ],
+                "predicted": [
+                  "open:research"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open_paper:2"
+                ],
+                "predicted": [
+                  "open:research"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "resume-then-ask-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:resume"
+                ],
+                "predicted": [
+                  "open:resume"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "open:resume"
+                ],
+                "exact": false
+              }
+            ]
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 289.0293159722223,
+          "p50Ms": 242.87145800000053,
+          "p95Ms": 499.4046669999998,
+          "minMs": 220.686334,
+          "maxMs": 687.39975
+        },
+        "model": "vllm-sr/vela3.1-pico-380m"
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-18T13:31:39.533Z",
+    "source": "decision-planner",
+    "config": {
+      "model": null,
+      "planner": "vllm-sr/d3-edge",
+      "backend": "decision·cpu",
+      "reasoning": "none",
+      "language": "en",
+      "repeats": 1
+    },
+    "configKey": "no-chat·planner:vllm-sr/d3-edge·decision·cpu·r:none·en",
+    "runtimeMs": 201583.741958,
+    "suites": {
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.8571428571428571,
+        "actionF1": 0.9047619047619048,
+        "precision": 0.9285714285714286,
+        "recall": 0.8928571428571429,
+        "targetAccuracy": 0.8888888888888888,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 0.8571428571428571,
+            "actionF1": 0.9523809523809524
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 0.5,
+            "actionF1": 0.5
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 0.75,
+            "actionF1": 0.9166666666666666
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 0.6666666666666666,
+            "actionF1": 0.8888888888888888
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "search the web for digital pathology",
+            "expected": [
+              "browse:digital pathology"
+            ],
+            "predicted": [
+              "search:digital pathology"
+            ],
+            "f1": 0
+          },
+          {
+            "input": "open projects and summarize the highlights",
+            "expected": [
+              "open:projects",
+              "chat"
+            ],
+            "predicted": [
+              "chat"
+            ],
+            "f1": 0.667
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 5599.493148166667,
+          "p50Ms": 4714.514082999987,
+          "p95Ms": 9374.472375000012,
+          "minMs": 4260.1304580000005,
+          "maxMs": 13964.967542000006
+        },
+        "model": "vllm-sr/d3-edge"
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.6666666666666666,
+        "turnExactMatch": 0.8636363636363636,
+        "turnF1": 0.8636363636363636,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.6666666666666666
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 0.6666666666666666
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 0.6
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.5
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 0
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.75
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "search:show me the projects"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "paper-pronoun",
+            "turns": [
+              {
+                "expected": [
+                  "open:research",
+                  "open_paper:5"
+                ],
+                "predicted": [
+                  "open:research",
+                  "open_paper:5"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "open:research"
+                ],
+                "exact": false
+              }
+            ]
+          },
+          {
+            "id": "resume-then-ask-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:resume"
+                ],
+                "predicted": [
+                  "open:resume"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "open:resume"
+                ],
+                "exact": false
+              }
+            ]
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 5599.493148166667,
+          "p50Ms": 4714.514082999987,
+          "p95Ms": 9374.472375000012,
+          "minMs": 4260.1304580000005,
+          "maxMs": 13964.967542000006
+        },
+        "model": "vllm-sr/d3-edge"
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-18T13:40:25.822Z",
+    "source": "decision-planner",
+    "config": {
+      "model": null,
+      "planner": "vllm-sr/d3-lite",
+      "backend": "decision·cpu",
+      "reasoning": "none",
+      "language": "en",
+      "repeats": 1
+    },
+    "configKey": "no-chat·planner:vllm-sr/d3-lite·decision·cpu·r:none·en",
+    "runtimeMs": 498842.588625,
+    "suites": {
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.7857142857142857,
+        "actionF1": 0.8571428571428571,
+        "precision": 0.8571428571428571,
+        "recall": 0.8571428571428571,
+        "targetAccuracy": 0.7222222222222222,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 0.5714285714285714,
+            "actionF1": 0.7142857142857143
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 0.5,
+            "actionF1": 0.75
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 0.6666666666666666,
+            "actionF1": 0.8333333333333334
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "open research",
+            "expected": [
+              "open:research"
+            ],
+            "predicted": [
+              "open:projects"
+            ],
+            "f1": 0
+          },
+          {
+            "input": "open projects and summarize the highlights",
+            "expected": [
+              "open:projects",
+              "chat"
+            ],
+            "predicted": [
+              "search:open projects",
+              "chat"
+            ],
+            "f1": 0.5
+          },
+          {
+            "input": "open resume and then open research",
+            "expected": [
+              "open:resume",
+              "open:research"
+            ],
+            "predicted": [
+              "open:resume",
+              "open:projects"
+            ],
+            "f1": 0.5
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 13856.676586861107,
+          "p50Ms": 11171.653750000001,
+          "p95Ms": 22039.120209000015,
+          "minMs": 10742.43974999999,
+          "maxMs": 33016.20762499998
+        },
+        "model": "vllm-sr/d3-lite"
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.6666666666666666,
+        "turnExactMatch": 0.8636363636363636,
+        "turnF1": 0.8863636363636364,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.6666666666666666
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 0.6666666666666666
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 0.8
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.5
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 0
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.75
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "search:show me the projects"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "paper-pronoun",
+            "turns": [
+              {
+                "expected": [
+                  "open:research",
+                  "open_paper:5"
+                ],
+                "predicted": [
+                  "open:projects",
+                  "open_paper:5"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "projects-to-skills-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 13856.676586861107,
+          "p50Ms": 11171.653750000001,
+          "p95Ms": 22039.120209000015,
+          "minMs": 10742.43974999999,
+          "maxMs": 33016.20762499998
+        },
+        "model": "vllm-sr/d3-lite"
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-18T13:41:43.567Z",
+    "source": "decision-planner",
+    "config": {
+      "model": null,
+      "planner": "vllm-sr/Decision-1.0-Kai-0.6B",
+      "backend": "decision·cpu",
+      "reasoning": "none",
+      "language": "en",
+      "repeats": 1
+    },
+    "configKey": "no-chat·planner:vllm-sr/Decision-1.0-Kai-0.6B·decision·cpu·r:none·en",
+    "runtimeMs": 4820.154125,
+    "suites": {
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.42857142857142855,
+        "actionF1": 0.5476190476190477,
+        "precision": 0.5476190476190477,
+        "recall": 0.5476190476190477,
+        "targetAccuracy": 0.16666666666666666,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 0,
+            "actionF1": 0.14285714285714285
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 0,
+            "actionF1": 0.41666666666666663
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 0,
+            "actionF1": 0.5555555555555555
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 0.5,
+            "actionF1": 0.8333333333333333
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 0.5,
+            "actionF1": 0.8333333333333333
+          }
+        },
+        "failures": [
+          {
+            "input": "open research",
+            "expected": [
+              "open:research"
+            ],
+            "predicted": [
+              "chat"
+            ],
+            "f1": 0
+          },
+          {
+            "input": "open the resume",
+            "expected": [
+              "open:resume"
+            ],
+            "predicted": [
+              "chat"
+            ],
+            "f1": 0
+          },
+          {
+            "input": "show skills",
+            "expected": [
+              "open:skills"
+            ],
+            "predicted": [
+              "chat"
+            ],
+            "f1": 0
+          },
+          {
+            "input": "open contact",
+            "expected": [
+              "open:contact"
+            ],
+            "predicted": [
+              "chat"
+            ],
+            "f1": 0
+          },
+          {
+            "input": "open resume and tell me about his experience",
+            "expected": [
+              "open:resume",
+              "chat"
+            ],
+            "predicted": [
+              "chat",
+              "chat"
+            ],
+            "f1": 0.5
+          },
+          {
+            "input": "open projects and summarize the highlights",
+            "expected": [
+              "open:projects",
+              "chat"
+            ],
+            "predicted": [
+              "browse:open projects",
+              "chat"
+            ],
+            "f1": 0.5
+          },
+          {
+            "input": "open research, open the 3rd paper, and summarize it",
+            "expected": [
+              "open:research",
+              "open_paper:3",
+              "chat"
+            ],
+            "predicted": [
+              "chat",
+              "open_paper:3",
+              "chat"
+            ],
+            "f1": 0.667
+          },
+          {
+            "input": "open resume and then open research",
+            "expected": [
+              "open:resume",
+              "open:research"
+            ],
+            "predicted": [
+              "chat",
+              "chat"
+            ],
+            "f1": 0
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 133.84214922222216,
+          "p50Ms": 112.81483299999991,
+          "p95Ms": 220.80329099999994,
+          "minMs": 103.07537499999944,
+          "maxMs": 337.76916600000004
+        },
+        "model": "vllm-sr/Decision-1.0-Kai-0.6B"
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.2222222222222222,
+        "turnExactMatch": 0.5454545454545454,
+        "turnF1": 0.5984848484848485,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.2222222222222222
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 0.3333333333333333
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 0.2
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 0
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0
+          }
+        },
+        "failures": [
+          {
+            "id": "resume-then-ask",
+            "turns": [
+              {
+                "expected": [
+                  "open:resume"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "paper-pronoun",
+            "turns": [
+              {
+                "expected": [
+                  "open:research",
+                  "open_paper:5"
+                ],
+                "predicted": [
+                  "chat",
+                  "open_paper:5"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "research-drilldown-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:research"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open_paper:2"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "resume-then-ask-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:resume"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "github-then-desktop-casual",
+            "turns": [
+              {
+                "expected": [
+                  "browse:github.com/andreped"
+                ],
+                "predicted": [
+                  "browse:github.com/andreped"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "desktop"
+                ],
+                "predicted": [
+                  "chat",
+                  "desktop"
+                ],
+                "exact": false
+              }
+            ]
+          },
+          {
+            "id": "projects-to-skills-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 133.84214922222216,
+          "p50Ms": 112.81483299999991,
+          "p95Ms": 220.80329099999994,
+          "minMs": 103.07537499999944,
+          "maxMs": 337.76916600000004
+        },
+        "model": "vllm-sr/Decision-1.0-Kai-0.6B"
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-18T13:51:56.208Z",
+    "source": "decision-planner",
+    "config": {
+      "model": null,
+      "planner": "vllm-sr/Decision-1.0-Sol-2B",
+      "backend": "decision·cpu",
+      "reasoning": "none",
+      "language": "en",
+      "repeats": 1
+    },
+    "configKey": "no-chat·planner:vllm-sr/Decision-1.0-Sol-2B·decision·cpu·r:none·en",
+    "runtimeMs": 495104.288458,
+    "suites": {
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.8571428571428571,
+        "actionF1": 0.8928571428571429,
+        "precision": 0.8928571428571429,
+        "recall": 0.8928571428571429,
+        "targetAccuracy": 0.8333333333333334,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 0.7142857142857143,
+            "actionF1": 0.7857142857142857
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 0.75,
+            "actionF1": 0.875
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "open research",
+            "expected": [
+              "open:research"
+            ],
+            "predicted": [
+              "browse:open research"
+            ],
+            "f1": 0
+          },
+          {
+            "input": "open resume and then open research",
+            "expected": [
+              "open:resume",
+              "open:research"
+            ],
+            "predicted": [
+              "open:resume",
+              "browse:open research"
+            ],
+            "f1": 0.5
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 13752.790077361104,
+          "p50Ms": 11776.361499999999,
+          "p95Ms": 23940.37604199999,
+          "minMs": 9715.334875,
+          "maxMs": 34955.304083000025
+        },
+        "model": "vllm-sr/Decision-1.0-Sol-2B"
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.5555555555555556,
+        "turnExactMatch": 0.8181818181818182,
+        "turnF1": 0.8409090909090909,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.5555555555555556
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 0.3333333333333333
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 0.6
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.5
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 0
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.5
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "search:show me the projects"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "paper-pronoun",
+            "turns": [
+              {
+                "expected": [
+                  "open:research",
+                  "open_paper:5"
+                ],
+                "predicted": [
+                  "browse:open research",
+                  "open_paper:5"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "research-drilldown-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:research"
+                ],
+                "predicted": [
+                  "browse:scholar.google.com/citations?user=u20zuhqaaaaj"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open_paper:2"
+                ],
+                "predicted": [
+                  "open_paper:2"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "projects-to-skills-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "browse:github.com/andreped"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 13752.790077361104,
+          "p50Ms": 11776.361499999999,
+          "p95Ms": 23940.37604199999,
+          "minMs": 9715.334875,
+          "maxMs": 34955.304083000025
+        },
+        "model": "vllm-sr/Decision-1.0-Sol-2B"
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-18T14:01:02.468Z",
+    "source": "decision-planner",
+    "config": {
+      "model": null,
+      "planner": "vllm-sr/vela3.1-pico-150m",
+      "backend": "decision·onnxruntime-web·wasm·model_quantized.onnx",
+      "reasoning": "none",
+      "language": "en",
+      "repeats": 1
+    },
+    "configKey": "no-chat·planner:vllm-sr/vela3.1-pico-150m·decision·onnxruntime-web·wasm·model_quantized.onnx·r:none·en",
+    "runtimeMs": 25714.267958,
+    "suites": {
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.9285714285714286,
+        "actionF1": 0.9285714285714286,
+        "precision": 0.9285714285714286,
+        "recall": 0.9285714285714286,
+        "targetAccuracy": 0.8888888888888888,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 0.8571428571428571,
+            "actionF1": 0.8571428571428571
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "open contact",
+            "expected": [
+              "open:contact"
+            ],
+            "predicted": [],
+            "f1": 0
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 714.2289989166662,
+          "p50Ms": 606.7820419999989,
+          "p95Ms": 1201.9509580000013,
+          "minMs": 564.5914170000001,
+          "maxMs": 1810.6323330000014
+        },
+        "model": "vllm-sr/vela3.1-pico-150m"
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.6666666666666666,
+        "turnExactMatch": 0.8181818181818182,
+        "turnF1": 0.8181818181818182,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.6666666666666666
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 1
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 0.8
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.25
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 1
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.5
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "search:show me the projects"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "resume-then-ask-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:resume"
+                ],
+                "predicted": [
+                  "open:resume"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "open:resume"
+                ],
+                "exact": false
+              }
+            ]
+          },
+          {
+            "id": "projects-to-skills-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 714.2289989166662,
+          "p50Ms": 606.7820419999989,
+          "p95Ms": 1201.9509580000013,
+          "minMs": 564.5914170000001,
+          "maxMs": 1810.6323330000014
+        },
+        "model": "vllm-sr/vela3.1-pico-150m"
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-18T14:01:31.520Z",
+    "source": "decision-planner",
+    "config": {
+      "model": null,
+      "planner": "vllm-sr/vela3.1-pico-150m",
+      "backend": "decision·onnxruntime-web·wasm·model.onnx",
+      "reasoning": "none",
+      "language": "en",
+      "repeats": 1
+    },
+    "configKey": "no-chat·planner:vllm-sr/vela3.1-pico-150m·decision·onnxruntime-web·wasm·model.onnx·r:none·en",
+    "runtimeMs": 27454.626916,
+    "suites": {
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 1,
+        "actionF1": 1,
+        "precision": 1,
+        "recall": 1,
+        "targetAccuracy": 1,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [],
+        "latency": {
+          "n": 36,
+          "meanMs": 762.5699096944445,
+          "p50Ms": 662.5139999999992,
+          "p95Ms": 1247.2263330000005,
+          "minMs": 582.93775,
+          "maxMs": 1881.244041
+        },
+        "model": "vllm-sr/vela3.1-pico-150m"
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.6666666666666666,
+        "turnExactMatch": 0.8181818181818182,
+        "turnF1": 0.8181818181818182,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.6666666666666666
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 1
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 0.8
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.25
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 1
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.5
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "search:show me the projects"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "resume-then-ask-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:resume"
+                ],
+                "predicted": [
+                  "open:resume"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "open:resume"
+                ],
+                "exact": false
+              }
+            ]
+          },
+          {
+            "id": "projects-to-skills-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 762.5699096944445,
+          "p50Ms": 662.5139999999992,
+          "p95Ms": 1247.2263330000005,
+          "minMs": 582.93775,
+          "maxMs": 1881.244041
+        },
+        "model": "vllm-sr/vela3.1-pico-150m"
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-18T14:03:08.416Z",
+    "source": "decision-planner",
+    "config": {
+      "model": null,
+      "planner": "vllm-sr/vela3.1-pico-150m",
+      "backend": "decision·onnxruntime-web·wasm·model_quantized.onnx",
+      "reasoning": "none",
+      "language": "en",
+      "repeats": 1
+    },
+    "configKey": "no-chat·planner:vllm-sr/vela3.1-pico-150m·decision·onnxruntime-web·wasm·model_quantized.onnx·r:none·en",
+    "runtimeMs": 16344.698375,
+    "suites": {
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.9285714285714286,
+        "actionF1": 0.9285714285714286,
+        "precision": 0.9285714285714286,
+        "recall": 0.9285714285714286,
+        "targetAccuracy": 0.8888888888888888,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 0.8571428571428571,
+            "actionF1": 0.8571428571428571
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "open contact",
+            "expected": [
+              "open:contact"
+            ],
+            "predicted": [],
+            "f1": 0
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 453.9618345,
+          "p50Ms": 349.85270899999887,
+          "p95Ms": 880.3999999999996,
+          "minMs": 252.88624999999956,
+          "maxMs": 1091.3552080000009
+        },
+        "model": "vllm-sr/vela3.1-pico-150m"
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.6666666666666666,
+        "turnExactMatch": 0.8181818181818182,
+        "turnF1": 0.8181818181818182,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.6666666666666666
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 1
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 0.8
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.25
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 1
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.5
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "search:show me the projects"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "resume-then-ask-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:resume"
+                ],
+                "predicted": [
+                  "open:resume"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "open:resume"
+                ],
+                "exact": false
+              }
+            ]
+          },
+          {
+            "id": "projects-to-skills-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 453.9618345,
+          "p50Ms": 349.85270899999887,
+          "p95Ms": 880.3999999999996,
+          "minMs": 252.88624999999956,
+          "maxMs": 1091.3552080000009
+        },
+        "model": "vllm-sr/vela3.1-pico-150m"
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-18T14:11:19.121Z",
+    "source": "decision-planner",
+    "config": {
+      "model": null,
+      "planner": "vllm-sr/vela3.1-pico-150m",
+      "backend": "decision·onnxruntime-web·wasm·model.onnx",
+      "reasoning": "none",
+      "language": "en",
+      "repeats": 1
+    },
+    "configKey": "no-chat·planner:vllm-sr/vela3.1-pico-150m·decision·onnxruntime-web·wasm·model.onnx·r:none·en",
+    "runtimeMs": 19924.946833,
+    "suites": {
+      "routing": {
+        "suite": "routing",
+        "total": 28,
+        "accuracy": 1,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "confusion": {
+          "tp": 15,
+          "fp": 0,
+          "fn": 0,
+          "tn": 13
+        },
+        "byTag": {
+          "open": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "window": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "browse": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "research-action": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "norwegian": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "bio": {
+            "total": 7,
+            "accuracy": 1
+          },
+          "research-question": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "skills": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "contact": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "tricky": {
+            "total": 5,
+            "accuracy": 1
+          },
+          "meta": {
+            "total": 1,
+            "accuracy": 1
+          }
+        },
+        "failures": [],
+        "latency": {
+          "n": 28,
+          "meanMs": 192.27341075000004,
+          "p50Ms": 188.5697909999999,
+          "p95Ms": 211.46895799999993,
+          "minMs": 183.31395900000007,
+          "maxMs": 223.08408400000008
+        },
+        "model": "vllm-sr/vela3.1-pico-150m"
+      },
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 1,
+        "actionF1": 1,
+        "precision": 1,
+        "recall": 1,
+        "targetAccuracy": 1,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [],
+        "latency": {
+          "n": 36,
+          "meanMs": 403.857076361111,
+          "p50Ms": 309.1830829999999,
+          "p95Ms": 732.3372499999969,
+          "minMs": 228.25866599999972,
+          "maxMs": 990.4090410000008
+        },
+        "model": "vllm-sr/vela3.1-pico-150m"
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.6666666666666666,
+        "turnExactMatch": 0.8181818181818182,
+        "turnF1": 0.8181818181818182,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.6666666666666666
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 1
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 0.8
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.25
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 1
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.5
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "search:show me the projects"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "resume-then-ask-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:resume"
+                ],
+                "predicted": [
+                  "open:resume"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "open:resume"
+                ],
+                "exact": false
+              }
+            ]
+          },
+          {
+            "id": "projects-to-skills-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 403.857076361111,
+          "p50Ms": 309.1830829999999,
+          "p95Ms": 732.3372499999969,
+          "minMs": 228.25866599999972,
+          "maxMs": 990.4090410000008
+        },
+        "model": "vllm-sr/vela3.1-pico-150m"
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-18T14:12:05.358Z",
+    "source": "decision-planner",
+    "config": {
+      "model": null,
+      "planner": "vllm-sr/vela3.1-pico-150m",
+      "backend": "decision·onnxruntime-web·wasm·model.onnx",
+      "reasoning": "none",
+      "language": "en",
+      "repeats": 1
+    },
+    "configKey": "no-chat·planner:vllm-sr/vela3.1-pico-150m·decision·onnxruntime-web·wasm·model.onnx·r:none·en",
+    "runtimeMs": 27807.606125,
+    "suites": {
+      "routing": {
+        "suite": "routing",
+        "total": 28,
+        "accuracy": 1,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "confusion": {
+          "tp": 15,
+          "fp": 0,
+          "fn": 0,
+          "tn": 13
+        },
+        "byTag": {
+          "open": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "window": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "browse": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "research-action": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "norwegian": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "bio": {
+            "total": 7,
+            "accuracy": 1
+          },
+          "research-question": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "skills": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "contact": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "tricky": {
+            "total": 5,
+            "accuracy": 1
+          },
+          "meta": {
+            "total": 1,
+            "accuracy": 1
+          }
+        },
+        "failures": [],
+        "latency": {
+          "n": 28,
+          "meanMs": 246.12149849999994,
+          "p50Ms": 205.68587500000012,
+          "p95Ms": 369.71550000000025,
+          "minMs": 187.96429199999966,
+          "maxMs": 546.6249169999996
+        },
+        "model": "vllm-sr/vela3.1-pico-150m"
+      },
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.9285714285714286,
+        "actionF1": 0.9285714285714286,
+        "precision": 0.9285714285714286,
+        "recall": 0.9285714285714286,
+        "targetAccuracy": 0.8888888888888888,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 0.8571428571428571,
+            "actionF1": 0.8571428571428571
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "show skills",
+            "expected": [
+              "open:skills"
+            ],
+            "predicted": [
+              "chat"
+            ],
+            "f1": 0
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 580.7434352222218,
+          "p50Ms": 454.414249999998,
+          "p95Ms": 1002.3172500000001,
+          "minMs": 340.2081670000007,
+          "maxMs": 1466.8496669999986
+        },
+        "model": "vllm-sr/vela3.1-pico-150m"
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.7777777777777778,
+        "turnExactMatch": 0.9090909090909091,
+        "turnF1": 0.9090909090909091,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.7777777777777778
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 1
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 1
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.75
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 1
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.75
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "open:projects"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "github-then-desktop-casual",
+            "turns": [
+              {
+                "expected": [
+                  "browse:github.com/andreped"
+                ],
+                "predicted": [
+                  "open:social"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "desktop"
+                ],
+                "predicted": [
+                  "desktop"
+                ],
+                "exact": true
+              }
+            ]
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 580.7434352222218,
+          "p50Ms": 454.414249999998,
+          "p95Ms": 1002.3172500000001,
+          "minMs": 340.2081670000007,
+          "maxMs": 1466.8496669999986
+        },
+        "model": "vllm-sr/vela3.1-pico-150m"
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-18T14:13:16.144Z",
+    "source": "decision-planner",
+    "config": {
+      "model": null,
+      "planner": "vllm-sr/vela3.1-pico-150m",
+      "backend": "decision·onnxruntime-web·wasm·model_quantized.onnx",
+      "reasoning": "none",
+      "language": "en",
+      "repeats": 1
+    },
+    "configKey": "no-chat·planner:vllm-sr/vela3.1-pico-150m·decision·onnxruntime-web·wasm·model_quantized.onnx·r:none·en",
+    "runtimeMs": 28007.401958,
+    "suites": {
+      "routing": {
+        "suite": "routing",
+        "total": 28,
+        "accuracy": 1,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "confusion": {
+          "tp": 15,
+          "fp": 0,
+          "fn": 0,
+          "tn": 13
+        },
+        "byTag": {
+          "open": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "window": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "browse": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "research-action": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "norwegian": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "bio": {
+            "total": 7,
+            "accuracy": 1
+          },
+          "research-question": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "skills": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "contact": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "tricky": {
+            "total": 5,
+            "accuracy": 1
+          },
+          "meta": {
+            "total": 1,
+            "accuracy": 1
+          }
+        },
+        "failures": [],
+        "latency": {
+          "n": 28,
+          "meanMs": 233.0719270357143,
+          "p50Ms": 211.70350000000008,
+          "p95Ms": 349.57795799999985,
+          "minMs": 193.75629200000003,
+          "maxMs": 431.8842080000004
+        },
+        "model": "vllm-sr/vela3.1-pico-150m"
+      },
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.9285714285714286,
+        "actionF1": 0.9285714285714286,
+        "precision": 0.9285714285714286,
+        "recall": 0.9285714285714286,
+        "targetAccuracy": 0.8888888888888888,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 0.8571428571428571,
+            "actionF1": 0.8571428571428571
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "show skills",
+            "expected": [
+              "open:skills"
+            ],
+            "predicted": [
+              "chat"
+            ],
+            "f1": 0
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 596.6103321111109,
+          "p50Ms": 603.7929170000007,
+          "p95Ms": 1010.8545830000003,
+          "minMs": 341.30583300000035,
+          "maxMs": 1707.6795419999999
+        },
+        "model": "vllm-sr/vela3.1-pico-150m"
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.6666666666666666,
+        "turnExactMatch": 0.8636363636363636,
+        "turnF1": 0.8636363636363636,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.6666666666666666
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 0.6666666666666666
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 0.8
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.75
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 1
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.5
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "open:projects"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "research-drilldown-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:research"
+                ],
+                "predicted": [
+                  "open:research"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open_paper:2"
+                ],
+                "predicted": [
+                  "open:research"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "github-then-desktop-casual",
+            "turns": [
+              {
+                "expected": [
+                  "browse:github.com/andreped"
+                ],
+                "predicted": [
+                  "open:social"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "desktop"
+                ],
+                "predicted": [
+                  "desktop"
+                ],
+                "exact": true
+              }
+            ]
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 596.6103321111109,
+          "p50Ms": 603.7929170000007,
+          "p95Ms": 1010.8545830000003,
+          "minMs": 341.30583300000035,
+          "maxMs": 1707.6795419999999
+        },
+        "model": "vllm-sr/vela3.1-pico-150m"
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-18T14:13:58.677Z",
+    "source": "decision-planner",
+    "config": {
+      "model": null,
+      "planner": "vllm-sr/vela3.1-pico-380m",
+      "backend": "decision·cpu",
+      "reasoning": "none",
+      "language": "en",
+      "repeats": 1
+    },
+    "configKey": "no-chat·planner:vllm-sr/vela3.1-pico-380m·decision·cpu·r:none·en",
+    "runtimeMs": 12112.439416,
+    "suites": {
+      "routing": {
+        "suite": "routing",
+        "total": 28,
+        "accuracy": 0.9642857142857143,
+        "precision": 0.9375,
+        "recall": 1,
+        "f1": 0.967741935483871,
+        "confusion": {
+          "tp": 15,
+          "fp": 1,
+          "fn": 0,
+          "tn": 12
+        },
+        "byTag": {
+          "open": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "window": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "browse": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "research-action": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "norwegian": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "bio": {
+            "total": 7,
+            "accuracy": 1
+          },
+          "research-question": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "skills": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "contact": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "tricky": {
+            "total": 5,
+            "accuracy": 0.8
+          },
+          "meta": {
+            "total": 1,
+            "accuracy": 0
+          }
+        },
+        "failures": [
+          {
+            "input": "what can you do?",
+            "expected": "direct",
+            "predicted": "command"
+          }
+        ],
+        "latency": {
+          "n": 28,
+          "meanMs": 142.63308939285716,
+          "p50Ms": 125.95504200000005,
+          "p95Ms": 349.457541,
+          "minMs": 104.97925000000032,
+          "maxMs": 391.3665
+        },
+        "model": "vllm-sr/vela3.1-pico-380m"
+      },
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.5714285714285714,
+        "actionF1": 0.6904761904761905,
+        "precision": 0.6904761904761905,
+        "recall": 0.6904761904761905,
+        "targetAccuracy": 0.5555555555555556,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 0.42857142857142855,
+            "actionF1": 0.5714285714285714
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 0.5,
+            "actionF1": 0.5
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 0.25,
+            "actionF1": 0.6666666666666666
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 0.3333333333333333,
+            "actionF1": 0.7222222222222222
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 0.5,
+            "actionF1": 0.8333333333333333
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 0.5,
+            "actionF1": 0.8333333333333333
+          }
+        },
+        "failures": [
+          {
+            "input": "open research",
+            "expected": [
+              "open:research"
+            ],
+            "predicted": [
+              "search:open research"
+            ],
+            "f1": 0
+          },
+          {
+            "input": "show skills",
+            "expected": [
+              "open:skills"
+            ],
+            "predicted": [
+              "search:show skills"
+            ],
+            "f1": 0
+          },
+          {
+            "input": "search the web for digital pathology",
+            "expected": [
+              "browse:digital pathology"
+            ],
+            "predicted": [
+              "search:digital pathology"
+            ],
+            "f1": 0
+          },
+          {
+            "input": "open projects and summarize the highlights",
+            "expected": [
+              "open:projects",
+              "chat"
+            ],
+            "predicted": [
+              "search:open projects",
+              "chat"
+            ],
+            "f1": 0.5
+          },
+          {
+            "input": "open research, open the 3rd paper, and summarize it",
+            "expected": [
+              "open:research",
+              "open_paper:3",
+              "chat"
+            ],
+            "predicted": [
+              "search:open research",
+              "open_paper:3",
+              "chat"
+            ],
+            "f1": 0.667
+          },
+          {
+            "input": "open resume and then open research",
+            "expected": [
+              "open:resume",
+              "open:research"
+            ],
+            "predicted": [
+              "open:resume",
+              "search:open research"
+            ],
+            "f1": 0.5
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 225.4531666944444,
+          "p50Ms": 166.001291999999,
+          "p95Ms": 442.5964160000003,
+          "minMs": 145.7941660000006,
+          "maxMs": 461.7062499999993
+        },
+        "model": "vllm-sr/vela3.1-pico-380m"
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.6666666666666666,
+        "turnExactMatch": 0.8181818181818182,
+        "turnF1": 0.8409090909090909,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.6666666666666666
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 0.3333333333333333
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 0.6
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.75
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 0
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.75
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "search:show me the projects"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "paper-pronoun",
+            "turns": [
+              {
+                "expected": [
+                  "open:research",
+                  "open_paper:5"
+                ],
+                "predicted": [
+                  "search:open research",
+                  "open_paper:5"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "research-drilldown-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:research"
+                ],
+                "predicted": [
+                  "open:research"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open_paper:2"
+                ],
+                "predicted": [
+                  "minimize"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 225.4531666944444,
+          "p50Ms": 166.001291999999,
+          "p95Ms": 442.5964160000003,
+          "minMs": 145.7941660000006,
+          "maxMs": 461.7062499999993
+        },
+        "model": "vllm-sr/vela3.1-pico-380m"
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-18T14:24:40.657Z",
+    "source": "decision-planner",
+    "config": {
+      "model": null,
+      "planner": "vllm-sr/vela3.1-pico-380m",
+      "backend": "decision·onnxruntime-web·wasm·model_quantized.onnx",
+      "reasoning": "none",
+      "language": "en",
+      "repeats": 1
+    },
+    "configKey": "no-chat·planner:vllm-sr/vela3.1-pico-380m·decision·onnxruntime-web·wasm·model_quantized.onnx·r:none·en",
+    "runtimeMs": 65088.580500000004,
+    "suites": {
+      "routing": {
+        "suite": "routing",
+        "total": 28,
+        "accuracy": 0.9642857142857143,
+        "precision": 0.9375,
+        "recall": 1,
+        "f1": 0.967741935483871,
+        "confusion": {
+          "tp": 15,
+          "fp": 1,
+          "fn": 0,
+          "tn": 12
+        },
+        "byTag": {
+          "open": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "window": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "browse": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "research-action": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "norwegian": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "bio": {
+            "total": 7,
+            "accuracy": 1
+          },
+          "research-question": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "skills": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "contact": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "tricky": {
+            "total": 5,
+            "accuracy": 0.8
+          },
+          "meta": {
+            "total": 1,
+            "accuracy": 0
+          }
+        },
+        "failures": [
+          {
+            "input": "what can you do?",
+            "expected": "direct",
+            "predicted": "command"
+          }
+        ],
+        "latency": {
+          "n": 28,
+          "meanMs": 535.4213793214284,
+          "p50Ms": 533.6301670000003,
+          "p95Ms": 557.3407499999994,
+          "minMs": 514.3979999999992,
+          "maxMs": 568.2603750000001
+        },
+        "model": "vllm-sr/vela3.1-pico-380m"
+      },
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.6428571428571429,
+        "actionF1": 0.7619047619047619,
+        "precision": 0.7619047619047619,
+        "recall": 0.7619047619047619,
+        "targetAccuracy": 0.5555555555555556,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 0.42857142857142855,
+            "actionF1": 0.5714285714285714
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 0.25,
+            "actionF1": 0.6666666666666666
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 0.3333333333333333,
+            "actionF1": 0.7222222222222222
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 0.5,
+            "actionF1": 0.8333333333333333
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 0.5,
+            "actionF1": 0.8333333333333333
+          }
+        },
+        "failures": [
+          {
+            "input": "open research",
+            "expected": [
+              "open:research"
+            ],
+            "predicted": [
+              "search:open research"
+            ],
+            "f1": 0
+          },
+          {
+            "input": "show skills",
+            "expected": [
+              "open:skills"
+            ],
+            "predicted": [
+              "search:show skills"
+            ],
+            "f1": 0
+          },
+          {
+            "input": "open projects and summarize the highlights",
+            "expected": [
+              "open:projects",
+              "chat"
+            ],
+            "predicted": [
+              "search:open projects",
+              "chat"
+            ],
+            "f1": 0.5
+          },
+          {
+            "input": "open research, open the 3rd paper, and summarize it",
+            "expected": [
+              "open:research",
+              "open_paper:3",
+              "chat"
+            ],
+            "predicted": [
+              "search:open research",
+              "open_paper:3",
+              "chat"
+            ],
+            "f1": 0.667
+          },
+          {
+            "input": "open resume and then open research",
+            "expected": [
+              "open:resume",
+              "open:research"
+            ],
+            "predicted": [
+              "open:resume",
+              "search:open research"
+            ],
+            "f1": 0.5
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 1391.5063345000005,
+          "p50Ms": 1021.4254999999976,
+          "p95Ms": 2635.3595419999983,
+          "minMs": 941.2386670000014,
+          "maxMs": 3005.3979169999984
+        },
+        "model": "vllm-sr/vela3.1-pico-380m"
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.6666666666666666,
+        "turnExactMatch": 0.8181818181818182,
+        "turnF1": 0.8409090909090909,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.6666666666666666
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 0.3333333333333333
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 0.6
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.75
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 0
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.75
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "search:show me the projects"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "paper-pronoun",
+            "turns": [
+              {
+                "expected": [
+                  "open:research",
+                  "open_paper:5"
+                ],
+                "predicted": [
+                  "search:open research",
+                  "open_paper:5"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "research-drilldown-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:research"
+                ],
+                "predicted": [
+                  "open:research"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open_paper:2"
+                ],
+                "predicted": [
+                  "minimize"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          }
+        ],
+        "latency": {
+          "n": 36,
+          "meanMs": 1391.5063345000005,
+          "p50Ms": 1021.4254999999976,
+          "p95Ms": 2635.3595419999983,
+          "minMs": 941.2386670000014,
+          "maxMs": 3005.3979169999984
+        },
+        "model": "vllm-sr/vela3.1-pico-380m"
+      }
+    }
+  }
+]

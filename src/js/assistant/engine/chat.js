@@ -5,10 +5,36 @@ import * as webllm from "@mlc-ai/web-llm";
 import { buildProfileContext } from "./andre-profile.js";
 import { RAGEngine }   from "../retrieval/RAGEngine.js";
 import { ActiveContext } from "../retrieval/ActiveContext.js";
-import { getModelId, MODELS, getLLMLanguage, CUSTOM_MODELS, getReasoningEffort, REASONING_LEVELS, isCpuModel, getCpuModel, isMobile } from "../../platform/services/Settings.js";
+import { getModelId, MODELS, getLLMLanguage, CUSTOM_MODELS, getReasoningEffort, REASONING_LEVELS, isCpuModel, getCpuModel, isMobile, getPlanner, DECISION_MODEL } from "../../platform/services/Settings.js";
 import { appRegistry } from "../../apps/index.js";
+import { planWithDecisions, routeWithDecisions } from "./decisionPlanner.js";
 
 const MODEL_ID = getModelId(); // resolved from Settings at load time — re-read on retry()
+
+// ── Decision-model planner (Settings → Command planner) ───────────────────────────
+// Vela pico routes and picks the actions in this tab (onnxruntime-web); the chat
+// LLM only writes answers. Dev serves the local export (scripts/export_vela_web.py).
+const VELA_VARIANT = DECISION_MODEL.split('/').pop().replace('vela3.1-', ''); // e.g. pico-150m
+const VELA_URL = import.meta.env.DEV
+    ? `/models/vela3.1-onnx/${VELA_VARIANT}/`
+    : `https://huggingface.co/andreped/vela3.1-onnx/resolve/main/${VELA_VARIANT}/`;
+let velaPromise = null;
+
+function getVela() {
+    return velaPromise ??= import('./vela.js').then(m => m.loadVela({ baseUrl: VELA_URL }))
+        .then(v => { console.log(`[OSAssistant] Vela planner ready (${v.device})`); return v; })
+        .catch(err => { velaPromise = null; throw err; });
+}
+
+async function routeWithVela(text) {
+    const { decide } = await getVela();
+    return routeWithDecisions(text, { decide, activeApp: ActiveContext.getActiveApp() });
+}
+
+async function planWithVela(text) {
+    const { decide } = await getVela();
+    return planWithDecisions(text, { decide, apps: appRegistry.launchable(), activeApp: ActiveContext.getActiveApp() });
+}
 
 // Phones/tablets OOM-reload the tab when the chat LLM loads (even the CPU model),
 // so we never load it there. Transcription (whisper) is unaffected and still runs.
@@ -624,6 +650,9 @@ window.OSAssistant = {
     /** True when the loaded model runs on the CPU (wllama) backend. */
     get isCpuBackend() { return engineState === 'ready' && isCpuModel(); },
 
+    /** The model that made the last plan: the decision model, or the chat model (also on fallback). */
+    get plannerModelId() { return this.lastPlanBy === 'decision' ? DECISION_MODEL : this.currentModelId; },
+
     /**
      * BM25 paper search — used by SearchOverlay to include publications in
      * the desktop search results.
@@ -795,6 +824,11 @@ window.OSAssistant = {
 
     async parseCommand(text, history = []) {
         if (engineState !== 'ready') return null;
+        if (getPlanner() === 'vela') {
+            try { const plan = await planWithVela(text); this.lastPlanBy = 'decision'; return plan; }
+            catch (err) { console.warn('[OSAssistant] Vela planner failed, using the chat model:', err); }
+        }
+        this.lastPlanBy = 'ai';
         const histCtx = history.slice(-6)
             .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
             .join('\n');
@@ -858,6 +892,10 @@ Request: "${text.replace(/"/g, "'")}"`;
 
     async routeIntent(text, history = []) {
         if (engineState !== 'ready') return null;
+        if (getPlanner() === 'vela') {
+            try { return await routeWithVela(text); }
+            catch (err) { console.warn('[OSAssistant] Vela router failed, using the chat model:', err); }
+        }
         const histCtx = history.slice(-4)
             .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
             .join('\n');

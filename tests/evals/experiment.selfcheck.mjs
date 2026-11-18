@@ -3,7 +3,7 @@
  * Pure logic only — no browser, no model. Runnable: node tests/evals/experiment.selfcheck.mjs
  */
 import assert from 'node:assert/strict';
-import { snapshotConfig, latencyStats, makeTimer, headlineMetrics } from '../../src/js/apps/evals/experiment.js';
+import { snapshotConfig, latencyStats, makeTimer, headlineMetrics, suiteModel } from '../../src/js/apps/evals/experiment.js';
 
 // snapshotConfig — stable key + params round-trip
 {
@@ -13,6 +13,20 @@ import { snapshotConfig, latencyStats, makeTimer, headlineMetrics } from '../../
     assert.equal(configKey, 'Qwen3.5-2B-q4f16_1-MLC·webgpu·r:none·en');
     assert.equal(config.backend, 'webgpu');
     assert.equal(config.repeats, 3);
+}
+
+// snapshotConfig + suiteModel — a separate planner is keyed and attributed per suite
+{
+    const { config, configKey } = snapshotConfig({
+        model: 'Qwen3.5-2B-q4f16_1-MLC', planner: 'vela3.1-pico-150m', backend: 'webgpu', reasoning: 'none', language: 'en', repeats: 3,
+    });
+    assert.equal(configKey, 'Qwen3.5-2B-q4f16_1-MLC·planner:vela3.1-pico-150m·webgpu·r:none·en');
+    assert.equal(suiteModel('routing', { config }), 'vela3.1-pico-150m');
+    assert.equal(suiteModel('plan', { config }), 'vela3.1-pico-150m');
+    assert.equal(suiteModel('answers', { config }), 'Qwen3.5-2B-q4f16_1-MLC');
+    assert.equal(suiteModel('retrieval', { config }), 'BM25 keyword search');
+    assert.equal(snapshotConfig({ model: 'x', planner: 'x', backend: 'b', reasoning: 'none', language: 'en' }).config.planner, undefined, 'same model → no planner');
+    assert.equal(suiteModel('commands', { config, suites: { commands: { model: 'override' } } }), 'override', 'per-suite model wins');
 }
 
 // latencyStats — percentiles, mean, extrema; empty → null

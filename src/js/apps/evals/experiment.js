@@ -20,12 +20,26 @@ export const HEADLINE_METRIC = {
 
 /**
  * Snapshot the run's configuration (the "params" of the experiment) and derive a
- * stable key so runs with the same config group together across time.
+ * stable key so runs with the same config group together across time. `model` is
+ * the chat model (answers); `planner` the model that routes/plans, when different.
  */
-export function snapshotConfig({ model, backend, reasoning, language, repeats }) {
-    const config = { model, backend, reasoning, language, repeats };
-    const configKey = `${model}·${backend}·r:${reasoning}·${language}`;
+export function snapshotConfig({ model, planner, backend, reasoning, language, repeats }) {
+    const config = { model, planner: planner && planner !== model ? planner : undefined, backend, reasoning, language, repeats };
+    const configKey = `${model ?? 'no-chat'}${config.planner ? `·planner:${config.planner}` : ''}·${backend}·r:${reasoning}·${language}`;
     return { config, configKey };
+}
+
+/**
+ * Which model produced each suite's predictions. Routing/commands/plan come from
+ * the planner (a decision model or the chat model); answers from the chat model;
+ * the deterministic suites use no model at all. Older scorecards fall back to config.
+ */
+export function suiteModel(key, scorecard) {
+    const s = scorecard?.suites?.[key];
+    if (s?.model) return s.model;
+    const { model, planner } = scorecard?.config ?? {};
+    return { retrieval: 'BM25 keyword search', resolution: 'rules (app registry)', integrity: 'static check',
+        routing: planner ?? model, commands: planner ?? model, plan: planner ?? model, answers: model }[key] ?? null;
 }
 
 /** p50/p95/mean/min/max over an array of millisecond samples (null if empty). */

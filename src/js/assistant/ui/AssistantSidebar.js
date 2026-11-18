@@ -118,9 +118,10 @@ export class AssistantSidebar {
      * Append a finished message bubble.
      * @param {'user'|'assistant'|'system'} role
      * @param {string} text
+     * @param {{ label: string, title: string }} [source] who handled it (quick action vs the AI)
      * @returns {HTMLElement} the bubble element
      */
-    appendMessage(role, text = '') {
+    appendMessage(role, text = '', source = null) {
         this._messages?.querySelector('.asst-welcome')?.remove();
         const bubble = document.createElement('div');
         bubble.className = `asst-bubble asst-bubble-${role}`;
@@ -134,10 +135,20 @@ export class AssistantSidebar {
             this._messages?.appendChild(row);
         } else {
             bubble._answerText = text; // clean text for retry/history
+            bubble._source = source;
+            if (source) bubble.appendChild(this._sourceTag(source));
             this._messages?.appendChild(bubble);
         }
         this._scroll();
         return bubble;
+    }
+
+    _sourceTag({ label, title }) {
+        const tag = document.createElement('div');
+        tag.className = 'asst-meta';
+        tag.textContent = label;
+        tag.title = title;
+        return tag;
     }
 
     /**
@@ -226,6 +237,7 @@ export class AssistantSidebar {
             answer.textContent = ''; // hide the bare cursor while the status shows
             this._scroll();
         };
+        update.setSource = (source) => { bubble._source = source; };
         return update;
     }
 
@@ -252,9 +264,10 @@ export class AssistantSidebar {
             }
             if (target) {
                 const ms = performance.now() - this._genStart;
-                const tag = document.createElement('div');
-                tag.className = 'asst-meta';
-                tag.textContent = ms < 1000 ? `${Math.round(ms)} ms` : `${(ms / 1000).toFixed(1)} s`;
+                const time = ms < 1000 ? `${Math.round(ms)} ms` : `${(ms / 1000).toFixed(1)} s`;
+                const src = target._source;
+                target.querySelector(':scope > .asst-meta')?.remove(); // one tag: source · time
+                const tag = this._sourceTag({ label: src ? `${src.label} · ${time}` : time, title: src?.title ?? '' });
                 target.appendChild(tag);
                 this._scroll();
             }
@@ -268,10 +281,11 @@ export class AssistantSidebar {
      * Each step starts pending (○); the returned controller flips steps to a
      * spinner while running, then ✓ (done), ✗ (failed) or ⊘ (skipped).
      * @param {string[]} steps human-readable step descriptions
+     * @param {{ label: string, title: string }} [source] who planned it (quick action vs the AI)
      * @returns {{ setActive:(i:number)=>void, setDone:(i:number)=>void,
      *            setFailed:(i:number)=>void, setSkipped:(i:number)=>void }}
      */
-    startPlan(steps = []) {
+    startPlan(steps = [], source = null) {
         this._messages?.querySelector('.asst-welcome')?.remove();
 
         const block = document.createElement('div');
@@ -280,6 +294,13 @@ export class AssistantSidebar {
         const header = document.createElement('div');
         header.className = 'asst-plan-header';
         header.innerHTML = '<span class="asst-plan-title">📋 Plan</span>';
+        if (source) {
+            const tag = document.createElement('span');
+            tag.className = 'asst-plan-source';
+            tag.textContent = source.label;
+            tag.title = source.title;
+            header.appendChild(tag);
+        }
         block.appendChild(header);
 
         const list = document.createElement('ol');

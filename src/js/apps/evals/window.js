@@ -2,8 +2,8 @@
  * Evals app window logic.
  *
  * Two modes feed the same scorecard UI:
- *   • Committed  — imports tests/evals/results/latest.json (what CI last wrote)
- *                  and history.json for the trend sparklines.
+ *   • Committed  — opens on the newest committed run (experiments.json / latest.json)
+ *                  scored with the visitor's current settings; history.json feeds the trend sparklines.
  *   • Live       — re-runs every suite in the browser. The deterministic suites
  *                  (retrieval / resolution / integrity) run instantly; the
  *                  LLM suites (routing / commands) call the real Ask André
@@ -33,8 +33,8 @@ import { scorePlanCase, summarisePlan } from '../../../../tests/evals/harness/sc
 import { scoreAnswerRow, summariseAnswers } from '../../../../tests/evals/harness/scoreAnswers.js';
 import { routeLabel } from '../../../../tests/evals/harness/normalize.js';
 import { mean, stdev, majority, mode, passAtK, repeat } from '../../../../tests/evals/harness/stats.js';
-import { getModelId, getReasoningEffort, getLLMLanguage, isCpuModel } from '../../platform/services/Settings.js';
-import { snapshotConfig, makeTimer } from './experiment.js';
+import { getModelId, getReasoningEffort, getLLMLanguage, isCpuModel, getPlannerModelId } from '../../platform/services/Settings.js';
+import { snapshotConfig, makeTimer, headlineMetrics, suiteModel } from './experiment.js';
 
 // How many times each LLM sample is re-run to measure nondeterminism. Real
 // model calls vary run-to-run, so a single sample is misleading — we repeat and
@@ -47,10 +47,10 @@ const SUITE_META = {
     retrieval:  { label: 'Retrieval',  metric: 'hit3',         fmt: 'pct', min: 0.8,  desc: 'BM25 paper ranking',        subs: [['hit@1', 'hit1', 'pct'], ['MRR', 'mrr', 'num'], ['recall', 'recall', 'pct']] },
     resolution: { label: 'Resolution', metric: 'accuracy',     fmt: 'pct', min: 0.95, desc: 'App name → id',              subs: [] },
     integrity:  { label: 'Integrity',  metric: 'pass',         fmt: 'bool', min: 1,   desc: 'Registry structure',        subs: [['profiles', 'total', 'int']] },
-    routing:    { label: 'Routing',    metric: 'accuracy',     fmt: 'pct', min: 0.8,  desc: 'Command vs ask (LLM)',       subs: [['precision', 'precision', 'pct'], ['recall', 'recall', 'pct'], ['stability', 'stability', 'pct'], ['pass@k', 'passAtK', 'pct']] },
-    commands:   { label: 'Commands',   metric: 'exactMatch',   fmt: 'pct', min: 0.6,  desc: 'Right actions · single-shot (LLM)', subs: [['action F1', 'actionF1', 'num'], ['target acc', 'targetAccuracy', 'pct'], ['stability', 'stability', 'pct'], ['pass@k', 'passAtK', 'pct']] },
-    plan:       { label: 'Plan',       metric: 'planExactMatch', fmt: 'pct', min: 0.5, desc: 'Right plan · multi-shot (LLM)', subs: [['turn exact', 'turnExactMatch', 'pct'], ['turn F1', 'turnF1', 'num'], ['stability', 'stability', 'pct'], ['pass@k', 'passAtK', 'pct']] },
-    answers:    { label: 'Answers',    metric: 'ragas',        fmt: 'pct', min: 0.4,  desc: 'RAGAS-style answer quality (LLM)', subs: [['faithful', 'faithfulness', 'pct'], ['correct', 'correctness', 'pct'], ['relevant', 'relevancy', 'pct'], ['halluc.', 'hallucinationRate', 'pct'], ['stability', 'stability', 'pct']] },
+    routing:    { label: 'Routing',    metric: 'accuracy',     fmt: 'pct', min: 0.8,  desc: 'Command vs ask',             subs: [['precision', 'precision', 'pct'], ['recall', 'recall', 'pct'], ['stability', 'stability', 'pct'], ['pass@k', 'passAtK', 'pct']] },
+    commands:   { label: 'Commands',   metric: 'exactMatch',   fmt: 'pct', min: 0.6,  desc: 'Right actions · single-shot', subs: [['action F1', 'actionF1', 'num'], ['target acc', 'targetAccuracy', 'pct'], ['stability', 'stability', 'pct'], ['pass@k', 'passAtK', 'pct']] },
+    plan:       { label: 'Plan',       metric: 'planExactMatch', fmt: 'pct', min: 0.5, desc: 'Right plan · multi-shot', subs: [['turn exact', 'turnExactMatch', 'pct'], ['turn F1', 'turnF1', 'num'], ['stability', 'stability', 'pct'], ['pass@k', 'passAtK', 'pct']] },
+    answers:    { label: 'Answers',    metric: 'ragas',        fmt: 'pct', min: 0.4,  desc: 'RAGAS-style answer quality', subs: [['faithful', 'faithfulness', 'pct'], ['correct', 'correctness', 'pct'], ['relevant', 'relevancy', 'pct'], ['halluc.', 'hallucinationRate', 'pct'], ['stability', 'stability', 'pct']] },
 };
 const SUITE_ORDER = ['routing', 'commands', 'plan', 'answers', 'retrieval', 'resolution', 'integrity'];
 
@@ -96,9 +96,30 @@ function reconstructSuite(key, suite) {
 }
 
 // A visitor's own runs are kept privately in localStorage (never committed to the
-// repo). Only the trend history is stored — the default view on open is always the
-// committed latest.json, so everyone sees the published, canonical results first.
+// repo). Only the trend history is stored — the default view on open is always a
+// committed run, so everyone sees the published, canonical results first.
 const LS_HISTORY = 'andreos:evals:history';
+
+// Committed scorecards: every run in experiments.json plus latest.json (deduped).
+// Dev fetches the raw files: the watcher ignores results/, so an import() would stay stale.
+async function loadCommittedRuns() {
+    const fresh = (file) => fetch(`/tests/evals/results/${file}`, { cache: 'no-store' }).then((r) => r.json());
+    const [exp, latest] = await Promise.all([
+        (import.meta.env.DEV ? fresh('experiments.json') : import('../../../../tests/evals/results/experiments.json').then((m) => m.default)).catch(() => []),
+        (import.meta.env.DEV ? fresh('latest.json') : import('../../../../tests/evals/results/latest.json').then((m) => m.default)).catch(() => null),
+    ]);
+    const seen = new Set();
+    const runs = [...(exp ?? []), latest].filter((sc) => sc?.suites && !seen.has(sc.generatedAt) && seen.add(sc.generatedAt));
+    return { runs, latest };
+}
+
+/** The newest committed run scored with the current settings (chat model + planner), or null. */
+function runForSettings(runs) {
+    const chat = getModelId(), planner = getPlannerModelId();
+    return runs
+        .filter((sc) => sc.config?.model === chat && (sc.config.planner ?? sc.config.model) === planner)
+        .sort((a, b) => new Date(b.generatedAt) - new Date(a.generatedAt))[0] ?? null;
+}
 
 // Cloud experiment store (Cloudflare D1 via /api/evals). Reads are public — no
 // token — so anyone can browse the published experiments. Publishing is done
@@ -196,18 +217,19 @@ export function setupEvalsWindow(winEl) {
     }
 
     // ── Load results ─────────────────────────────────────────────────────────
-    // Default view = the committed latest.json (the published, canonical results).
+    // Default view = the newest committed run for the visitor's current settings
+    // (for most visitors: the defaults on main), else the committed latest.json.
     // A visitor's own runs live only in localStorage and feed the trend sparklines;
     // they never override the default on open and are never persisted to the repo.
     (async () => {
         let committedHistory = [];
         try {
-            const [{ default: latest }, hist] = await Promise.all([
-                import('../../../../tests/evals/results/latest.json'),
+            const [{ runs, latest }, hist] = await Promise.all([
+                loadCommittedRuns(),
                 import('../../../../tests/evals/results/history.json').catch(() => ({ default: [] })),
             ]);
             committedHistory = hist.default ?? [];
-            current = latest;
+            current = runForSettings(runs) ?? latest;
         } catch { /* no committed scorecard yet */ }
 
         // Merge the visitor's private local runs into the trend history only.
@@ -501,30 +523,32 @@ export function setupEvalsWindow(winEl) {
     }
     publishBtn.addEventListener('click', (e) => { e.stopPropagation(); publishDev(); });
 
-    // ── Experiments (cloud store) ─────────────────────────────────────────────
+    // ── Experiments (committed local runs + cloud store) ──────────────────────────────
     let expLoading = false;
+    let localRuns = [];
     async function loadExperiments() {
         if (expLoading) return;
         expLoading = true;
         expStatusEl.textContent = 'Loading experiments…';
+        localRuns = (await loadCommittedRuns()).runs.filter((sc) => sc.config);
+        const local = localRuns.map((sc, i) => ({
+            id: `local:${i}`, config_key: sc.configKey, ...sc.config,
+            metrics: headlineMetrics(sc), runtime_ms: sc.runtimeMs, created_at: sc.generatedAt,
+        }));
+        let cloud = [];
+        let note = '';
         try {
             const res = await fetch(`${evalsEndpoint()}?limit=300`, { headers: { accept: 'application/json' } });
             const data = await res.json().catch(() => ({}));
-            if (!data.ok) {
-                expStatusEl.textContent = data.reason === 'unbound'
-                    ? 'No experiment store configured (bind D1 as EVALS_DB to enable).'
-                    : `Could not load experiments (${data.reason ?? res.status}).`;
-                expListEl.innerHTML = '';
-                return;
-            }
-            renderExperiments(data.runs ?? []);
-            expStatusEl.textContent = `${data.runs?.length ?? 0} runs · grouped by config`;
+            if (data.ok) cloud = data.runs ?? [];
+            else note = data.reason === 'unbound' ? 'no cloud store bound' : `cloud: ${data.reason ?? res.status}`;
         } catch {
-            expStatusEl.textContent = 'Experiment store unreachable (dev build has no /api — deploy or set an endpoint override).';
-            expListEl.innerHTML = '';
+            note = 'cloud store unreachable';
         } finally {
             expLoading = false;
         }
+        renderExperiments([...local, ...cloud]);
+        expStatusEl.textContent = `${local.length} committed · ${cloud.length} cloud runs · grouped by config${note ? ` · ${note}` : ''}`;
     }
 
     // Group runs by config; show the latest run's headline metrics + timings per
@@ -547,8 +571,12 @@ export function setupEvalsWindow(winEl) {
                 const m = l.metrics ?? {};
                 const metricCells = cols.map((k) => `<td>${m[k] != null ? pct(m[k]) : '—'}</td>`).join('');
                 const runtime = median(g.runtimes);
+                // Chat model in bold; a separate router/planner (e.g. a decision model) as its own line.
+                const main = l.model ?? l.planner ?? '?';
+                const planner = l.model && l.planner ? `<br><span class="eval-model">planner: ${escapeHtml(l.planner)}</span>`
+                    : !l.model ? '<br><span class="eval-model">planner only · no chat model</span>' : '';
                 return `<tr data-run-id="${l.id}" title="Load this run's scorecard">
-                    <td><b>${escapeHtml(l.model ?? '?')}</b><br><span class="eval-ds-tag">${escapeHtml(l.backend ?? '?')}</span>`
+                    <td><b>${escapeHtml(main)}</b>${planner}<br><span class="eval-ds-tag">${escapeHtml(l.backend ?? '?')}</span>`
                     + `<span class="eval-ds-tag">reason:${escapeHtml(l.reasoning ?? '?')}</span>`
                     + `<span class="eval-ds-tag">${escapeHtml(l.language ?? '?')}</span></td>`
                     + `<td>${g.count}</td>${metricCells}`
@@ -572,8 +600,10 @@ export function setupEvalsWindow(winEl) {
         if (!tr) return;
         e.stopPropagation();
         try {
-            const res = await fetch(`${evalsEndpoint()}?id=${tr.dataset.runId}`);
-            const scorecard = await res.json();
+            const { runId } = tr.dataset;
+            const scorecard = runId.startsWith('local:')
+                ? localRuns[Number(runId.slice(6))]
+                : await (await fetch(`${evalsEndpoint()}?id=${runId}`)).json();
             if (scorecard?.suites) { current = scorecard; paint(); showLastRun(scorecard); activateTab('scorecard'); }
         } catch { /* ignore */ }
     });
@@ -584,6 +614,7 @@ export function setupEvalsWindow(winEl) {
         const when = new Date(current.generatedAt).toLocaleString();
         sourceEl.textContent = `· ${current.source} · ${when}`;
         if (!running) statusEl.textContent = summaryLine(current);
+        paintSetup();
 
         grid.innerHTML = SUITE_ORDER
             .filter((k) => current.suites[k])
@@ -602,6 +633,23 @@ export function setupEvalsWindow(winEl) {
 
     function paintJson() {
         jsonEl.textContent = current ? JSON.stringify(current, null, 2) : '{}';
+    }
+
+    // Which setup this scorecard was scored with, vs what Settings would use now.
+    function paintSetup() {
+        const el = winEl.querySelector('#evals-setup');
+        if (!el) return;
+        const { model, planner } = current.config ?? {};
+        const ran = { chat: model ?? null, planner: planner ?? model ?? null };
+        const now = { chat: getModelId(), planner: getPlannerModelId() };
+        const describe = ({ chat, planner: p }) => !chat && !p ? 'no models (deterministic suites only)'
+            : p && p !== chat ? `${chat ? shortModel(chat) : 'no chat model'} · planner ${shortModel(p)}`
+            : `${shortModel(chat)} (chat + planner)`;
+        const same = ran.chat === now.chat && ran.planner === now.planner;
+        el.classList.toggle('mismatch', !same);
+        el.textContent = same
+            ? `Scored with your current setup: ${describe(now)}.`
+            : `Scored with ${describe(ran)} — not your current setup (${describe(now)}). Run live evals to score it.`;
     }
 
     function paintDataset() {
@@ -641,6 +689,7 @@ export function setupEvalsWindow(winEl) {
         <div class="eval-card">
             <h3>${meta.label}</h3>
             <div class="eval-desc">${meta.desc} · n=${suite.total ?? '?'}</div>
+            <div class="eval-model" title="Model that produced these predictions">${escapeHtml(suiteModel(key, current) ?? '?')}</div>
             <div class="eval-metric">
                 <span class="val" style="color:${pass ? 'var(--text-strong)' : '#f87171'}">${fmtVal(value, meta.fmt)}</span>
                 <span class="lbl">${meta.metric}</span>
@@ -715,11 +764,13 @@ async function runLive(reporter, shouldAbort = () => false) {
     const modelId = chat?.currentModelId ?? getModelId();
     const { config, configKey } = snapshotConfig({
         model: modelId,
+        planner: chat?.plannerModelId ?? modelId,
         backend: isCpuModel(modelId) ? 'wllama-cpu' : 'webgpu',
         reasoning: getReasoningEffort(),
         language: getLLMLanguage(),
         repeats: REPEATS,
     });
+    for (const [k, s] of Object.entries(suites)) if (!s.skipped) s.model = suiteModel(k, { config });
     return { generatedAt: new Date().toISOString(), source: 'browser', config, configKey, runtimeMs, suites };
 }
 
@@ -940,6 +991,7 @@ function scoreIntegrity(registry) {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+const shortModel = (id) => String(id ?? '?').split('/').pop().replace(/-q4f16_1-MLC$/, '');
 function historyEntry(scorecard) {
     return {
         generatedAt: scorecard.generatedAt,

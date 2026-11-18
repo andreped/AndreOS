@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig, defaultClientConditions } from 'vite';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -9,7 +9,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
  * Dev-only endpoint that lets the in-browser Evals app persist a run straight to
  * the repo file on disk (a browser can't write files itself). POST
  * `/__evals/save` with `{ scorecard, entry }` → writes tests/evals/results/
- * latest.json and appends to history.json, matching runNode.js's format.
+ * latest.json, appends to history.json (matching runNode.js's format) and adds the
+ * full scorecard to experiments.json, so each config keeps its committed run.
  * Only active under `vite dev` (apply: 'serve'); never part of a production build.
  */
 function evalsSavePlugin() {
@@ -34,6 +35,11 @@ function evalsSavePlugin() {
                         try { history = JSON.parse(fs.readFileSync(historyPath, 'utf8')); } catch { history = []; }
                         if (entry) history.push(entry);
                         fs.writeFileSync(historyPath, JSON.stringify(history.slice(-100), null, 2) + '\n');
+
+                        const expPath = path.join(RESULTS_DIR, 'experiments.json');
+                        let runs = [];
+                        try { runs = JSON.parse(fs.readFileSync(expPath, 'utf8')); } catch { runs = []; }
+                        if (scorecard.config) fs.writeFileSync(expPath, JSON.stringify([...runs, scorecard].slice(-50), null, 2) + '\n');
 
                         res.statusCode = 200;
                         res.setHeader('content-type', 'application/json');
@@ -182,6 +188,11 @@ export default defineConfig({
     // paths; pre-bundling rewrites those URLs and breaks the lookup.
     optimizeDeps: {
         exclude: ['@xenova/transformers', 'onnxruntime-web'],
+    },
+    // onnxruntime-web's bundled build emits a 29 MB .wasm, over Cloudflare Pages'
+    // 25 MiB file limit; this build loads it from ort.env.wasm.wasmPaths (vela.js).
+    resolve: {
+        conditions: ['onnxruntime-web-use-extern-wasm', ...defaultClientConditions],
     },
     root: '.',
     server: {

@@ -1,4 +1,4 @@
-import { getModelId, getSettings, saveSettings, getWhisperModel, getTranscribeLang, getLLMLanguage, getReasoningEffort, getTheme, getBackground, isOnboardingEnabled } from '../../platform/services/Settings.js';
+import { getModelId, getSettings, saveSettings, getWhisperModel, getTranscribeLang, getLLMLanguage, getReasoningEffort, getPlanner, getTheme, getBackground, isOnboardingEnabled } from '../../platform/services/Settings.js';
 import { setTheme, setBackground } from '../../platform/services/ThemeManager.js';
 
 export function setupSettingsWindow(winEl) {
@@ -65,6 +65,12 @@ export function setupSettingsWindow(winEl) {
         refresh();
         pills.forEach(p => p.addEventListener('click', () => { saveSettings({ reasoningEffort: p.dataset.effort }); refresh(); }));
     }
+
+    // Planner pills — read per request, so no AI restart needed.
+    const plannerPills = [...winEl.querySelectorAll('#planner-pills .lang-pill')];
+    const refreshPlanner = () => plannerPills.forEach(p => p.classList.toggle('active', p.dataset.planner === getPlanner()));
+    refreshPlanner();
+    plannerPills.forEach(p => p.addEventListener('click', () => { saveSettings({ planner: p.dataset.planner }); refreshPlanner(); }));
 
     // Voice section
     const voiceApplyBtn = winEl.querySelector('#voice-apply-btn');

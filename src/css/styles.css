@@ -5840,6 +5840,13 @@ body {
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.45);
 }
+.asst-plan-source {
+    margin-left: auto;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    cursor: help;
+}
 .asst-plan-list {
     list-style: none;
     margin: 0;
