@@ -179,6 +179,12 @@ export function getTranscribeLang() { return getSettings().transcribeLang || 'en
 export function getLLMLanguage()    { return getSettings().llmLang        || 'en'; }        // default English
 export function isVoiceAIEnabled()  { return getSettings().voiceAI !== false; }
 export function getReasoningEffort(){ return getSettings().reasoningEffort || 'none'; }     // none | low | medium | high
+export function getPlanner()        { return getSettings().planner        || 'llm'; }      // llm | vela (in-browser decision model)
+
+/** The decision model behind the 'vela' planner (hosted ONNX export: huggingface.co/andreped/vela3.1-onnx). */
+export const DECISION_MODEL = 'vllm-sr/vela3.1-pico-150m';
+/** The model that routes and plans with the current settings. */
+export function getPlannerModelId() { return getPlanner() === 'vela' ? DECISION_MODEL : getModelId(); }
 export function getTheme()          { return getSettings().theme          || 'light'; }     // default Light
 export function getBackground()     { return getSettings().background     || 'light'; }     // match | light | dark — default Bright
 export function isOnboardingEnabled() { return getSettings().onboardingEnabled === true; }  // opt-in; off by default

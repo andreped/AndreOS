@@ -5,10 +5,37 @@ import * as webllm from "@mlc-ai/web-llm";
 import { buildProfileContext } from "./andre-profile.js";
 import { RAGEngine }   from "../retrieval/RAGEngine.js";
 import { ActiveContext } from "../retrieval/ActiveContext.js";
-import { getModelId, MODELS, getLLMLanguage, CUSTOM_MODELS, getReasoningEffort, REASONING_LEVELS, isCpuModel, getCpuModel, isMobile } from "../../platform/services/Settings.js";
+import { getModelId, MODELS, getLLMLanguage, CUSTOM_MODELS, getReasoningEffort, REASONING_LEVELS, isCpuModel, getCpuModel, isMobile, getPlanner, DECISION_MODEL } from "../../platform/services/Settings.js";
 import { appRegistry } from "../../apps/index.js";
+import { planWithDecisions, routeWithDecisions } from "./decisionPlanner.js";
+import { routerPrompt, parseRoute, ROUTER_GEN, plannerPrompt, parsePlan, PLANNER_GEN } from "./llmPlanner.js";
 
 const MODEL_ID = getModelId(); // resolved from Settings at load time — re-read on retry()
+
+// ── Decision-model planner (Settings → Command planner) ───────────────────────────
+// Vela pico routes and picks the actions in this tab (onnxruntime-web); the chat
+// LLM only writes answers. Dev serves the local export (scripts/export_vela_web.py).
+const VELA_VARIANT = DECISION_MODEL.split('/').pop().replace('vela3.1-', ''); // e.g. pico-150m
+const VELA_URL = import.meta.env.DEV
+    ? `/models/vela3.1-onnx/${VELA_VARIANT}/`
+    : `https://huggingface.co/andreped/vela3.1-onnx/resolve/main/${VELA_VARIANT}/`;
+let velaPromise = null;
+
+function getVela() {
+    return velaPromise ??= import('./vela.js').then(m => m.loadVela({ baseUrl: VELA_URL }))
+        .then(v => { console.log(`[OSAssistant] Vela planner ready (${v.device})`); return v; })
+        .catch(err => { velaPromise = null; throw err; });
+}
+
+async function routeWithVela(text) {
+    const { decide } = await getVela();
+    return routeWithDecisions(text, { decide, activeApp: ActiveContext.getActiveApp() });
+}
+
+async function planWithVela(text) {
+    const { decide } = await getVela();
+    return planWithDecisions(text, { decide, apps: appRegistry.launchable(), activeApp: ActiveContext.getActiveApp() });
+}
 
 // Phones/tablets OOM-reload the tab when the chat LLM loads (even the CPU model),
 // so we never load it there. Transcription (whisper) is unaffected and still runs.
@@ -624,6 +651,9 @@ window.OSAssistant = {
     /** True when the loaded model runs on the CPU (wllama) backend. */
     get isCpuBackend() { return engineState === 'ready' && isCpuModel(); },
 
+    /** The model that made the last plan: the decision model, or the chat model (also on fallback). */
+    get plannerModelId() { return this.lastPlanBy === 'decision' ? DECISION_MODEL : this.currentModelId; },
+
     /**
      * BM25 paper search — used by SearchOverlay to include publications in
      * the desktop search results.
@@ -795,61 +825,14 @@ window.OSAssistant = {
 
     async parseCommand(text, history = []) {
         if (engineState !== 'ready') return null;
-        const histCtx = history.slice(-6)
-            .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
-            .join('\n');
-        const appIds = appRegistry.launchable().map(m => m.id).join(', ');
-        const prompt =
-`You are AndreOS's command planner. Turn the request into a JSON array of actions that, run in order, fulfil it.
-Apps (use with "open"): ${appIds}
-Actions:
-  {"a":"open","t":"<app>"}         open one of the apps listed above
-  {"a":"open_paper","n":<number>}  open a specific numbered paper in the Research app
-  {"a":"close"} | {"a":"minimize"} | {"a":"desktop"}   window management
-  {"a":"browse","t":"<url-or-web-query>"}   open the web browser (external sites, or "search the web for …")
-  {"a":"search","t":"<query>"}     type into the AndreOS desktop/taskbar search bar
-  {"a":"chat","t":"<message>"}     answer a question or do a task about André (needs no OS action)
-Rules:
-- The apps listed above are ALWAYS {"a":"open","t":"<app>"} — for "open/show/pull up/see/switch to/what about <app>". Never {"a":"browse"} an app, and never {"a":"open","t":"chat"}.
-- "desktop"/"show the desktop"/"back to the desktop" → {"a":"desktop"}. "close"/"minimize" are OS actions too. These are NOT apps — never {"a":"open","t":"desktop"}.
-- Follow-ups that switch apps ("what about his skills?", "actually his projects", "switch to resume") → {"a":"open"} for that app.
-- External websites are ALWAYS {"a":"browse"} (never {"a":"open"}). If the user gives an explicit URL or domain (e.g. "github.com", "example.org/x"), browse it VERBATIM — never rewrite it. Only a bare service name maps to André's profile: github → github.com/andreped, linkedin → linkedin.com/in/andré-pedersen, scholar → his Google Scholar. Also "search/look/google … on the web" → {"a":"browse"} with the query. Only use {"a":"search"} to search AndreOS itself.
-- "his research", "his publications", "his papers" mean the Research app → {"a":"open","t":"research"}. Never web-browse for these; only github/linkedin/scholar/personal sites are {"a":"browse"}.
-- A bare question, follow-up, or task about André ("summarise it", "what is it about?", "tell me about his experience", "what's his background") → a single {"a":"chat","t":"…"}. Rewrite pronouns from the conversation so the message stands alone. Do NOT return an empty array for these.
-- COMPOUND requests that pair an action with a question/task (joined by "and", "then", "&", a comma, etc. — e.g. "open the 2nd paper AND summarise it", "open research and tell me about it") MUST output BOTH: the OS action(s) FOLLOWED by a trailing {"a":"chat"}. Never stop after the open — dropping the final chat is the most common mistake. Phrases like "summarise/summary of it", "give me a summary", "explain it", "what is it about", "the gist of it" are the chat step.
-- Add a trailing {"a":"chat"} ONLY when the request itself asks a question or task. A plain "open X" has no chat.
-- Plan the LATEST request only. Any earlier conversation is context for resolving references ("it", "that paper", "the 3rd one") — never skip an action or return an empty array just because something was already opened earlier.
-Examples:
-"open research" → [{"a":"open","t":"research"}]
-"show me the projects" → [{"a":"open","t":"projects"}]
-"what about his skills?" → [{"a":"open","t":"skills"}]
-"show desktop" → [{"a":"desktop"}]
-"ok show the desktop" → [{"a":"desktop"}]
-"open the 3rd paper" → [{"a":"open_paper","n":3}]
-"summarise it for me" → [{"a":"chat","t":"summarise this paper"}]
-"open the ninth paper and give me a summary of the paper" → [{"a":"open_paper","n":9},{"a":"chat","t":"summarise this paper"}]
-"open the second paper and summarise it" → [{"a":"open_paper","n":2},{"a":"chat","t":"summarise this paper"}]
-"what is it about?" → [{"a":"chat","t":"what is this about"}]
-"pop open his github page" → [{"a":"browse","t":"github.com/andreped"}]
-"go to github.com" → [{"a":"browse","t":"github.com"}]
-"show me his publications" → [{"a":"open","t":"research"}]
-"search the web for digital pathology" → [{"a":"browse","t":"digital pathology"}]
-"open resume and tell me about his experience" → [{"a":"open","t":"resume"},{"a":"chat","t":"tell me about his experience"}]
-"open research, open 40th paper, and summarize important topics" → [{"a":"open","t":"research"},{"a":"open_paper","n":40},{"a":"chat","t":"summarize important topics in this paper"}]
-Multi-turn example (earlier turns already ran — still plan the latest request):
-  [earlier: user "open research" → assistant "Opened research."]
-  "open the 3rd paper" → [{"a":"open_paper","n":3}]
-Reply with ONLY the JSON array for the latest request.${histCtx ? `\nEarlier conversation (context only — do not re-plan it):\n${histCtx}` : ''}
-Request: "${text.replace(/"/g, "'")}"`;
-
+        if (getPlanner() === 'vela') {
+            try { const plan = await planWithVela(text); this.lastPlanBy = 'decision'; return plan; }
+            catch (err) { console.warn('[OSAssistant] Vela planner failed, using the chat model:', err); }
+        }
+        this.lastPlanBy = 'ai';
+        const prompt = plannerPrompt(text, history, appRegistry.launchable().map(m => m.id));
         try {
-            // Classification doesn't benefit from reasoning and loops with it — keep it fast/deterministic.
-            const raw = await completeText([{ role: 'user', content: prompt }],
-                { maxTokens: 150, temperature: 0.1, think: false });
-            const jsonMatch = raw.match(/\[[\s\S]*?\]/);
-            if (!jsonMatch) return null;
-            const actions = JSON.parse(jsonMatch[0]);
-            return Array.isArray(actions) && actions.length > 0 ? actions : null;
+            return parsePlan(await completeText([{ role: 'user', content: prompt }], PLANNER_GEN));
         } catch (err) {
             console.warn('[OSAssistant] parseCommand failed:', err);
             return null;
@@ -858,36 +841,12 @@ Request: "${text.replace(/"/g, "'")}"`;
 
     async routeIntent(text, history = []) {
         if (engineState !== 'ready') return null;
-        const histCtx = history.slice(-4)
-            .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
-            .join('\n');
-        const prompt =
-`You are AndreOS's intent router. Classify the user's latest message as "command" or "direct".
-- "command" = an OS action: open/show/close/minimize a named app or window; show desktop; browse or search the web; open a numbered paper; or act on the current app (sort, filter, find papers). Includes non-English, e.g. Norwegian ("åpne", "lukk", "vis").
-- "direct" = a question or conversation to answer about André (bio, career, research, skills, opinions). A question about what/where/how he worked is "direct" even if it opens with "show me" or "tell me" (nothing gets opened).
-${histCtx ? `Recent conversation:\n${histCtx}\n` : ''}Reply with ONLY "command" or "direct".
-Examples:
-"open research" → command
-"show me the projects app" → command
-"show desktop" → command
-"go to github.com" → command
-"take me to his github" → command
-"search the web for medical imaging" → command
-"sort by most cited" → command
-"filter to only journals" → command
-"find pathology papers" → command
-"lukk vinduet" → command
-"who is André?" → direct
-"tell me about his work" → direct
-"show me what he worked on at SINTEF" → direct
-"what programming languages does he know?" → direct
-"can you tell me about his projects" → direct
-Message: "${text.replace(/"/g, "'")}"`;
+        if (getPlanner() === 'vela') {
+            try { return await routeWithVela(text); }
+            catch (err) { console.warn('[OSAssistant] Vela router failed, using the chat model:', err); }
+        }
         try {
-            // Classification doesn't benefit from reasoning and loops with it — keep it fast/deterministic.
-            const out = (await completeText([{ role: 'user', content: prompt }],
-                { maxTokens: 8, temperature: 0, think: false })).toLowerCase();
-            return out.includes('command') ? 'command' : 'direct';
+            return parseRoute(await completeText([{ role: 'user', content: routerPrompt(text, history) }], ROUTER_GEN));
         } catch {
             return null;
         }

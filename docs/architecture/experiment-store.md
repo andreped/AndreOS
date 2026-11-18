@@ -27,10 +27,18 @@ One row per run in `eval_runs` (schema:
 
 | Column | Purpose |
 |---|---|
-| `config_key`, `model`, `backend`, `reasoning`, `language`, `repeats` | the run's config (MLflow "params"); `config_key` groups runs |
-| `metrics` | JSON of headline numbers per suite (routing accuracy, commands exact, …) |
+| `config_key`, `model`, `backend`, `reasoning`, `language`, `repeats` | the run's config (MLflow "params"); `config_key` groups runs and includes the planner when it isn't the chat model (e.g. `…·planner:vllm-sr/vela3.1-pico-150m·…`) |
+| `metrics` | JSON of headline numbers per suite (routing accuracy, commands exact, …) plus `p50`: median time per model call per suite |
 | `runtime_ms` | overall wall-clock of the run |
-| `scorecard` | the full scorecard JSON, rendered on demand when a row is opened |
+| `scorecard` | the full scorecard JSON (incl. each suite's `model` and `latency`), rendered on demand when a row is opened |
+
+Runs published before `metrics.p50` existed still show per-task times: the
+Experiments tab reads them from those runs' scorecards.
+
+The **Experiments** tab also lists **committed** runs from
+`tests/evals/results/experiments.json` (live runs saved under `vite dev`, and
+planner experiments such as decision models), so comparisons work without a
+cloud store.
 
 `config` snapshot, latency stats, and the per-suite timer are pure helpers in
 [src/js/apps/evals/experiment.js](../../src/js/apps/evals/experiment.js)

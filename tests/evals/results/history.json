@@ -356,5 +356,15 @@
       "plan": 0,
       "answers": 0.5186751612391327
     }
+  },
+  {
+    "generatedAt": "2026-11-18T15:42:30.265Z",
+    "source": "node",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "scorers": 1
+    }
   }
 ]

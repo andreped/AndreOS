@@ -15,7 +15,7 @@
  *   await vcm.toggleRecording();   // first call loads the model; subsequent calls toggle mic
  */
 import { VoiceEngine }       from './VoiceEngine.js';
-import { isVoiceAIEnabled, getWhisperModel, getTranscribeLang } from '../../platform/services/Settings.js';
+import { isVoiceAIEnabled, getWhisperModel, getTranscribeLang, getPlanner } from '../../platform/services/Settings.js';
 import { appRegistry }       from '../../apps/registry/AppRegistry.js';
 import { assistantRegistry } from '../registry/AssistantRegistry.js';
 
@@ -27,6 +27,14 @@ const MIC_ICON = `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" xm
 </svg>`;
 import { ActionDispatcher }  from '../registry/ActionDispatcher.js';
 import { resolveResearchIntent } from '../researchContext.js';
+
+// Shown on plans and replies so visitors can tell a quick action from the chat AI.
+const SOURCES = {
+    rules:    { label: '⚡ Quick action',      title: 'Recognised instantly by built-in commands — the AI wasn’t needed.' },
+    decision: { label: '⚡ Quick action',      title: 'A small, fast decision model picked these steps — the chat AI wasn’t needed.' },
+    ai:       { label: '🧠 Planned by the AI', title: 'The chat AI worked out these steps.' },
+    answer:   { label: '🧠 Answered by the AI', title: 'Written by the chat AI running in your browser.' },
+};
 
 /**
  * OS-level voice commands (window management + help).
@@ -274,7 +282,7 @@ export class VoiceCommandManager {
                 this._feedback(`🎤 Heard: "${heard}"\n↳ ${contextual.label}`, 'success');
                 this._dispatch(contextual);
                 const reply = `✓ ${contextual.label}`;
-                this._onMessage('assistant', reply);
+                this._onMessage('assistant', reply, SOURCES.rules);
                 this._addHistory('assistant', reply);
             }
             if (fromVoice) this._setState('ready');
@@ -307,7 +315,7 @@ export class VoiceCommandManager {
                 // only the first message is slow). GPU routing is cheap, so it's
                 // gated to CPU only. Eval suites call routeIntent/parseCommand
                 // directly, so their scores are unaffected.
-                const skipRouting = window.OSAssistant.isCpuBackend && !_looksLikeOSCommand(text);
+                const skipRouting = window.OSAssistant.isCpuBackend && getPlanner() !== 'vela' && !_looksLikeOSCommand(text);
                 if (!skipRouting) this._thinkingUpdate?.setStatus?.('Understanding your request…');
                 const route = skipRouting ? 'direct' : await window.OSAssistant.routeIntent(text, this._history);
                 if (this._aborted) { if (fromVoice) this._setState('ready'); return; }
@@ -326,7 +334,7 @@ export class VoiceCommandManager {
                                 .join('\n');
                             this._addHistory('assistant', `📋 Plan:\n${planText}`);
 
-                            await this._executeSequence(actions, { showPlan: true });
+                            await this._executeSequence(actions, { showPlan: true, source: SOURCES[window.OSAssistant.lastPlanBy] });
                             if (!actions.some(a => a.a === 'chat')) {
                                 const reply = `✓ Done`;
                                 this._onMessage('assistant', reply);
@@ -361,7 +369,7 @@ export class VoiceCommandManager {
                 this._feedback(`🎤 Heard: "${heard}"\n↳ ${match.label}`, 'success');
                 this._dispatch(match);
                 const reply = `✓ ${match.label}`;
-                this._onMessage('assistant', reply);
+                this._onMessage('assistant', reply, SOURCES.rules);
                 this._addHistory('assistant', reply);
             }
             if (fromVoice) this._setState('ready');
@@ -376,7 +384,7 @@ export class VoiceCommandManager {
             await this._executeSequence(compound);
             if (!compound.some(a => a.a === 'chat')) {
                 const reply = `✓ ${intent}`;
-                this._onMessage('assistant', reply);
+                this._onMessage('assistant', reply, SOURCES.rules);
                 this._addHistory('assistant', reply);
             }
             if (fromVoice) this._setState('ready');
@@ -458,6 +466,7 @@ export class VoiceCommandManager {
                 update = this._onStreamMessage('assistant');
             }
             if (update) {
+                update.setSource?.(SOURCES.answer);
                 update.setStatus?.('Generating response…');
                 await window.OSAssistant.querySidebar(text, update, update);
             } else {
@@ -610,7 +619,7 @@ export class VoiceCommandManager {
      * @param {{ showPlan?: boolean }} [opts] when showPlan is set the steps are
      *        rendered as a live checklist block that updates as each step runs.
      */
-    async _executeSequence(actions, { showPlan = false } = {}) {
+    async _executeSequence(actions, { showPlan = false, source = null } = {}) {
         // When the sidebar is open and the sequence includes a chat reply,
         // drop any redundant “open chat” step — the answer streams inline.
         const hasChat = actions.some(a => a.a === 'chat');
@@ -620,7 +629,7 @@ export class VoiceCommandManager {
 
         // Render a live plan checklist (distinct from chat bubbles) when asked.
         const plan = (showPlan && this._onPlan && steps.length)
-            ? this._onPlan(steps.map(a => this._describeSingleAction(a)))
+            ? this._onPlan(steps.map(a => this._describeSingleAction(a)), source)
             : null;
 
         for (let i = 0; i < steps.length; i++) {

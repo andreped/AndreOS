@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig, defaultClientConditions } from 'vite';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -9,7 +9,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
  * Dev-only endpoint that lets the in-browser Evals app persist a run straight to
  * the repo file on disk (a browser can't write files itself). POST
  * `/__evals/save` with `{ scorecard, entry }` → writes tests/evals/results/
- * latest.json and appends to history.json, matching runNode.js's format.
+ * latest.json, appends to history.json (matching runNode.js's format) and adds the
+ * full scorecard to experiments.json, so each config keeps its committed run.
  * Only active under `vite dev` (apply: 'serve'); never part of a production build.
  */
 function evalsSavePlugin() {
@@ -35,9 +36,38 @@ function evalsSavePlugin() {
                         if (entry) history.push(entry);
                         fs.writeFileSync(historyPath, JSON.stringify(history.slice(-100), null, 2) + '\n');
 
+                        const expPath = path.join(RESULTS_DIR, 'experiments.json');
+                        let runs = [];
+                        try { runs = JSON.parse(fs.readFileSync(expPath, 'utf8')); } catch { runs = []; }
+                        if (scorecard.config) fs.writeFileSync(expPath, JSON.stringify([...runs, scorecard].slice(-50), null, 2) + '\n');
+
                         res.statusCode = 200;
                         res.setHeader('content-type', 'application/json');
                         res.end(JSON.stringify({ ok: true }));
+                    } catch (err) {
+                        res.statusCode = 400;
+                        res.end(JSON.stringify({ ok: false, error: String(err) }));
+                    }
+                });
+            });
+
+            // Dev-only: append a single experiment scorecard (e.g. an in-browser WebGPU
+            // planner run) to experiments.json, without touching latest.json/history.
+            server.middlewares.use('/__evals/experiment', (req, res, next) => {
+                if (req.method !== 'POST') return next();
+                let body = '';
+                req.on('data', (chunk) => { body += chunk; });
+                req.on('end', () => {
+                    try {
+                        const scorecard = JSON.parse(body || '{}');
+                        if (!scorecard?.config || !scorecard?.suites) throw new Error('missing config/suites');
+                        const expPath = path.join(RESULTS_DIR, 'experiments.json');
+                        let runs = [];
+                        try { runs = JSON.parse(fs.readFileSync(expPath, 'utf8')); } catch { runs = []; }
+                        fs.writeFileSync(expPath, JSON.stringify([...runs, scorecard].slice(-50), null, 2) + '\n');
+                        res.statusCode = 200;
+                        res.setHeader('content-type', 'application/json');
+                        res.end(JSON.stringify({ ok: true, runs: Math.min(runs.length + 1, 50) }));
                     } catch (err) {
                         res.statusCode = 400;
                         res.end(JSON.stringify({ ok: false, error: String(err) }));
@@ -182,6 +212,11 @@ export default defineConfig({
     // paths; pre-bundling rewrites those URLs and breaks the lookup.
     optimizeDeps: {
         exclude: ['@xenova/transformers', 'onnxruntime-web'],
+    },
+    // onnxruntime-web's bundled build emits a 29 MB .wasm, over Cloudflare Pages'
+    // 25 MiB file limit; this build loads it from ort.env.wasm.wasmPaths (vela.js).
+    resolve: {
+        conditions: ['onnxruntime-web-use-extern-wasm', ...defaultClientConditions],
     },
     root: '.',
     server: {

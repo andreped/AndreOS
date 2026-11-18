@@ -36,6 +36,8 @@ export function render() {
                 background: var(--accent); margin-left: 6px; vertical-align: middle; animation: evalsPulse 1s infinite; }
 
             .evals-status { font-size: 11px; color: var(--text-faint); padding: 9px 18px 0; flex: 0 0 auto; }
+            .evals-setup { font-size: 11px; color: var(--text-muted); margin-top: 10px; }
+            .evals-setup.mismatch { color: #f59e0b; }
             /* Body is a non-scrolling flex column; each active panel owns a fixed
                sub-header plus a single scrollable region below it. */
             .evals-body { flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
@@ -65,6 +67,8 @@ export function render() {
             .eval-card { background: var(--surface-raised); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
             .eval-card h3 { margin: 0 0 2px; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); }
             .eval-card .eval-desc { font-size: 10.5px; color: var(--text-faint); margin-bottom: 10px; }
+            .eval-model { font-size: 10.5px; color: var(--text-muted); font-family: ui-monospace, monospace; }
+            .eval-card .eval-model { margin: -6px 0 10px; }
             .eval-metric { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
             .eval-metric .val { font-size: 26px; font-weight: 700; line-height: 1; }
             .eval-metric .lbl { font-size: 11px; color: var(--text-faint); }
@@ -181,6 +185,7 @@ export function render() {
             <div class="evals-panel active" data-panel="scorecard">
                 <div class="evals-subhead">
                     <div class="eval-ds-tabs" id="evals-sc-tabs"></div>
+                    <div class="evals-setup" id="evals-setup"></div>
                 </div>
                 <div class="evals-scroll">
                     <div id="evals-sc-metrics">

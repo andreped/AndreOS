@@ -18,6 +18,9 @@ export const ActiveContext = {
     /** Called by the window manager when a window gains focus. */
     setActiveApp(appId) { _activeAppId = appId ?? null; },
 
+    /** The focused app's id, or null. */
+    getActiveApp() { return _activeAppId; },
+
     /**
      * Clear the active app. When an id is given, only clears if it is the
      * currently active one (so closing a background window is a no-op).

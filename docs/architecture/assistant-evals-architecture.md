@@ -24,6 +24,10 @@ Two properties shape the whole design:
   results are committed back to the repo. Because real model calls are
   **nondeterministic**, every LLM sample is run several times and scored for both
   quality *and* stability (see §5b).
+- **Routing and planning can be done by a decision model instead** (Settings →
+  Command planner; see [decision-models.md](./decision-models.md)). It is
+  deterministic and also runs in Node, so those three suites can be scored from the
+  CLI for any planner, and runs are compared per model (§6b).
 
 ```mermaid
 flowchart LR
@@ -60,8 +64,8 @@ dataset plus a scorer that emits a single headline metric (and supporting ones).
 
 | Suite | Assistant code | Question it answers | Headline metric |
 |---|---|---|---|
-| **routing** | `routeIntent()` in `chat.js` | Is this an *ask* or a *command*? | accuracy |
-| **commands** | `parseCommand()` in `chat.js` | Did it produce the *right actions* (single-shot)? | exact-match |
+| **routing** | `routeIntent()` in `chat.js` (chat model or decision model) | Is this an *ask* or a *command*? | accuracy |
+| **commands** | `parseCommand()` in `chat.js` (chat model or decision model) | Did it produce the *right actions* (single-shot)? | exact-match |
 | **plan** | `parseCommand()` over a dialogue | Does it plan right *across turns* (multi-shot)? | plan exact-match |
 | **answers** | `answer()` in `chat.js` | Is the *written answer* correct, grounded & relevant? | RAGAS score |
 | **retrieval** | `RAGEngine` / `BM25` | Did it surface the *right paper*? | hit@3 |
@@ -150,9 +154,11 @@ flowchart TB
   is fully reproducible in CI.
 - **Resolution** and **integrity** import the live registries (with a tiny DOM
   shim) and inspect them directly.
-- **Routing** and **commands** call the real in-browser engine. They cannot run
-  in headless CI without WebGPU, so the Evals app is their home; a developer can
-  **export** a run and commit it to publish those numbers.
+- **Routing** and **commands** call the real in-browser engine. With the chat
+  model they cannot run in headless CI without WebGPU, so the Evals app is their
+  home; a developer can **export** a run and commit it to publish those numbers.
+  With a **decision model** (or the chat model's prompts on a local Ollama model),
+  routing / commands / plan also run from the CLI — see §7.
 
 ---
 
@@ -230,30 +236,47 @@ tests/evals/
 │   ├── scoreCommands.js
 │   ├── scorePlan.js         multi-shot plan scoring (reuses scoreCommands)
 │   ├── scoreAnswers.js      RAGAS-style facets
-│   └── scoreRetrieval.js
+│   ├── scoreRetrieval.js
+│   └── plannerSuites.js     routing + commands + plan for any router/planner (Node + browser)
 ├── runNode.js           ▶️ deterministic runner + scorer self-test (writes the scorecard)
+├── decisionPlanner.experiment.mjs   ▶️ planner experiment CLI (decision model or LLM via Ollama)
+├── vela.selfcheck.mjs   ✅ browser decision engine vs the PyTorch reference
+├── experiment.selfcheck.mjs  ✅ config / per-suite model / latency helpers
 └── results/
-    ├── latest.json          the current scorecard
+    ├── latest.json          the latest live scorecard
+    ├── experiments.json     every committed run (live + planner experiments), one per config and time
     └── history.json         trimmed per-run headline metrics (trend)
 ```
 
-- `latest.json` — the canonical scorecard the app and CI both read.
+- `latest.json` — the last live scorecard (also what CI writes for the deterministic suites).
+- `experiments.json` — full scorecards of committed runs; feeds the default view and the **Experiments** tab.
 - `history.json` — one small entry per run, powering the sparklines.
 
 ### Default view & privacy
 
-The Evals app **always opens on the committed `latest.json`** — the published,
-canonical results that everyone sees first. When a *visitor* runs the evals in
+The Evals app **opens on the newest committed run scored with the visitor's
+current settings** (chat model + planner) — for most visitors, the defaults on
+main. If none matches, it shows `latest.json` with a note that it was scored with
+a different setup. When a *visitor* runs the evals in
 their browser, that run is shown in-session and its headline metrics are kept
 **privately in their own `localStorage`** (feeding only their trend sparklines).
 Visitor runs are **never** written back to the repo and never override the
 default on open — their actions stay private to their browser.
 
 Publishing new numbers is a deliberate **developer** action: run the evals
-locally, click **⬇ Export for commit** to download a `latest.json` (identical in
-format to what `runNode.js` writes), drop it into `tests/evals/results/`, and
-commit. This is the only way the LLM suites (routing + commands) — which can
-only run in a browser — reach the deployed site.
+locally under `vite dev` (the run is saved to `latest.json`, `history.json` and
+`experiments.json`), or click **⬇ Export** and drop the file into
+`tests/evals/results/`, then commit.
+
+## 6b. Comparing models per task
+
+Every suite in a scorecard records **which model produced it** (`suite.model`:
+the planner for routing/commands/plan, the chat model for answers, *BM25* / *rules*
+for the deterministic suites) and its **median time per model call**
+(`suite.latency.p50Ms`). The run's config keeps the chat model and the planner
+separately (`config.model`, `config.planner`), and both are part of the config
+key, so the **Experiments** tab shows one row per setup with *score · time per
+call* for each task — e.g. routing by a decision model vs by a 2B LLM.
 
 ---
 
@@ -279,6 +302,21 @@ only run in a browser — reach the deployed site.
    trend sparklines. The run stays private (localStorage); a **developer** can
    **Export for commit** to publish it.
 
+**Planner experiments** (routing + commands + plan for one router/planner, CLI):
+
+```bash
+VELA_DIR=models/vela3.1-onnx/pico-150m node tests/evals/decisionPlanner.experiment.mjs   # decision model (browser engine, CPU)
+LLM_MODEL=qwen3.5:2b [LLM_CPU=1] node tests/evals/decisionPlanner.experiment.mjs         # chat-model prompts via Ollama
+DEV=1 VELA_DIR=… node tests/evals/decisionPlanner.experiment.mjs                          # dev set only, nothing saved
+```
+
+Tune prompts and option wording on the **dev set** (`datasets/plannerDev.js`, fresh
+phrasings that no scorecard uses), then report the test sets. Tuning directly on the
+test sets makes the scores measure memorisation.
+
+Each run is appended to `experiments.json` (planner only, no chat model). The same
+`harness/plannerSuites.js` runs in the browser for WebGPU decision-model runs.
+
 ```mermaid
 flowchart LR
     NPM["npm run eval"] --> DETS["retrieval · resolution · integrity"]
@@ -301,6 +339,7 @@ flowchart LR
 | You want… | You do… |
 |---|---|
 | A new test case | **Add a row** to the relevant `datasets/*.js` file |
+| A case to tune a planner prompt against | Add it to `datasets/plannerDev.js` (never scored) |
 | A new fixture paper | Add an entry to `fixtureCorpus.js` (+ reference it in `retrieval.js`) |
 | A new metric on a suite | Extend the scorer in `harness/` (both runners get it) |
 | A new suite (new decision point) | Add a dataset + a scorer + wire it into `runNode.js` and the app's `SUITE_META` |
