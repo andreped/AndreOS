@@ -78,7 +78,9 @@ export class AssistantSidebar {
 
     /** Pre-fill the input with example text (does not submit). */
     setDraft(text = '') {
-        if (this._input) this._input.value = text;
+        if (!this._input) return;
+        this._input.value = text;
+        this._input.scrollLeft = this._input.scrollWidth; // keep the newest dictated words in view
     }
 
     /** Switch the visible tab pane. */
@@ -354,7 +356,7 @@ export class AssistantSidebar {
 
         const TITLES = {
             idle:       'Click to load voice model',
-            loading:    'Loading Whisper model…',
+            loading:    'Loading speech model…',
             ready:      'Click to speak',
             recording:  'Listening… click to stop',
             processing: 'Transcribing…',
@@ -374,19 +376,19 @@ export class AssistantSidebar {
         }
         this._micBtn.title = TITLES[state] ?? 'Voice input';
 
-        // Swap the text field for an inline status while loading the model or
-        // recording, so the user knows to wait / that we're listening.
-        const busy = state === 'recording' || state === 'loading';
+        // Swap the text field for an inline status while loading the model. While
+        // recording the field stays visible (read-only) to show the live transcript.
+        const busy = state === 'loading';
         if (this._listeningEl) {
             this._listeningEl.hidden = !busy;
             this._listeningEl.dataset.state = state;
             const textEl = this._listeningEl.querySelector('.asst-listening-text');
-            if (textEl) {
-                textEl.textContent = state === 'loading' ? 'Preparing model…' : 'Listening…';
-            }
+            if (textEl) textEl.textContent = 'Preparing model…';
         }
         if (this._input) {
             this._input.style.display = busy ? 'none' : '';
+            this._input.readOnly = state === 'recording';
+            this._input.placeholder = state === 'recording' ? 'Listening…' : 'Ask or command…';
             // Disable text input while the two channels could clash
             this._input.disabled = busy || state === 'processing';
         }

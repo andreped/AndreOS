@@ -94,10 +94,16 @@ export const CPU_MODELS = [
     },
 ];
 
+// Mirrors NEMOTRON_MODEL in assistant/voice/nemotron.js (not imported here: it pulls in onnxruntime-web).
+export const NEMOTRON_SPEECH_MODEL = 'onnx-community/nemotron-3.5-asr-streaming-0.6b-onnx-int4';
+// Whisper stays the default: Nemotron's Norwegian is too weak (docs/adr/0002-streaming-speech-nemotron.md).
+export const DEFAULT_SPEECH_MODEL = 'Xenova/whisper-base';
+
 export const WHISPER_MODELS = [
     { id: 'Xenova/whisper-tiny',  name: 'Whisper Tiny',  size: '~39 MB',  desc: 'Fastest · Multilingual · Lower accuracy', badge: null },
     { id: 'Xenova/whisper-base',  name: 'Whisper Base',  size: '~74 MB',  desc: 'Recommended · Multilingual · Good balance', badge: 'Recommended' },
     { id: 'Xenova/whisper-small', name: 'Whisper Small', size: '~244 MB', desc: 'Best accuracy · Multilingual · Slower load', badge: 'Best Quality' },
+    { id: NEMOTRON_SPEECH_MODEL,  name: 'Nemotron 3.5 ASR', size: '~790 MB', desc: 'Realtime streaming · Strong English · Weak Norwegian', badge: 'Experimental' },
 ];
 
 export const TRANSCRIBE_LANGUAGES = [
@@ -174,8 +180,9 @@ export function isCpuModel(id = getModelId()) { return CPU_MODELS.some(m => m.id
 /** The CPU model record for the selected (or given) id, or null. */
 export function getCpuModel(id = getModelId()) { return CPU_MODELS.find(m => m.id === id) ?? null; }
 
-export function getWhisperModel()   { return getSettings().whisperModel   || 'Xenova/whisper-base'; }
+export function getWhisperModel()   { return getSettings().whisperModel   || DEFAULT_SPEECH_MODEL; }
 export function getTranscribeLang() { return getSettings().transcribeLang || 'english'; }  // default English — more reliable than auto
+export function getTranscribeMode() { return getSettings().transcribeMode || 'realtime'; } // realtime | full (send audio only when you stop)
 export function getLLMLanguage()    { return getSettings().llmLang        || 'en'; }        // default English
 export function isVoiceAIEnabled()  { return getSettings().voiceAI !== false; }
 export function getReasoningEffort(){ return getSettings().reasoningEffort || 'none'; }     // none | low | medium | high
