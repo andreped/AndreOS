@@ -30,6 +30,11 @@ also **skip routing for plainly conversational text** to keep the KV cache warm.
 routing sits around ~79% accuracy; misroutes cluster on verbless commands and indirect
 phrasing ("summarize his PhD research", "what can you do?"). Acceptable for a portfolio toy.
 
+With Settings → Command planner = **Decision model**, routing (and planning) don't touch the
+chat model at all: a small decision model answers them in the browser (~36 ms on WebGPU,
+~250 ms on CPU, 100% on the routing set), so the chat model's KV cache stays warm and the
+CPU skip isn't needed. See [decision-models.md](./decision-models.md).
+
 ## Why not agentic tool-calling
 Textbook-correct, but each tool round-trip is another full prefill → slower on CPU, and 2B
 tool-call reliability is shaky. One-shot retrieval gets ~90% of the benefit in one pass.

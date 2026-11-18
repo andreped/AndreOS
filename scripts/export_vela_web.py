@@ -5,7 +5,7 @@
 """Export a Vela 3.1 pico decision model to ONNX for in-browser inference (onnxruntime-web).
 
 Run:  uv run scripts/export_vela_web.py [--model vllm-sr/vela3.1-pico-150m] [--out models/vela3.1-onnx/pico-150m]
-Out:  onnx/model.onnx (fp32), onnx/model_fp16.onnx (WebGPU), onnx/model_quantized.onnx (int8, WASM),
+Out:  onnx/model.onnx (fp32), onnx/model_fp16w.onnx (WebGPU), onnx/model_quantized.onnx (int8, WASM),
       tokenizer files, config.json and parity.json (PyTorch reference answers for the JS self-check).
 The graph includes the decision readout heads, so JS only renders, tokenises and soft-maxes.
 One question per forward (batch 1): no padding, so no masked rows to go NaN in fp16.
@@ -22,8 +22,8 @@ import onnxruntime as ort
 import torch
 import torch.nn.functional as F
 from huggingface_hub import HfApi, snapshot_download
+from onnx import TensorProto, helper, numpy_helper
 from onnxruntime.quantization import QuantType, quantize_dynamic
-from onnxruntime.transformers.float16 import convert_float_to_float16
 
 p = argparse.ArgumentParser()
 p.add_argument("--model", default="vllm-sr/vela3.1-pico-150m")
@@ -76,8 +76,27 @@ with torch.no_grad():
         dynamo=False,
     )
 
-variants = {"fp32": fp32, "fp16": out / "onnx/model_fp16.onnx", "q8": out / "onnx/model_quantized.onnx"}
-onnx.save(convert_float_to_float16(onnx.load(str(fp32)), keep_io_types=True), str(variants["fp16"]))
+def fp16_weights(model):
+    """Store large weights as fp16 + a Cast to fp32 (folded at load): fp16 download, fp32 math.
+    tl;dr: full fp16 compute flips decisions on onnxruntime-web's WebGPU EP (max |dp| 0.8), this is exact."""
+    g = model.graph
+    casts, keep = [], []
+    for init in g.initializer:
+        if init.data_type == TensorProto.FLOAT and int(np.prod(init.dims)) >= 1024:
+            keep.append(numpy_helper.from_array(numpy_helper.to_array(init).astype(np.float16), init.name + "__fp16"))
+            casts.append(helper.make_node("Cast", [init.name + "__fp16"], [init.name], to=TensorProto.FLOAT, name=init.name + "__cast"))
+        else:
+            keep.append(init)
+    del g.initializer[:]
+    g.initializer.extend(keep)
+    nodes = casts + list(g.node)
+    del g.node[:]
+    g.node.extend(nodes)
+    return model
+
+
+variants = {"fp32": fp32, "fp16w": out / "onnx/model_fp16w.onnx", "q8": out / "onnx/model_quantized.onnx"}
+onnx.save(fp16_weights(onnx.load(str(fp32))), str(variants["fp16w"]))
 # Naive dynamic int8 flips decisions: RoPE, attention, MLP down_proj (outlier activations) and the readout
 # (cosine / tau amplifies error ~20x) stay fp32 — the same "xdown" recipe as the source package's onnx/.
 keep_fp32 = [n.name for n in onnx.load(str(fp32), load_external_data=False).graph.node if n.op_type in ("MatMul", "Gemm")
@@ -124,7 +143,7 @@ cfg = dec.encoder.config
     "model": name, "source": args.model, "source_revision": revision, "renderer": "render31/1",
     "markers": {t: int(i) for t, i in cfg.decision["marker_ids"].items()},
     "bos_token_id": dec.tok.bos_token_id, "eos_token_id": dec.tok.eos_token_id,
-    "files": {"webgpu": "onnx/model_fp16.onnx", "wasm": "onnx/model_quantized.onnx"},
+    "files": {"webgpu": "onnx/model_fp16w.onnx", "wasm": "onnx/model_quantized.onnx"},
 }, indent=2) + "\n")
 (out / "parity.json").write_text(json.dumps(parity, ensure_ascii=False) + "\n")
 for f in ("tokenizer.json", "tokenizer_config.json", "LICENSE"):
@@ -144,7 +163,7 @@ call is render → tokenise → one forward per question → softmax.
 
 | File | Use |
 |---|---|
-| `onnx/model_fp16.onnx` | WebGPU |
+| `onnx/model_fp16w.onnx` | WebGPU (fp16-stored weights, fp32 compute) |
 | `onnx/model_quantized.onnx` | WASM / CPU (dynamic int8; RoPE, attention, MLP down-projections and heads kept fp32) |
 | `onnx/model.onnx` | fp32 reference |
 

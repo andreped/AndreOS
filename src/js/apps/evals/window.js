@@ -542,6 +542,11 @@ export function setupEvalsWindow(winEl) {
             const data = await res.json().catch(() => ({}));
             if (data.ok) cloud = data.runs ?? [];
             else note = data.reason === 'unbound' ? 'no cloud store bound' : `cloud: ${data.reason ?? res.status}`;
+            // Runs published before per-suite latency was stored in the list: read it from their scorecard.
+            await Promise.all(cloud.filter((r) => !r.metrics?.p50).map(async (r) => {
+                try { r.metrics = { ...r.metrics, p50: suiteLatency(await (await fetch(`${evalsEndpoint()}?id=${r.id}`)).json()) }; }
+                catch { /* keep the score only */ }
+            }));
         } catch {
             note = 'cloud store unreachable';
         } finally {

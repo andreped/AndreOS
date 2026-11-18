@@ -3818,5 +3818,2360 @@
         "model": "vllm-sr/vela3.1-pico-380m"
       }
     }
+  },
+  {
+    "generatedAt": "2026-11-18T14:56:43.995Z",
+    "source": "llm-planner",
+    "config": {
+      "model": "qwen3.5:2b",
+      "backend": "ollama",
+      "reasoning": "none",
+      "language": "en",
+      "repeats": 1
+    },
+    "configKey": "qwen3.5:2b·ollama·r:none·en",
+    "runtimeMs": 37652.590292,
+    "suites": {
+      "routing": {
+        "suite": "routing",
+        "total": 28,
+        "accuracy": 0.9642857142857143,
+        "precision": 0.9375,
+        "recall": 1,
+        "f1": 0.967741935483871,
+        "confusion": {
+          "tp": 15,
+          "fp": 1,
+          "fn": 0,
+          "tn": 12
+        },
+        "byTag": {
+          "open": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "window": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "browse": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "research-action": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "norwegian": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "bio": {
+            "total": 7,
+            "accuracy": 1
+          },
+          "research-question": {
+            "total": 3,
+            "accuracy": 0.6666666666666666
+          },
+          "skills": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "contact": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "tricky": {
+            "total": 5,
+            "accuracy": 1
+          },
+          "meta": {
+            "total": 1,
+            "accuracy": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "summarize his PhD research",
+            "expected": "direct",
+            "predicted": "command"
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 28,
+          "meanMs": 475.0158423928572,
+          "p50Ms": 376.12658399999964,
+          "p95Ms": 478.57120900000155,
+          "minMs": 367.62866699999904,
+          "maxMs": 2959.5631670000002
+        }
+      },
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.8571428571428571,
+        "actionF1": 0.8571428571428571,
+        "precision": 0.8571428571428571,
+        "recall": 0.8571428571428571,
+        "targetAccuracy": 1,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 0.3333333333333333,
+            "actionF1": 0.3333333333333333
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "close this window",
+            "expected": [
+              "close"
+            ],
+            "predicted": [],
+            "f1": 0
+          },
+          {
+            "input": "minimize",
+            "expected": [
+              "minimize"
+            ],
+            "predicted": [
+              "close"
+            ],
+            "f1": 0
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 14,
+          "meanMs": 710.6933690714288,
+          "p50Ms": 658.4690840000003,
+          "p95Ms": 952.5659169999999,
+          "minMs": 537.3998329999995,
+          "maxMs": 1091.1516659999998
+        }
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.7777777777777778,
+        "turnExactMatch": 0.9090909090909091,
+        "turnF1": 0.9090909090909091,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.7777777777777778
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 1
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 1
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.5
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 1
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.75
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "open:projects"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [],
+                "exact": false
+              }
+            ]
+          },
+          {
+            "id": "projects-to-skills-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "open:projects"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [],
+                "exact": false
+              }
+            ]
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 22,
+          "meanMs": 654.5297990909082,
+          "p50Ms": 652.6370419999985,
+          "p95Ms": 732.9447499999987,
+          "minMs": 550.8044999999984,
+          "maxMs": 761.7713750000003
+        }
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-18T14:57:27.167Z",
+    "source": "decision-planner",
+    "config": {
+      "model": null,
+      "planner": "vllm-sr/vela3.1-pico-150m",
+      "backend": "decision·onnxruntime-web·wasm·model_quantized.onnx",
+      "reasoning": "none",
+      "language": "en",
+      "repeats": 1
+    },
+    "configKey": "no-chat·planner:vllm-sr/vela3.1-pico-150m·decision·onnxruntime-web·wasm·model_quantized.onnx·r:none·en",
+    "runtimeMs": 30463.695708,
+    "suites": {
+      "routing": {
+        "suite": "routing",
+        "total": 28,
+        "accuracy": 1,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "confusion": {
+          "tp": 15,
+          "fp": 0,
+          "fn": 0,
+          "tn": 13
+        },
+        "byTag": {
+          "open": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "window": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "browse": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "research-action": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "norwegian": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "bio": {
+            "total": 7,
+            "accuracy": 1
+          },
+          "research-question": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "skills": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "contact": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "tricky": {
+            "total": 5,
+            "accuracy": 1
+          },
+          "meta": {
+            "total": 1,
+            "accuracy": 1
+          }
+        },
+        "failures": [],
+        "model": "vllm-sr/vela3.1-pico-150m",
+        "latency": {
+          "n": 28,
+          "meanMs": 243.42482585714288,
+          "p50Ms": 231.10262499999953,
+          "p95Ms": 354.34124999999995,
+          "minMs": 216.93570799999998,
+          "maxMs": 378.316417
+        }
+      },
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.9285714285714286,
+        "actionF1": 0.9285714285714286,
+        "precision": 0.9285714285714286,
+        "recall": 0.9285714285714286,
+        "targetAccuracy": 0.8888888888888888,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 0.8571428571428571,
+            "actionF1": 0.8571428571428571
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "show skills",
+            "expected": [
+              "open:skills"
+            ],
+            "predicted": [
+              "chat"
+            ],
+            "f1": 0
+          }
+        ],
+        "model": "vllm-sr/vela3.1-pico-150m",
+        "latency": {
+          "n": 14,
+          "meanMs": 750.9839822142858,
+          "p50Ms": 682.5113340000007,
+          "p95Ms": 1428.3292919999985,
+          "minMs": 383.2268330000006,
+          "maxMs": 1551.5975409999992
+        }
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.6666666666666666,
+        "turnExactMatch": 0.8636363636363636,
+        "turnF1": 0.8636363636363636,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.6666666666666666
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 0.6666666666666666
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 0.8
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.75
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 1
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.5
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "open:projects"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "research-drilldown-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:research"
+                ],
+                "predicted": [
+                  "open:research"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open_paper:2"
+                ],
+                "predicted": [
+                  "open:research"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "github-then-desktop-casual",
+            "turns": [
+              {
+                "expected": [
+                  "browse:github.com/andreped"
+                ],
+                "predicted": [
+                  "open:social"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "desktop"
+                ],
+                "predicted": [
+                  "desktop"
+                ],
+                "exact": true
+              }
+            ]
+          }
+        ],
+        "model": "vllm-sr/vela3.1-pico-150m",
+        "latency": {
+          "n": 22,
+          "meanMs": 596.8727802272729,
+          "p50Ms": 669.3612079999984,
+          "p95Ms": 781.5321670000012,
+          "minMs": 396.73162500000035,
+          "maxMs": 1207.7380409999969
+        }
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-18T15:01:11.193Z",
+    "source": "llm-planner",
+    "config": {
+      "model": "qwen3.5:2b",
+      "backend": "ollama·cpu",
+      "reasoning": "none",
+      "language": "en",
+      "repeats": 1
+    },
+    "configKey": "qwen3.5:2b·ollama·cpu·r:none·en",
+    "runtimeMs": 85461.26004200001,
+    "suites": {
+      "routing": {
+        "suite": "routing",
+        "total": 28,
+        "accuracy": 0.9285714285714286,
+        "precision": 0.8823529411764706,
+        "recall": 1,
+        "f1": 0.9375,
+        "confusion": {
+          "tp": 15,
+          "fp": 2,
+          "fn": 0,
+          "tn": 11
+        },
+        "byTag": {
+          "open": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "window": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "browse": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "research-action": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "norwegian": {
+            "total": 3,
+            "accuracy": 0.6666666666666666
+          },
+          "bio": {
+            "total": 7,
+            "accuracy": 0.8571428571428571
+          },
+          "research-question": {
+            "total": 3,
+            "accuracy": 0.6666666666666666
+          },
+          "skills": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "contact": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "tricky": {
+            "total": 5,
+            "accuracy": 1
+          },
+          "meta": {
+            "total": 1,
+            "accuracy": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "summarize his PhD research",
+            "expected": "direct",
+            "predicted": "command"
+          },
+          {
+            "input": "fortell meg om utdanningen hans",
+            "expected": "direct",
+            "predicted": "command"
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 28,
+          "meanMs": 984.5809896071426,
+          "p50Ms": 836.6932919999999,
+          "p95Ms": 1118.1530410000014,
+          "minMs": 710.4532500000005,
+          "maxMs": 4527.769375000001
+        }
+      },
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.8571428571428571,
+        "actionF1": 0.8571428571428571,
+        "precision": 0.8571428571428571,
+        "recall": 0.8571428571428571,
+        "targetAccuracy": 1,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 0.3333333333333333,
+            "actionF1": 0.3333333333333333
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "close this window",
+            "expected": [
+              "close"
+            ],
+            "predicted": [],
+            "f1": 0
+          },
+          {
+            "input": "minimize",
+            "expected": [
+              "minimize"
+            ],
+            "predicted": [
+              "close"
+            ],
+            "f1": 0
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 14,
+          "meanMs": 1799.3930208571433,
+          "p50Ms": 1653.4802500000005,
+          "p95Ms": 2022.8644580000037,
+          "minMs": 1364.1856659999976,
+          "maxMs": 3220.4553750000014
+        }
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.7777777777777778,
+        "turnExactMatch": 0.9090909090909091,
+        "turnF1": 0.9090909090909091,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.7777777777777778
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 1
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 1
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.5
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 1
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.75
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "open:projects"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [],
+                "exact": false
+              }
+            ]
+          },
+          {
+            "id": "projects-to-skills-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "open:projects"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [],
+                "exact": false
+              }
+            ]
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 22,
+          "meanMs": 1486.259695045455,
+          "p50Ms": 1469.3290420000048,
+          "p95Ms": 1718.4112909999967,
+          "minMs": 1262.3303339999984,
+          "maxMs": 1772.9761660000004
+        }
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-18T15:04:14.143Z",
+    "source": "decision-planner",
+    "config": {
+      "model": null,
+      "planner": "vllm-sr/vela3.1-pico-150m",
+      "backend": "decision·cpu",
+      "reasoning": "none",
+      "language": "en",
+      "repeats": 1
+    },
+    "configKey": "no-chat·planner:vllm-sr/vela3.1-pico-150m·decision·cpu·r:none·en",
+    "runtimeMs": 3446.343375,
+    "suites": {
+      "routing": {
+        "suite": "routing",
+        "total": 28,
+        "accuracy": 1,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "confusion": {
+          "tp": 15,
+          "fp": 0,
+          "fn": 0,
+          "tn": 13
+        },
+        "byTag": {
+          "open": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "window": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "browse": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "research-action": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "norwegian": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "bio": {
+            "total": 7,
+            "accuracy": 1
+          },
+          "research-question": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "skills": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "contact": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "tricky": {
+            "total": 5,
+            "accuracy": 1
+          },
+          "meta": {
+            "total": 1,
+            "accuracy": 1
+          }
+        },
+        "failures": [],
+        "model": "vllm-sr/vela3.1-pico-150m",
+        "latency": {
+          "n": 28,
+          "meanMs": 32.03287210714286,
+          "p50Ms": 23.31337499999995,
+          "p95Ms": 125.12375000000009,
+          "minMs": 22.515125000000012,
+          "maxMs": 152.831875
+        }
+      },
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.9285714285714286,
+        "actionF1": 0.9285714285714286,
+        "precision": 0.9285714285714286,
+        "recall": 0.9285714285714286,
+        "targetAccuracy": 0.8888888888888888,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 0.8571428571428571,
+            "actionF1": 0.8571428571428571
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "show skills",
+            "expected": [
+              "open:skills"
+            ],
+            "predicted": [
+              "chat"
+            ],
+            "f1": 0
+          }
+        ],
+        "model": "vllm-sr/vela3.1-pico-150m",
+        "latency": {
+          "n": 14,
+          "meanMs": 96.51504778571429,
+          "p50Ms": 65.66504200000008,
+          "p95Ms": 192.55658300000005,
+          "minMs": 33.20074999999997,
+          "maxMs": 324.719209
+        }
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.7777777777777778,
+        "turnExactMatch": 0.9090909090909091,
+        "turnF1": 0.9090909090909091,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.7777777777777778
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 1
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 1
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.75
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 1
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.75
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "open:projects"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "github-then-desktop-casual",
+            "turns": [
+              {
+                "expected": [
+                  "browse:github.com/andreped"
+                ],
+                "predicted": [
+                  "open:social"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "desktop"
+                ],
+                "predicted": [
+                  "desktop"
+                ],
+                "exact": true
+              }
+            ]
+          }
+        ],
+        "model": "vllm-sr/vela3.1-pico-150m",
+        "latency": {
+          "n": 22,
+          "meanMs": 54.370801227272686,
+          "p50Ms": 53.16724999999997,
+          "p95Ms": 108.33762500000012,
+          "minMs": 33.34783299999981,
+          "maxMs": 121.05708300000015
+        }
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-18T15:09:58.894Z",
+    "source": "decision-planner",
+    "config": {
+      "model": null,
+      "planner": "vllm-sr/vela3.1-pico-150m",
+      "backend": "decision·onnxruntime-web·wasm·model_quantized.onnx",
+      "reasoning": "none",
+      "language": "en",
+      "repeats": 1
+    },
+    "configKey": "no-chat·planner:vllm-sr/vela3.1-pico-150m·decision·onnxruntime-web·wasm·model_quantized.onnx·r:none·en",
+    "runtimeMs": 34047.945917000005,
+    "suites": {
+      "routing": {
+        "suite": "routing",
+        "total": 28,
+        "accuracy": 1,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "confusion": {
+          "tp": 15,
+          "fp": 0,
+          "fn": 0,
+          "tn": 13
+        },
+        "byTag": {
+          "open": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "window": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "browse": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "research-action": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "norwegian": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "bio": {
+            "total": 7,
+            "accuracy": 1
+          },
+          "research-question": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "skills": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "contact": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "tricky": {
+            "total": 5,
+            "accuracy": 1
+          },
+          "meta": {
+            "total": 1,
+            "accuracy": 1
+          }
+        },
+        "failures": [],
+        "model": "vllm-sr/vela3.1-pico-150m",
+        "latency": {
+          "n": 28,
+          "meanMs": 302.7833273928571,
+          "p50Ms": 289.5968750000002,
+          "p95Ms": 460.908042,
+          "minMs": 244.30316700000003,
+          "maxMs": 656.7189160000003
+        }
+      },
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.9285714285714286,
+        "actionF1": 0.9285714285714286,
+        "precision": 0.9285714285714286,
+        "recall": 0.9285714285714286,
+        "targetAccuracy": 0.8888888888888888,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 0.8571428571428571,
+            "actionF1": 0.8571428571428571
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "show skills",
+            "expected": [
+              "open:skills"
+            ],
+            "predicted": [
+              "chat"
+            ],
+            "f1": 0
+          }
+        ],
+        "model": "vllm-sr/vela3.1-pico-150m",
+        "latency": {
+          "n": 14,
+          "meanMs": 852.5530475000002,
+          "p50Ms": 816.7760830000007,
+          "p95Ms": 1445.8208749999994,
+          "minMs": 384.13204100000075,
+          "maxMs": 1750.792125
+        }
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.6666666666666666,
+        "turnExactMatch": 0.8636363636363636,
+        "turnF1": 0.8636363636363636,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.6666666666666666
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 0.6666666666666666
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 0.8
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.75
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 1
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.5
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "open:projects"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "research-drilldown-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:research"
+                ],
+                "predicted": [
+                  "open:research"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open_paper:2"
+                ],
+                "predicted": [
+                  "open:research"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "github-then-desktop-casual",
+            "turns": [
+              {
+                "expected": [
+                  "browse:github.com/andreped"
+                ],
+                "predicted": [
+                  "open:social"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "desktop"
+                ],
+                "predicted": [
+                  "desktop"
+                ],
+                "exact": true
+              }
+            ]
+          }
+        ],
+        "model": "vllm-sr/vela3.1-pico-150m",
+        "latency": {
+          "n": 22,
+          "meanMs": 619.3705113636365,
+          "p50Ms": 669.9081250000017,
+          "p95Ms": 941.5511249999981,
+          "minMs": 353.2885840000017,
+          "maxMs": 1031.1473340000011
+        }
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-18T15:10:29.233Z",
+    "source": "decision-planner",
+    "config": {
+      "model": null,
+      "planner": "vllm-sr/vela3.1-pico-150m",
+      "backend": "decision·browser·webgpu·model_fp16w.onnx",
+      "reasoning": "none",
+      "language": "en",
+      "repeats": 1
+    },
+    "configKey": "no-chat·planner:vllm-sr/vela3.1-pico-150m·decision·browser·webgpu·model_fp16w.onnx·r:none·en",
+    "runtimeMs": 4563.3949999809265,
+    "suites": {
+      "routing": {
+        "suite": "routing",
+        "total": 28,
+        "accuracy": 1,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "confusion": {
+          "tp": 15,
+          "fp": 0,
+          "fn": 0,
+          "tn": 13
+        },
+        "byTag": {
+          "open": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "window": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "browse": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "research-action": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "norwegian": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "bio": {
+            "total": 7,
+            "accuracy": 1
+          },
+          "research-question": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "skills": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "contact": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "tricky": {
+            "total": 5,
+            "accuracy": 1
+          },
+          "meta": {
+            "total": 1,
+            "accuracy": 1
+          }
+        },
+        "failures": [],
+        "model": "vllm-sr/vela3.1-pico-150m",
+        "latency": {
+          "n": 28,
+          "meanMs": 36.76821428537369,
+          "p50Ms": 36.44499999284744,
+          "p95Ms": 39.860000014305115,
+          "minMs": 32.2600000500679,
+          "maxMs": 47.12000000476837
+        }
+      },
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.9285714285714286,
+        "actionF1": 0.9285714285714286,
+        "precision": 0.9285714285714286,
+        "recall": 0.9285714285714286,
+        "targetAccuracy": 0.8888888888888888,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 0.8571428571428571,
+            "actionF1": 0.8571428571428571
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "show skills",
+            "expected": [
+              "open:skills"
+            ],
+            "predicted": [
+              "chat"
+            ],
+            "f1": 0
+          }
+        ],
+        "model": "vllm-sr/vela3.1-pico-150m",
+        "latency": {
+          "n": 14,
+          "meanMs": 113.6478571508612,
+          "p50Ms": 105.4200000166893,
+          "p95Ms": 213.60000002384186,
+          "minMs": 60.455000042915344,
+          "maxMs": 240.44999998807907
+        }
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.7777777777777778,
+        "turnExactMatch": 0.9090909090909091,
+        "turnF1": 0.9090909090909091,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.7777777777777778
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 1
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 1
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.75
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 1
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.75
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "open:projects"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "github-then-desktop-casual",
+            "turns": [
+              {
+                "expected": [
+                  "browse:github.com/andreped"
+                ],
+                "predicted": [
+                  "open:social"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "desktop"
+                ],
+                "predicted": [
+                  "desktop"
+                ],
+                "exact": true
+              }
+            ]
+          }
+        ],
+        "model": "vllm-sr/vela3.1-pico-150m",
+        "latency": {
+          "n": 22,
+          "meanMs": 88.08613635464148,
+          "p50Ms": 89.72000002861023,
+          "p95Ms": 125.5450000166893,
+          "minMs": 59.830000042915344,
+          "maxMs": 174.55500000715256
+        }
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-18T15:10:45.305Z",
+    "source": "decision-planner",
+    "config": {
+      "model": null,
+      "planner": "vllm-sr/vela3.1-pico-380m",
+      "backend": "decision·browser·webgpu·model_fp16w.onnx",
+      "reasoning": "none",
+      "language": "en",
+      "repeats": 1
+    },
+    "configKey": "no-chat·planner:vllm-sr/vela3.1-pico-380m·decision·browser·webgpu·model_fp16w.onnx·r:none·en",
+    "runtimeMs": 9375.274999976158,
+    "suites": {
+      "routing": {
+        "suite": "routing",
+        "total": 28,
+        "accuracy": 0.9642857142857143,
+        "precision": 0.9375,
+        "recall": 1,
+        "f1": 0.967741935483871,
+        "confusion": {
+          "tp": 15,
+          "fp": 1,
+          "fn": 0,
+          "tn": 12
+        },
+        "byTag": {
+          "open": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "window": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "browse": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "research-action": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "norwegian": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "bio": {
+            "total": 7,
+            "accuracy": 1
+          },
+          "research-question": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "skills": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "contact": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "tricky": {
+            "total": 5,
+            "accuracy": 0.8
+          },
+          "meta": {
+            "total": 1,
+            "accuracy": 0
+          }
+        },
+        "failures": [
+          {
+            "input": "what can you do?",
+            "expected": "direct",
+            "predicted": "command"
+          }
+        ],
+        "model": "vllm-sr/vela3.1-pico-380m",
+        "latency": {
+          "n": 28,
+          "meanMs": 70.7446428601231,
+          "p50Ms": 70.94499999284744,
+          "p95Ms": 74.91000002622604,
+          "minMs": 65.77000004053116,
+          "maxMs": 76.61500000953674
+        }
+      },
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.5714285714285714,
+        "actionF1": 0.6904761904761905,
+        "precision": 0.6904761904761905,
+        "recall": 0.6904761904761905,
+        "targetAccuracy": 0.5555555555555556,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 0.42857142857142855,
+            "actionF1": 0.5714285714285714
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 0.5,
+            "actionF1": 0.5
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 0.25,
+            "actionF1": 0.6666666666666666
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 0.3333333333333333,
+            "actionF1": 0.7222222222222222
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 0.5,
+            "actionF1": 0.8333333333333333
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 0.5,
+            "actionF1": 0.8333333333333333
+          }
+        },
+        "failures": [
+          {
+            "input": "open research",
+            "expected": [
+              "open:research"
+            ],
+            "predicted": [
+              "search:open research"
+            ],
+            "f1": 0
+          },
+          {
+            "input": "show skills",
+            "expected": [
+              "open:skills"
+            ],
+            "predicted": [
+              "search:show skills"
+            ],
+            "f1": 0
+          },
+          {
+            "input": "search the web for digital pathology",
+            "expected": [
+              "browse:digital pathology"
+            ],
+            "predicted": [
+              "search:digital pathology"
+            ],
+            "f1": 0
+          },
+          {
+            "input": "open projects and summarize the highlights",
+            "expected": [
+              "open:projects",
+              "chat"
+            ],
+            "predicted": [
+              "search:open projects",
+              "chat"
+            ],
+            "f1": 0.5
+          },
+          {
+            "input": "open research, open the 3rd paper, and summarize it",
+            "expected": [
+              "open:research",
+              "open_paper:3",
+              "chat"
+            ],
+            "predicted": [
+              "search:open research",
+              "open_paper:3",
+              "chat"
+            ],
+            "f1": 0.667
+          },
+          {
+            "input": "open resume and then open research",
+            "expected": [
+              "open:resume",
+              "open:research"
+            ],
+            "predicted": [
+              "open:resume",
+              "search:open research"
+            ],
+            "f1": 0.5
+          }
+        ],
+        "model": "vllm-sr/vela3.1-pico-380m",
+        "latency": {
+          "n": 14,
+          "meanMs": 227.43714287025588,
+          "p50Ms": 163.86500000953674,
+          "p95Ms": 410.6599999666214,
+          "minMs": 125.98000001907349,
+          "maxMs": 423.92500001192093
+        }
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.6666666666666666,
+        "turnExactMatch": 0.8181818181818182,
+        "turnF1": 0.8409090909090909,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.6666666666666666
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 0.3333333333333333
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 0.6
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.75
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 0
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.75
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "search:show me the projects"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "paper-pronoun",
+            "turns": [
+              {
+                "expected": [
+                  "open:research",
+                  "open_paper:5"
+                ],
+                "predicted": [
+                  "search:open research",
+                  "open_paper:5"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "research-drilldown-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:research"
+                ],
+                "predicted": [
+                  "open:research"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open_paper:2"
+                ],
+                "predicted": [
+                  "minimize"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          }
+        ],
+        "model": "vllm-sr/vela3.1-pico-380m",
+        "latency": {
+          "n": 22,
+          "meanMs": 191.3315909044309,
+          "p50Ms": 156.35499995946884,
+          "p95Ms": 271.47999995946884,
+          "minMs": 124.81499999761581,
+          "maxMs": 271.8100000023842
+        }
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-18T15:11:19.509Z",
+    "source": "decision-planner",
+    "config": {
+      "model": null,
+      "planner": "vllm-sr/vela3.1-pico-150m",
+      "backend": "decision·browser·wasm·model_quantized.onnx",
+      "reasoning": "none",
+      "language": "en",
+      "repeats": 1
+    },
+    "configKey": "no-chat·planner:vllm-sr/vela3.1-pico-150m·decision·browser·wasm·model_quantized.onnx·r:none·en",
+    "runtimeMs": 32629.07999998331,
+    "suites": {
+      "routing": {
+        "suite": "routing",
+        "total": 28,
+        "accuracy": 1,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "confusion": {
+          "tp": 15,
+          "fp": 0,
+          "fn": 0,
+          "tn": 13
+        },
+        "byTag": {
+          "open": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "window": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "browse": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "research-action": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "norwegian": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "bio": {
+            "total": 7,
+            "accuracy": 1
+          },
+          "research-question": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "skills": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "contact": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "tricky": {
+            "total": 5,
+            "accuracy": 1
+          },
+          "meta": {
+            "total": 1,
+            "accuracy": 1
+          }
+        },
+        "failures": [],
+        "model": "vllm-sr/vela3.1-pico-150m",
+        "latency": {
+          "n": 28,
+          "meanMs": 248.03874999923366,
+          "p50Ms": 249.7849999666214,
+          "p95Ms": 259.92500001192093,
+          "minMs": 232.62999999523163,
+          "maxMs": 263.17500001192093
+        }
+      },
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.9285714285714286,
+        "actionF1": 0.9285714285714286,
+        "precision": 0.9285714285714286,
+        "recall": 0.9285714285714286,
+        "targetAccuracy": 0.8888888888888888,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 0.8571428571428571,
+            "actionF1": 0.8571428571428571
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "show skills",
+            "expected": [
+              "open:skills"
+            ],
+            "predicted": [
+              "chat"
+            ],
+            "f1": 0
+          }
+        ],
+        "model": "vllm-sr/vela3.1-pico-150m",
+        "latency": {
+          "n": 14,
+          "meanMs": 795.5796428620815,
+          "p50Ms": 753.410000026226,
+          "p95Ms": 1530.199999988079,
+          "minMs": 437.9399999976158,
+          "maxMs": 1650.0299999713898
+        }
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.6666666666666666,
+        "turnExactMatch": 0.8636363636363636,
+        "turnF1": 0.8636363636363636,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.6666666666666666
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 0.6666666666666666
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 0.8
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.75
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 1
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.5
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "open:projects"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "research-drilldown-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:research"
+                ],
+                "predicted": [
+                  "open:research"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open_paper:2"
+                ],
+                "predicted": [
+                  "open:research"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "github-then-desktop-casual",
+            "turns": [
+              {
+                "expected": [
+                  "browse:github.com/andreped"
+                ],
+                "predicted": [
+                  "open:social"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "desktop"
+                ],
+                "predicted": [
+                  "desktop"
+                ],
+                "exact": true
+              }
+            ]
+          }
+        ],
+        "model": "vllm-sr/vela3.1-pico-150m",
+        "latency": {
+          "n": 22,
+          "meanMs": 661.132045453245,
+          "p50Ms": 723.785000026226,
+          "p95Ms": 975.035000026226,
+          "minMs": 431.8299999833107,
+          "maxMs": 1171.9749999642372
+        }
+      }
+    }
   }
 ]

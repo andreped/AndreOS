@@ -24,6 +24,12 @@ Settings → AI Engine.
 Switching models calls `unloadEngine()` → frees the previous engine **and** its
 workers, timeout-raced so a busy CPU worker can't hang "Restart AI".
 
+## Decision model on CPU
+The optional decision-model planner ([decision-models.md](./decision-models.md)) has its
+own CPU path: an int8 ONNX file on onnxruntime-web's WASM backend (~250 ms to route,
+~0.7 s to plan a command on an M4 Pro). It replaces the LLM's routing and planning
+prefills, which is where CPU visitors gain the most.
+
 ## Discussion topics
 - COEP: credentialless enables threads but can affect cross-origin iframes (Browser app).
 - TTFT is dominated by **prefill**, not the model — see [prompt-compression](./prompt-compression.md).

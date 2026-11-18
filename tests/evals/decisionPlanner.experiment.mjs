@@ -9,6 +9,8 @@
  *         node tests/evals/decisionPlanner.experiment.mjs
  *   or, in-process with the browser engine (onnxruntime-web, no Python):
  *         VELA_DIR=models/vela3.1-onnx/pico-150m [VELA_FILE=onnx/model.onnx] node tests/evals/decisionPlanner.experiment.mjs
+ *   or, LLM only (the app's router/planner prompts, llmPlanner.js) on a local Ollama model:
+ *         LLM_MODEL=qwen3.5:2b [LLM_CPU=1] [OLLAMA_URL=http://127.0.0.1:11434] node tests/evals/decisionPlanner.experiment.mjs
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
@@ -22,18 +24,11 @@ g.sessionStorage ??= g.localStorage;
 
 const { appRegistry } = await import('../../src/js/apps/index.js');
 const { planWithDecisions, routeWithDecisions } = await import('../../src/js/assistant/engine/decisionPlanner.js');
-const { COMMANDS_DATASET } = await import('./datasets/commands.js');
-const { PLANS_DATASET } = await import('./datasets/plans.js');
-const { ROUTING_DATASET } = await import('./datasets/routing.js');
-const { summariseRouting } = await import('./harness/scoreRouting.js');
-const { buildRow, summariseCommands } = await import('./harness/scoreCommands.js');
-const { scorePlan } = await import('./harness/scorePlan.js');
-const { snapshotConfig, latencyStats } = await import('../../src/js/apps/evals/experiment.js');
+const { routerPrompt, parseRoute, ROUTER_GEN, plannerPrompt, parsePlan, PLANNER_GEN } = await import('../../src/js/assistant/engine/llmPlanner.js');
+const { runPlannerSuites } = await import('./harness/plannerSuites.js');
 
 const ENDPOINT = process.env.DECISION_URL ?? 'http://127.0.0.1:8765/v1/systemone';
 const apps = appRegistry.launchable();
-const ms = { commands: [], plan: [] };
-let suite = 'commands';
 let server = {};
 const vela = process.env.VELA_DIR && await (await import('../../src/js/assistant/engine/vela.js')).loadVela({
     baseUrl: process.env.VELA_DIR.replace(/\/?$/, '/'), file: process.env.VELA_FILE,
@@ -53,42 +48,33 @@ async function decide(state, questions) {
     return answers;
 }
 
-async function plan(text, activeApp) {
-    const t0 = performance.now();
-    const out = await planWithDecisions(text, { decide, apps, activeApp });
-    ms[suite].push(performance.now() - t0);
-    return out ?? [];
+// LLM-only mode: same prompts and generation settings as chat.js, served by Ollama.
+const LLM = process.env.LLM_MODEL;
+const LLM_CPU = !!process.env.LLM_CPU; // num_gpu: 0 → no layers offloaded, pure CPU
+async function complete(prompt, { maxTokens, temperature, think }) {
+    const res = await fetch(`${process.env.OLLAMA_URL ?? 'http://127.0.0.1:11434'}/api/chat`, {
+        method: 'POST',
+        body: JSON.stringify({ model: LLM, messages: [{ role: 'user', content: prompt }], stream: false, think, options: { temperature, num_predict: maxTokens, ...(LLM_CPU && { num_gpu: 0 }) } }),
+    });
+    if (!res.ok) throw new Error(`Ollama ${res.status}: ${await res.text()}`);
+    return (await res.json()).message.content;
+}
+async function llmPlan(text, history) {
+    try { return parsePlan(await complete(plannerPrompt(text, history, apps.map((a) => a.id)), PLANNER_GEN)); }
+    catch { return null; } // malformed JSON counts as no plan, as in the app
 }
 
-const rows = [];
-const t0 = performance.now();
-const routeMs = [];
-const routeRows = [];
-for (const c of ROUTING_DATASET) {
-    const t = performance.now();
-    const predicted = await routeWithDecisions(c.input, { decide });
-    routeMs.push(performance.now() - t);
-    routeRows.push({ input: c.input, expected: c.expected, predicted, correct: predicted === c.expected, tags: c.tags ?? [] });
-}
-const routing = summariseRouting(routeRows);
-for (const c of COMMANDS_DATASET) rows.push(buildRow(c, await plan(c.input, c.activeApp)));
-const commands = summariseCommands(rows);
-suite = 'plan';
-const planSuite = await scorePlan(PLANS_DATASET, (text, _history, activeApp) => plan(text, activeApp));
-const runtimeMs = performance.now() - t0;
+const { scorecard, rows } = await runPlannerSuites(LLM ? {
+    route: (text) => complete(routerPrompt(text), ROUTER_GEN).then(parseRoute),
+    plan: (text, _activeApp, history) => llmPlan(text, history),
+} : {
+    route: (text) => routeWithDecisions(text, { decide }),
+    plan: (text, activeApp) => planWithDecisions(text, { decide, apps, activeApp }),
+}, () => (LLM
+    ? { model: LLM, planner: LLM, backend: LLM_CPU ? 'ollama·cpu' : 'ollama', source: 'llm-planner' }
+    : { model: null, planner: server.model ?? 'unknown', backend: `decision·${server.device ?? '?'}`, source: 'decision-planner' }));
+const { configKey, runtimeMs, suites: { routing, commands, plan: planSuite } } = scorecard;
 
-const { config, configKey } = snapshotConfig({
-    model: null, planner: server.model ?? 'unknown', backend: `decision·${server.device ?? '?'}`, reasoning: 'none', language: 'en', repeats: 1,
-});
-const by = { model: config.planner };
-const scorecard = {
-    generatedAt: new Date().toISOString(), source: 'decision-planner', config, configKey, runtimeMs,
-    suites: {
-        routing: { ...routing, ...by, latency: latencyStats(routeMs) },
-        commands: { ...commands, ...by, latency: latencyStats(ms.commands) },
-        plan: { ...planSuite, ...by, latency: latencyStats(ms.plan) },
-    },
-};
 const expPath = new URL('./results/experiments.json', import.meta.url);
 const runs = existsSync(expPath) ? JSON.parse(readFileSync(expPath, 'utf8')) : [];
 writeFileSync(expPath, JSON.stringify([...runs, scorecard].slice(-50), null, 2) + '\n');
@@ -96,15 +82,15 @@ writeFileSync(expPath, JSON.stringify([...runs, scorecard].slice(-50), null, 2) 
 const base = JSON.parse(readFileSync(new URL('./results/latest.json', import.meta.url), 'utf8'));
 const llm = base.suites;
 const pct = (x) => (x == null ? '  n/a' : `${(x * 100).toFixed(0)}%`.padStart(5));
-const sorted = [...ms].sort((a, b) => a - b);
+const p50 = (k) => `${Math.round(scorecard.suites[k].latency?.p50Ms ?? NaN)}ms`.padStart(7);
 
-console.log(`\nDecision planner (${configKey}) vs LLM planner (${base.config?.model})`);
-console.log(`  routing accuracy      ${pct(routing.accuracy)}  vs ${pct(llm.routing?.accuracy)}`);
-console.log(`  commands exactMatch   ${pct(commands.exactMatch)}  vs ${pct(llm.commands?.exactMatch)}`);
+console.log(`\nPlanner (${configKey}) vs LLM planner (${base.config?.model}) — score, then median time per call`);
+console.log(`  routing accuracy      ${pct(routing.accuracy)}  vs ${pct(llm.routing?.accuracy)}   ${p50('routing')}`);
+console.log(`  commands exactMatch   ${pct(commands.exactMatch)}  vs ${pct(llm.commands?.exactMatch)}   ${p50('commands')}`);
 console.log(`  commands actionF1     ${pct(commands.actionF1)}  vs ${pct(llm.commands?.actionF1)}`);
-console.log(`  plan planExactMatch   ${pct(planSuite.planExactMatch)}  vs ${pct(llm.plan?.planExactMatch)}`);
+console.log(`  plan planExactMatch   ${pct(planSuite.planExactMatch)}  vs ${pct(llm.plan?.planExactMatch)}   ${p50('plan')}`);
 console.log(`  plan turnExactMatch   ${pct(planSuite.turnExactMatch)}  vs ${pct(llm.plan?.turnExactMatch)}`);
-console.log(`  latency p50 / plan    ${Math.round(sorted[sorted.length >> 1])}ms  vs ${Math.round(llm.commands?.latency?.p50Ms ?? NaN)}ms`);
+console.log(`  total runtime         ${(runtimeMs / 1000).toFixed(1)}s`);
 
 const fails = [
     ...routing.failures.map((f) => `  [route] "${f.input}"  expected ${f.expected}  got ${f.predicted}`),

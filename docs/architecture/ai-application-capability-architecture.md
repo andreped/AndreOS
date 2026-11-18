@@ -169,7 +169,11 @@ flowchart TB
 - The **fast layer** handles simple, common phrases instantly and works even
   before the AI model has loaded.
 - The **model layer** handles anything trickier, using the registry's
-  capabilities as its menu of valid actions.
+  capabilities as its menu of valid actions. Routing and planning there are done
+  either by the chat model (prompted) or by a small **decision model** that picks
+  the action and app from registry-built options (Settings → Command planner; see
+  [decision-models.md](./decision-models.md)). Either way the output is the same
+  action list.
 - Both funnel into one place — the **`ActionDispatcher`** — which is the single,
   uniform way any action gets executed. No more scattered per-app globals.
 

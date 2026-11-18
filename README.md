@@ -10,6 +10,7 @@ Demo is available at https://andreped.dev.
 - **Build tool:** [Vite](https://vitejs.dev/)
 - **AI chat (GPU):** [@mlc-ai/web-llm](https://github.com/mlc-ai/web-llm) — user-selectable LLM on WebGPU (default: Qwen3.5-2B), run in a Web Worker
 - **AI chat (CPU):** [@wllama/wllama](https://github.com/ngxson/wllama) — llama.cpp/WASM backend for a no-GPU option (same Qwen3.5-2B, GGUF Q4_K_M)
+- **Routing & planning (optional):** [onnxruntime-web](https://onnxruntime.ai/docs/tutorials/web/) — a 150M decision model ([Vela 3.1 pico](https://huggingface.co/vllm-sr/vela3.1-pico-150m), our [browser export](https://huggingface.co/andreped/vela3.1-onnx)) on WebGPU or WASM
 - **Voice commands:** [@xenova/transformers](https://github.com/xenova/transformers.js) + ONNX Runtime Web — Whisper in a Web Worker; model and language configurable
 - **Browser requirement:** Chrome 113+, Edge 113+, or Safari 18+ (macOS Sequoia / iOS 18) for GPU AI chat (WebGPU). The CPU model needs no WebGPU; voice works in any browser with `MediaRecorder` + WASM support
 
@@ -45,6 +46,27 @@ Pick **Qwen3.5 2B (CPU)** in Settings → AI Engine to run the same model on the
 - **Prompt compression:** on the CPU path the assistant retrieves only the relevant bio sections (BM25) instead of injecting a ~1,200-token system prompt, and skips the router for plainly conversational text to keep the KV cache warm.
 
 See [docs/architecture/cpu-inference.md](docs/architecture/cpu-inference.md) and [prompt-compression.md](docs/architecture/prompt-compression.md).
+
+</details>
+
+<details open>
+<summary><strong>Decision-model planner</strong> — route and plan with a tiny model, answer with the LLM</summary>
+
+Pick **Settings → AI Engine → Command planner → Decision model** to let a 150M *decision model*
+([Vela 3.1 pico](https://huggingface.co/vllm-sr/vela3.1-pico-150m)) decide whether a message is a command and which
+actions to run — it *chooses* among options instead of generating JSON. The chat model only writes answers.
+It runs in the browser via onnxruntime-web (WebGPU, or WASM on CPU), loaded from our
+[ONNX export](https://huggingface.co/andreped/vela3.1-onnx). Replies are tagged **⚡ Quick action** or **🧠 by the AI**.
+
+| In the browser (M4 Pro) | Routing | Commands | Plans |
+|---|---|---|---|
+| Decision model · WebGPU | 100% · 36 ms | 93% · 105 ms | 78% · 90 ms |
+| Decision model · CPU | 100% · 250 ms | 93% · 753 ms | 67% · 724 ms |
+| Qwen3.5 2B (prompted) · WebGPU | 96% · 614 ms | 100% · 2.6 s | 100% · 2.7 s |
+
+Score · median time per call, on small eval sets (the LLM's prompt contains some eval cases as examples).
+See [docs/architecture/decision-models.md](docs/architecture/decision-models.md) and
+[ADR 0001](docs/adr/0001-decision-model-planner.md).
 
 </details>
 
@@ -130,7 +152,7 @@ The 🔍 search uses a pure-JS BM25 engine with prefix matching. It searches app
 
 All preferences persist in `localStorage`. Configure via the ⚙️ Settings app or the **EN / NO** taskbar button (updates both transcription and LLM language at once).
 
-- **AI Engine:** LLM model selector · reasoning effort (None / Low / Medium / High) · response language (Auto / EN / NO)
+- **AI Engine:** LLM model selector · reasoning effort (None / Low / Medium / High) · command planner (Chat model / Decision model) · response language (Auto / EN / NO)
 - **Speech:** Whisper Tiny / Base / Small · transcription language · AI command parsing toggle
 
 </details>
@@ -141,6 +163,8 @@ All preferences persist in `localStorage`. Configure via the ⚙️ Settings app
 The **Evals** app scores the assistant (retrieval, resolution, routing, commands, multi-shot plans, RAGAS-style answers) using the *same* scorers as the Node harness (`npm run eval`). Deterministic suites run instantly; the LLM suites run against the real loaded model.
 
 - **Live run** with per-sample progress; **Stop** halts a run mid-flight, and closing the app cancels it too (no background inference left running).
+- Opens on the committed run for **your current setup**; each suite shows the model that produced it, and the **Experiments** tab compares setups by score and time per call (e.g. decision model vs LLM for routing).
+- Planner experiments also run from the CLI: `VELA_DIR=models/vela3.1-onnx/pico-150m node tests/evals/decisionPlanner.experiment.mjs` (decision model) or `LLM_MODEL=qwen3.5:2b node tests/evals/decisionPlanner.experiment.mjs` (LLM via Ollama).
 - Runs in the background without blocking the desktop — see [docs/architecture/background-workers.md](docs/architecture/background-workers.md).
 
 </details>
@@ -230,6 +254,7 @@ Short design docs for the trickier subsystems:
 - [Prompt compression](docs/architecture/prompt-compression.md) — retrieval instead of a big system prompt (TTFT on CPU)
 - [Background work](docs/architecture/background-workers.md) — workers, non-blocking evals, cancellable pipeline
 - [Assistant & evals](docs/architecture/assistant-evals-architecture.md) — the assistant pipeline and eval suites
+- [Decision models](docs/architecture/decision-models.md) — routing & planning with a small in-browser decision model ([ADR 0001](docs/adr/0001-decision-model-planner.md))
 - [Experiment store](docs/architecture/experiment-store.md) — persisting & comparing eval runs across configs (Cloudflare D1)
 
 ---
@@ -238,5 +263,6 @@ Short design docs for the trickier subsystems:
 
 - **[Justinianus2001 (Hoang Le Ngoc)](https://github.com/Justinianus2001/my-portfolio)** — the original desktop portfolio template this project is based on. The core window management, taskbar, audio system, and visual design all originate from his work.
 - **[MLC AI / web-llm](https://github.com/mlc-ai/web-llm)** — WebGPU-powered in-browser LLM runtime powering the OS Assistant.
+- **[vLLM Semantic Router × KR Labs](https://huggingface.co/vllm-sr)** — the Vela 3.1 decision models behind the optional command planner.
 - **[wllama](https://github.com/ngxson/wllama)** — llama.cpp compiled to WebAssembly, powering the CPU inference backend.
 - **[Google Scholar](https://scholar.google.com/citations?user=U20zUHQAAAAJ)** — scraped weekly (via a proxy) into Cloudflare KV; powers the Research window and RAG index.

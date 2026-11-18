@@ -51,6 +51,30 @@ function evalsSavePlugin() {
                 });
             });
 
+            // Dev-only: append a single experiment scorecard (e.g. an in-browser WebGPU
+            // planner run) to experiments.json, without touching latest.json/history.
+            server.middlewares.use('/__evals/experiment', (req, res, next) => {
+                if (req.method !== 'POST') return next();
+                let body = '';
+                req.on('data', (chunk) => { body += chunk; });
+                req.on('end', () => {
+                    try {
+                        const scorecard = JSON.parse(body || '{}');
+                        if (!scorecard?.config || !scorecard?.suites) throw new Error('missing config/suites');
+                        const expPath = path.join(RESULTS_DIR, 'experiments.json');
+                        let runs = [];
+                        try { runs = JSON.parse(fs.readFileSync(expPath, 'utf8')); } catch { runs = []; }
+                        fs.writeFileSync(expPath, JSON.stringify([...runs, scorecard].slice(-50), null, 2) + '\n');
+                        res.statusCode = 200;
+                        res.setHeader('content-type', 'application/json');
+                        res.end(JSON.stringify({ ok: true, runs: Math.min(runs.length + 1, 50) }));
+                    } catch (err) {
+                        res.statusCode = 400;
+                        res.end(JSON.stringify({ ok: false, error: String(err) }));
+                    }
+                });
+            });
+
             // Dev-only publish proxy: forwards a scorecard to the cloud experiment
             // store using EVALS_ENDPOINT + EVALS_WRITE_TOKEN from the dev server's
             // env (.env). The token stays in Node — it never reaches the browser —

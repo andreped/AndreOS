@@ -1,10 +1,8 @@
 /**
  * vela.js — System One decisions in the browser (or Node) with a Vela 3.1 pico
- * ONNX export (scripts/export_vela_web.py): WASM (int8) by default, WebGPU (fp16)
- * on request. `decide(state, questions)` returns System One `answers`, so it is
- * a drop-in for the Python decision server in decisionPlanner.js.
- * tl;dr: fp16 on onnxruntime-web's WebGPU EP flips decisions (max |dp| 0.8; the same
- * file on CPU: 0.001; fp32 on WebGPU: exact), so WebGPU isn't the default until that's fixed.
+ * ONNX export (scripts/export_vela_web.py): WebGPU when available (fp16-stored
+ * weights, fp32 math), else WASM (int8). `decide(state, questions)` returns System
+ * One `answers`, so it is a drop-in for the Python decision server in decisionPlanner.js.
  */
 import * as ort from 'onnxruntime-web';
 import { Tokenizer } from '@huggingface/tokenizers';
@@ -43,7 +41,7 @@ async function cachedFetch(url) {
  * @returns {Promise<{ decide: (state: any, questions: object) => Promise<Record<string, any>>,
  *                     device: string, model: string, encode: Function }>}
  */
-export async function loadVela({ baseUrl, device = 'wasm', file, fetchFn = cachedFetch }) {
+export async function loadVela({ baseUrl, device = 'auto', file, fetchFn = cachedFetch }) {
     const get = async (f) => {
         const res = await fetchFn(baseUrl + f);
         if (!res.ok) throw new Error(`Vela: ${f} → HTTP ${res.status}`);

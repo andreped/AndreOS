@@ -85,7 +85,7 @@ export function render() {
                     </div>
 
                     <h3 class="settings-subsection-title">Command planner</h3>
-                    <p class="settings-section-desc">What turns a request into OS actions. The decision model (Vela 3.1 pico, 150M, ~200 MB download) picks actions instead of generating JSON — faster and more reliable; the chat model still writes the answers.</p>
+                    <p class="settings-section-desc">What turns a request into OS actions. The decision model (Vela 3.1 pico, 150M, ~200–300 MB download) picks actions instead of generating JSON — faster and more reliable; the chat model still writes the answers.</p>
                     <div class="lang-pills" id="planner-pills">
                         <button class="lang-pill" data-planner="llm">Chat model</button>
                         <button class="lang-pill" data-planner="vela">Decision model</button>
