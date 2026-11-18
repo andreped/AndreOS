@@ -70,6 +70,11 @@ export async function onRequestPost({ request, env }) {
         const s = scorecard.suites[suite];
         if (s && !s.skipped && typeof s[metric] === 'number') metrics[suite] = s[metric];
     }
+    // Per-suite median call latency, so the list view can compare speed per task.
+    metrics.p50 = {};
+    for (const [suite, s] of Object.entries(scorecard.suites)) {
+        if (!s?.skipped && Number.isFinite(s?.latency?.p50Ms)) metrics.p50[suite] = s.latency.p50Ms;
+    }
 
     const res = await env.EVALS_DB.prepare(
         `INSERT INTO eval_runs

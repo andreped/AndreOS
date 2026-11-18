@@ -34,7 +34,7 @@ import { scoreAnswerRow, summariseAnswers } from '../../../../tests/evals/harnes
 import { routeLabel } from '../../../../tests/evals/harness/normalize.js';
 import { mean, stdev, majority, mode, passAtK, repeat } from '../../../../tests/evals/harness/stats.js';
 import { getModelId, getReasoningEffort, getLLMLanguage, isCpuModel, getPlannerModelId } from '../../platform/services/Settings.js';
-import { snapshotConfig, makeTimer, headlineMetrics, suiteModel } from './experiment.js';
+import { snapshotConfig, makeTimer, headlineMetrics, suiteModel, suiteLatency } from './experiment.js';
 
 // How many times each LLM sample is re-run to measure nondeterminism. Real
 // model calls vary run-to-run, so a single sample is misleading — we repeat and
@@ -533,7 +533,7 @@ export function setupEvalsWindow(winEl) {
         localRuns = (await loadCommittedRuns()).runs.filter((sc) => sc.config);
         const local = localRuns.map((sc, i) => ({
             id: `local:${i}`, config_key: sc.configKey, ...sc.config,
-            metrics: headlineMetrics(sc), runtime_ms: sc.runtimeMs, created_at: sc.generatedAt,
+            metrics: { ...headlineMetrics(sc), p50: suiteLatency(sc) }, runtime_ms: sc.runtimeMs, created_at: sc.generatedAt,
         }));
         let cloud = [];
         let note = '';
@@ -557,9 +557,8 @@ export function setupEvalsWindow(winEl) {
         if (!runs.length) { expListEl.innerHTML = '<div class="eval-empty">No runs published yet.</div>'; return; }
         const groups = new Map();
         for (const r of runs) {
-            const g = groups.get(r.config_key) ?? { key: r.config_key, latest: r, count: 0, runtimes: [] };
+            const g = groups.get(r.config_key) ?? { key: r.config_key, latest: r, count: 0 };
             g.count++;
-            if (Number.isFinite(r.runtime_ms)) g.runtimes.push(r.runtime_ms);
             if (new Date(r.created_at) > new Date(g.latest.created_at)) g.latest = r;
             groups.set(r.config_key, g);
         }
@@ -569,8 +568,9 @@ export function setupEvalsWindow(winEl) {
             .map((g) => {
                 const l = g.latest;
                 const m = l.metrics ?? {};
-                const metricCells = cols.map((k) => `<td>${m[k] != null ? pct(m[k]) : '—'}</td>`).join('');
-                const runtime = median(g.runtimes);
+                // Score, with the median per-call latency for that task underneath.
+                const metricCells = cols.map((k) => `<td>${m[k] != null ? pct(m[k]) : '—'}`
+                    + `${m.p50?.[k] != null ? `<br><span class="eval-model">${fmtMs(m.p50[k])}</span>` : ''}</td>`).join('');
                 // Chat model in bold; a separate router/planner (e.g. a decision model) as its own line.
                 const main = l.model ?? l.planner ?? '?';
                 const planner = l.model && l.planner ? `<br><span class="eval-model">planner: ${escapeHtml(l.planner)}</span>`
@@ -580,15 +580,15 @@ export function setupEvalsWindow(winEl) {
                     + `<span class="eval-ds-tag">reason:${escapeHtml(l.reasoning ?? '?')}</span>`
                     + `<span class="eval-ds-tag">${escapeHtml(l.language ?? '?')}</span></td>`
                     + `<td>${g.count}</td>${metricCells}`
-                    + `<td>${runtime != null ? fmtMs(runtime) : '—'}</td>`
                     + `<td>${new Date(l.created_at).toLocaleString()}</td></tr>`;
             }).join('');
         expListEl.innerHTML = `
             <table class="eval-ds-table eval-exp-table">
                 <thead><tr>
                     <th>Config</th><th>Runs</th>
-                    <th>Routing</th><th>Commands</th><th>Plan</th><th>Answers</th>
-                    <th>Runtime</th><th>Last run</th>
+                    <th title="Score · median time per model call">Routing</th><th title="Score · median time per model call">Commands</th>
+                    <th title="Score · median time per model call">Plan</th><th title="Score · median time per model call">Answers</th>
+                    <th>Last run</th>
                 </tr></thead>
                 <tbody>${rows}</tbody>
             </table>`;
@@ -1088,9 +1088,3 @@ function escapeHtml(s) {
 // ── Experiments-table formatters ──────────────────────────────────────────────
 const pct = (v) => `${Math.round(v * 100)}%`;
 const fmtMs = (ms) => (ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${Math.round(ms)}ms`);
-function median(arr) {
-    if (!arr.length) return null;
-    const s = [...arr].sort((a, b) => a - b);
-    const mid = Math.floor(s.length / 2);
-    return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
-}

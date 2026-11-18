@@ -3,7 +3,7 @@
  * Pure logic only — no browser, no model. Runnable: node tests/evals/experiment.selfcheck.mjs
  */
 import assert from 'node:assert/strict';
-import { snapshotConfig, latencyStats, makeTimer, headlineMetrics, suiteModel } from '../../src/js/apps/evals/experiment.js';
+import { snapshotConfig, latencyStats, makeTimer, headlineMetrics, suiteModel, suiteLatency } from '../../src/js/apps/evals/experiment.js';
 
 // snapshotConfig — stable key + params round-trip
 {
@@ -66,6 +66,8 @@ import { snapshotConfig, latencyStats, makeTimer, headlineMetrics, suiteModel } 
     };
     const m = headlineMetrics(scorecard);
     assert.deepEqual(m, { routing: 0.9, commands: 0.6, plan: 0.5 });
+    assert.deepEqual(suiteLatency({ suites: { routing: { latency: { p50Ms: 12 } }, answers: { skipped: true, latency: { p50Ms: 9 } }, plan: {} } }),
+        { routing: 12 }, 'p50 per suite, skipped/missing omitted');
 }
 
 console.log('✅ experiment.selfcheck: all assertions passed');

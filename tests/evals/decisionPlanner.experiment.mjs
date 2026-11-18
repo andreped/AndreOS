@@ -32,7 +32,8 @@ const { snapshotConfig, latencyStats } = await import('../../src/js/apps/evals/e
 
 const ENDPOINT = process.env.DECISION_URL ?? 'http://127.0.0.1:8765/v1/systemone';
 const apps = appRegistry.launchable();
-const ms = [];
+const ms = { commands: [], plan: [] };
+let suite = 'commands';
 let server = {};
 const vela = process.env.VELA_DIR && await (await import('../../src/js/assistant/engine/vela.js')).loadVela({
     baseUrl: process.env.VELA_DIR.replace(/\/?$/, '/'), file: process.env.VELA_FILE,
@@ -55,7 +56,7 @@ async function decide(state, questions) {
 async function plan(text, activeApp) {
     const t0 = performance.now();
     const out = await planWithDecisions(text, { decide, apps, activeApp });
-    ms.push(performance.now() - t0);
+    ms[suite].push(performance.now() - t0);
     return out ?? [];
 }
 
@@ -72,17 +73,21 @@ for (const c of ROUTING_DATASET) {
 const routing = summariseRouting(routeRows);
 for (const c of COMMANDS_DATASET) rows.push(buildRow(c, await plan(c.input, c.activeApp)));
 const commands = summariseCommands(rows);
+suite = 'plan';
 const planSuite = await scorePlan(PLANS_DATASET, (text, _history, activeApp) => plan(text, activeApp));
 const runtimeMs = performance.now() - t0;
 
 const { config, configKey } = snapshotConfig({
     model: null, planner: server.model ?? 'unknown', backend: `decision·${server.device ?? '?'}`, reasoning: 'none', language: 'en', repeats: 1,
 });
-const latency = latencyStats(ms);
 const by = { model: config.planner };
 const scorecard = {
     generatedAt: new Date().toISOString(), source: 'decision-planner', config, configKey, runtimeMs,
-    suites: { routing: { ...routing, ...by, latency: latencyStats(routeMs) }, commands: { ...commands, ...by, latency }, plan: { ...planSuite, ...by, latency } },
+    suites: {
+        routing: { ...routing, ...by, latency: latencyStats(routeMs) },
+        commands: { ...commands, ...by, latency: latencyStats(ms.commands) },
+        plan: { ...planSuite, ...by, latency: latencyStats(ms.plan) },
+    },
 };
 const expPath = new URL('./results/experiments.json', import.meta.url);
 const runs = existsSync(expPath) ? JSON.parse(readFileSync(expPath, 'utf8')) : [];

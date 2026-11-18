@@ -89,3 +89,12 @@ export function headlineMetrics(scorecard) {
     }
     return out;
 }
+
+/** Median single-call latency per suite ({ suite: p50Ms }), for comparing models per task. */
+export function suiteLatency(scorecard) {
+    const out = {};
+    for (const [suite, s] of Object.entries(scorecard?.suites ?? {})) {
+        if (!s?.skipped && Number.isFinite(s?.latency?.p50Ms)) out[suite] = s.latency.p50Ms;
+    }
+    return out;
+}
