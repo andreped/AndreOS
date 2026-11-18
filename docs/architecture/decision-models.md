@@ -19,13 +19,11 @@ flowchart LR
     U["'open research and summarise it'"] --> R{"route<br/>command / direct"}
     R -->|direct| LLM["🧠 chat LLM answers"]
     R -->|command| S["split into clauses"]
-    S --> A{"action?<br/>open · open_paper · close · minimize<br/>desktop · browse · search · chat · none"}
+    A{"action?<br/>open · open_paper · close · minimize · desktop<br/>browse:github/linkedin/scholar/web · search:andreos · chat · none"}
     A -->|open| APP{"which app?"}
-    A -->|browse| SITE{"which site?"}
-    A -->|open_paper / search| SLOT["slot from text<br/>(paper n°, query, URL)"]
+    A -->|open_paper / browse / search| SLOT["slot from text<br/>(paper n°, query, URL)"]
     A -->|chat| LLM
     APP --> PLAN["📋 plan → ActionDispatcher"]
-    SITE --> PLAN
     SLOT --> PLAN
 ```
 
@@ -50,6 +48,31 @@ plan checklist UI and the evals don't care which planner made it.
 The state the model sees is `Focused window: <app>\nVisitor said: "<clause>"`.
 Option descriptions use example phrases that are **not** in the eval sets, so the
 scores measure generalisation.
+
+Prompt design notes. Decision models are encoders. They don't learn from in-context
+examples the way an LLM does; they match the request against the **option text**. So:
+
+- **Describe every option well.** App options are built from the registry: the
+  catalog `search.subtitle` plus the first voice keywords of the assistant profile.
+  That way Research and Skills, which have no subtitle, are still described.
+- **Give options meaningful names.** The model reads option names too.
+  `browse:web` and `search:andreos` work better than a bare `search`, which used to
+  catch "search online". The known sites are options in the action question
+  (`browse:github` …), which saves one forward pass.
+- **Guard options the text can't support.** The AndreOS search bar is picked only
+  when the request has an explicit search word (*search, find, look up, søk*), and
+  `open_paper` only when a paper number can be read ("paper 44", "the second one").
+  Otherwise the runner-up wins.
+- **Describe info requests as `chat`.** "Give me the author list" is a request to
+  answer, not an app to open; saying so in the `chat` option fixed it.
+- **Tune on the dev set, report on the test sets.**
+  [`datasets/plannerDev.js`](../../tests/evals/datasets/plannerDev.js) holds fresh
+  phrasings, and `DEV=1` scores only those and saves nothing. These changes took the
+  dev set from 17 to 27 of 28 correct. On the untouched test sets plans went from
+  78% to 89% on WebGPU and from 67% to 89% on CPU; commands stayed at 93%.
+  Flattening every step into one question ("open the Skills app", …) was also tried
+  and rejected. It scored 79% (commands) and 44% (plans) on the test sets, because
+  the app keywords pulled questions away from `chat`.
 
 ---
 
@@ -108,8 +131,9 @@ Apple M4 Pro, Chrome; score · median time per call. Small eval sets (28 / 14 / 
 
 | Planner | Where | Routing | Commands | Plans |
 |---|---|---|---|---|
-| pico-150m | WebGPU | 100% · 36 ms | 93% · 105 ms | 78% · 90 ms |
-| pico-150m | WASM (CPU) | 100% · 250 ms | 93% · 753 ms | 67% · 724 ms |
+| pico-150m | WebGPU | 100% · 37 ms | 93% · 170 ms | 89% · 86 ms |
+| pico-150m | WASM (CPU) | 100% · 223 ms | 93% · 1.4 s | 89% · 835 ms |
+| pico-380m | WebGPU | 96% · 51 ms | 79% · 284 ms | 56% · 286 ms |
 | Qwen3.5 2B prompted | WebGPU (WebLLM) | 96% · 614 ms | 100% · 2.6 s | 100% · 2.7 s |
 
 Decisions run *before* an answer is written, so the decision model and the chat
@@ -127,6 +151,8 @@ Routing / commands / plan can be scored for any planner, and every run records
 ```bash
 # decision model, in-process with the browser engine (CPU)
 VELA_DIR=models/vela3.1-onnx/pico-150m node tests/evals/decisionPlanner.experiment.mjs
+# the same, on the prompt-tuning dev set only (nothing saved)
+DEV=1 VELA_DIR=models/vela3.1-onnx/pico-150m node tests/evals/decisionPlanner.experiment.mjs
 # the chat model's prompts on a local Ollama model (add LLM_CPU=1 for CPU only)
 LLM_MODEL=qwen3.5:2b node tests/evals/decisionPlanner.experiment.mjs
 ```
@@ -143,7 +169,8 @@ and show in the Evals app's **Experiments** tab.
 - Request splitting and slot filling use **English-only** text patterns: Norwegian
   routing works, Norwegian multi-step plans don't yet.
 - The planner sees the **focused window**, not the conversation history.
-- Decision models are sensitive to **option wording** (pico-380m drops from 100 % to
-  57 % on commands with one wording change) — grow the eval set before tuning.
+- Decision models are sensitive to **option wording** (pico-380m moved from 57% to
+  79% on commands and from 67% to 56% on plans with the same wording change). Tune on
+  the dev set and grow it before tuning further.
 - First use downloads ~210–305 MB (cached afterwards); on WebGPU the weights take
   ~600 MB of GPU memory next to the chat model.

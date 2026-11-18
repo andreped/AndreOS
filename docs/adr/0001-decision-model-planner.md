@@ -44,9 +44,9 @@ read as indications. Apple M4 Pro, Chrome; score · median time per call.
 
 | Planner | Where | Routing | Commands | Plans | All three |
 |---|---|---|---|---|---|
-| **vela3.1-pico-150m** | browser · WebGPU | **100% · 36 ms** | **93% · 105 ms** | **78% · 90 ms** | **4.6 s** |
-| vela3.1-pico-150m | browser · WASM (CPU) | 100% · 250 ms | 93% · 753 ms | 67% · 724 ms | 32.6 s |
-| vela3.1-pico-380m | browser · WebGPU | 96% · 71 ms | 57% · 164 ms | 67% · 156 ms | 9.4 s |
+| **vela3.1-pico-150m** | browser · WebGPU | **100% · 37 ms** | **93% · 170 ms** | **89% · 86 ms** | **6.1 s** |
+| vela3.1-pico-150m | browser · WASM (CPU) | 100% · 223 ms | 93% · 1.4 s | 89% · 835 ms | 50.7 s |
+| vela3.1-pico-380m | browser · WebGPU | 96% · 51 ms | 79% · 284 ms | 56% · 286 ms | 11.4 s |
 | Qwen3.5 2B (prompted) | browser · WebGPU (Aug 2026) | 96% · 614 ms | 100% · 2.6 s | 100% · 2.7 s | — |
 | Qwen3.5 2B (prompted) | native GPU (Ollama) | 96% · 376 ms | 86% · 658 ms | 78% · 653 ms | 37.7 s |
 | Qwen3.5 2B (prompted) | native CPU (Ollama) | 93% · 837 ms | 86% · 1.65 s | 78% · 1.47 s | 85.5 s |
@@ -54,14 +54,34 @@ read as indications. Apple M4 Pro, Chrome; score · median time per call.
 | Llama 3.2 3B (prompted) | browser · WebGPU (Aug 2026) | 64% · 568 ms | 50% · 2.8 s | 0% · 2.7 s | — |
 
 - **Much faster where it runs.** In the browser on WebGPU, the decision model routes
-  ~17× and plans ~25–30× faster than Qwen3.5 2B doing the same tasks by prompting
-  (614 ms vs 36 ms; 2.6–2.7 s vs ~0.1 s). Even against Qwen running *natively* on the
-  GPU it is ~10× / ~6× faster, and on CPU it still finishes all suites ~2.8× sooner.
+  ~17× and plans ~15–30× faster than Qwen3.5 2B doing the same tasks by prompting
+  (614 ms vs 37 ms; 2.6–2.7 s vs 86–170 ms). Even against Qwen running *natively* on
+  the GPU it is ~10× faster at routing and ~4–8× at planning, and on CPU it still
+  finishes all suites ~1.7× sooner.
 - **About as accurate, without eval leakage.** Qwen3.5 2B scored 100 % on commands and
   plans in the browser, but its prompts contain eval inputs as few-shot examples; the
   decision model's option descriptions deliberately don't.
-- **Small model wins.** pico-150m beats pico-380m on our tasks (380m picks "search"
-  for "open X" — it is sensitive to option wording) and is a third of the download.
+- **Small model wins.** pico-150m beats pico-380m on our tasks and is a third of the
+  download. 380m is more sensitive to option wording: the prompt change below moved
+  its commands from 57% to 79% but its plans from 67% to 56%.
+- **Option text matters more than examples.** Decision models are encoders: they
+  match the request against option text rather than learning from in-context
+  examples, so adding example pairs does little. What helped, tuned on a separate dev
+  set ([plannerDev.js](../../tests/evals/datasets/plannerDev.js), 27 fresh phrasings)
+  and only then checked on the test sets:
+  - describing every app from the registry (catalog subtitle + voice keywords);
+  - meaningful option names (`browse:web`, `search:andreos` instead of a bare `search`);
+  - taking the in-app search bar only when the request has an explicit search word;
+  - describing info requests ("tell me …", "give me …", "list …") under `chat`;
+  - skipping `open_paper` when the text has no paper number, and reading a bare
+    number ("paper 44") as one.
+
+  Each guard falls back to the next-best option. Dev went from 17 to 27 of 28; on the
+  test sets pico-150m plans rose from 78% to 89% (WebGPU) and from 67% to 89% (CPU),
+  with commands unchanged at 93% ("show skills" now goes to chat). The longer options
+  cost time on CPU (commands median 0.75 s → 1.4 s), much less on WebGPU. Flattening
+  every step into one question was worse (79% commands, 44% plans): app keywords
+  pulled questions away from `chat`.
 - **Other decision models tried** (Python reference server, CPU): d3-edge 86 % / 67 %
   (commands / plans) at 4.7 s per plan, d3-lite 79 % / 67 % at 11 s,
   Decision-1.0-Sol-2B 86 % / 56 % at 11.5 s, Decision-1.0-Kai-0.6B 43 % / 22 %.
@@ -70,8 +90,8 @@ read as indications. Apple M4 Pro, Chrome; score · median time per call.
   fp16-stored weights with fp32 math are exact (|Δp| ≤ 0.0003). 4-bit weights flipped
   decisions too. Naive int8 flipped decisions until the sensitive layers stayed fp32.
 - **Decisions run before the answer**, so the decision model and the chat model never
-  compete for the device within a turn; on CPU the decision model adds only
-  ~0.25 s per message (routing) and ~0.7 s per command (planning).
+  compete for the device within a turn; on CPU the decision model adds
+  ~0.2 s per message (routing) and ~0.6–1.2 s per command (planning).
 
 ## Alternatives considered
 
@@ -100,6 +120,9 @@ read as indications. Apple M4 Pro, Chrome; score · median time per call.
 
 - Make the decision model the default planner once a live run of the default setup is committed.
 - Decide whether to keep the decision model on CPU when the chat model uses the GPU
-  (saves ~600 MB of GPU memory for ~0.2–0.6 s per message), or offer it as a setting.
-- Grow the eval sets (paraphrases, Norwegian) before tuning option wording further.
-- Give the planner the previous turn as context.
+  (saves ~600 MB of GPU memory for ~0.2–1.2 s per message), or offer it as a setting.
+- Grow the dev and test sets (paraphrases, Norwegian, follow-ups): with 14 commands
+  and 9 plans, one case moves a score by 7–11 points.
+- Give the planner the previous turn as context. The remaining plan failure is a
+  follow-up ("what about his skills?").
+- Consider falling back to the chat model when the top decision is not confident.

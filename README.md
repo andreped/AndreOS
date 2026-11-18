@@ -60,8 +60,8 @@ It runs in the browser via onnxruntime-web (WebGPU, or WASM on CPU), loaded from
 
 | In the browser (M4 Pro) | Routing | Commands | Plans |
 |---|---|---|---|
-| Decision model · WebGPU | 100% · 36 ms | 93% · 105 ms | 78% · 90 ms |
-| Decision model · CPU | 100% · 250 ms | 93% · 753 ms | 67% · 724 ms |
+| Decision model · WebGPU | 100% · 37 ms | 93% · 170 ms | 89% · 86 ms |
+| Decision model · CPU | 100% · 223 ms | 93% · 1.4 s | 89% · 835 ms |
 | Qwen3.5 2B (prompted) · WebGPU | 96% · 614 ms | 100% · 2.6 s | 100% · 2.7 s |
 
 Score · median time per call, on small eval sets (the LLM's prompt contains some eval cases as examples).

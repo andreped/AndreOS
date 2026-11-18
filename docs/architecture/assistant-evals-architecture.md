@@ -307,7 +307,12 @@ call* for each task — e.g. routing by a decision model vs by a 2B LLM.
 ```bash
 VELA_DIR=models/vela3.1-onnx/pico-150m node tests/evals/decisionPlanner.experiment.mjs   # decision model (browser engine, CPU)
 LLM_MODEL=qwen3.5:2b [LLM_CPU=1] node tests/evals/decisionPlanner.experiment.mjs         # chat-model prompts via Ollama
+DEV=1 VELA_DIR=… node tests/evals/decisionPlanner.experiment.mjs                          # dev set only, nothing saved
 ```
+
+Tune prompts and option wording on the **dev set** (`datasets/plannerDev.js`, fresh
+phrasings that no scorecard uses), then report the test sets. Tuning directly on the
+test sets makes the scores measure memorisation.
 
 Each run is appended to `experiments.json` (planner only, no chat model). The same
 `harness/plannerSuites.js` runs in the browser for WebGPU decision-model runs.
@@ -334,6 +339,7 @@ flowchart LR
 | You want… | You do… |
 |---|---|
 | A new test case | **Add a row** to the relevant `datasets/*.js` file |
+| A case to tune a planner prompt against | Add it to `datasets/plannerDev.js` (never scored) |
 | A new fixture paper | Add an entry to `fixtureCorpus.js` (+ reference it in `retrieval.js`) |
 | A new metric on a suite | Extend the scorer in `harness/` (both runners get it) |
 | A new suite (new decision point) | Add a dataset + a scorer + wire it into `runNode.js` and the app's `SUITE_META` |

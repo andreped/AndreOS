@@ -64,6 +64,18 @@ async function llmPlan(text, history) {
     catch { return null; } // malformed JSON counts as no plan, as in the app
 }
 
+// DEV=1: score only the tuning set (datasets/plannerDev.js) and save nothing.
+if (process.env.DEV) {
+    const { PLANNER_DEV_DATASET } = await import('./datasets/plannerDev.js');
+    const { buildRow } = await import('./harness/scoreCommands.js');
+    const devRows = [];
+    for (const c of PLANNER_DEV_DATASET) devRows.push(buildRow(c, (await (LLM ? llmPlan(c.input, []) : planWithDecisions(c.input, { decide, apps, activeApp: c.activeApp }))) ?? []));
+    const ok = devRows.filter((r) => r.exact).length;
+    console.log(`Dev set: ${ok}/${devRows.length} exact`);
+    for (const r of devRows.filter((r) => !r.exact)) console.log(`  "${r.input}"  expected ${r.expected}  got ${r.predicted}`);
+    process.exit(0);
+}
+
 const { scorecard, rows } = await runPlannerSuites(LLM ? {
     route: (text) => complete(routerPrompt(text), ROUTER_GEN).then(parseRoute),
     plan: (text, _activeApp, history) => llmPlan(text, history),
