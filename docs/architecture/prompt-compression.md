@@ -1,7 +1,8 @@
 # Prompt compression (retrieval, not a big system prompt)
 
 Cuts **time-to-first-token** by shrinking the prompt — critical on CPU, where TTFT ≈
-prefill length. Also helps the small (2B) model stay on-topic.
+prefill length. Also helps the small (2B) model stay on-topic. All prompts and how
+language is handled: [prompts.md](./prompts.md).
 
 ## Problem
 Every QA answer injected the full **~1,200-token** bio system prompt (+ all matched

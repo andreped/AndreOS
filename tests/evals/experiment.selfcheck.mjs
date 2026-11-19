@@ -3,7 +3,7 @@
  * Pure logic only — no browser, no model. Runnable: node tests/evals/experiment.selfcheck.mjs
  */
 import assert from 'node:assert/strict';
-import { snapshotConfig, latencyStats, makeTimer, headlineMetrics, suiteModel, suiteLatency } from '../../src/js/apps/evals/experiment.js';
+import { snapshotConfig, latencyStats, makeTimer, headlineMetrics, suiteModel, suiteLatency, evalLangOf, promptLangOf } from '../../src/js/apps/evals/experiment.js';
 
 // snapshotConfig — stable key + params round-trip
 {
@@ -13,6 +13,22 @@ import { snapshotConfig, latencyStats, makeTimer, headlineMetrics, suiteModel, s
     assert.equal(configKey, 'Qwen3.5-2B-q4f16_1-MLC·webgpu·r:none·en');
     assert.equal(config.backend, 'webgpu');
     assert.equal(config.repeats, 3);
+    assert.equal(config.evalLang, 'en');
+}
+
+// evalLang — Norwegian runs get their own key; keyless/old runs read as English
+{
+    const sc = snapshotConfig({ model: 'm', backend: 'webgpu', reasoning: 'none', language: 'auto', evalLang: 'no' });
+    assert.equal(sc.configKey, 'm·webgpu·r:none·auto·eval:no');
+    assert.equal(evalLangOf(sc), 'no');
+    assert.equal(evalLangOf({ config_key: sc.configKey }), 'no', 'cloud row');
+    assert.equal(evalLangOf({ configKey: 'm·webgpu·r:none·en' }), 'en', 'pre-bilingual run');
+    assert.equal(evalLangOf({}), 'en', 'node scorecard');
+    const both = snapshotConfig({ model: 'm', backend: 'b', reasoning: 'none', language: 'en', evalLang: 'no', promptLang: 'no' });
+    assert.equal(both.configKey, 'm·b·r:none·en·prompt:no·eval:no');
+    assert.equal(evalLangOf(both), 'no', 'eval suffix stays last');
+    assert.equal(promptLangOf(both), 'no');
+    assert.equal(promptLangOf({ configKey: 'm·b·r:none·en' }), 'en', 'pre-bilingual run');
 }
 
 // snapshotConfig + suiteModel — a separate planner is keyed and attributed per suite

@@ -13,7 +13,9 @@
  *
  * Output: writes results/latest.json (canonical scorecard) and appends a
  * trimmed entry to results/history.json. Exits non-zero when any suite falls
- * below its threshold in THRESHOLDS, so CI gates on it.
+ * below its threshold in THRESHOLDS, so CI gates on it. Retrieval + resolution
+ * also run on the Norwegian translations (scorecard.languages.no) — reported
+ * for comparison, not gated.
  *
  * Usage:  node tests/evals/runNode.js
  */
@@ -44,34 +46,37 @@ const THRESHOLDS = {
 };
 
 async function main() {
-    const [{ BM25 }, { FIXTURE_CORPUS }, { RETRIEVAL_DATASET }, { RESOLUTION_DATASET }, { scoreRetrieval }] =
+    const [{ BM25 }, { FIXTURE_CORPUS }, { evalDatasets, EVAL_LANGUAGES }, { scoreRetrieval }] =
         await Promise.all([
             import('../../src/js/assistant/retrieval/BM25.js'),
             import('./datasets/fixtureCorpus.js'),
-            import('./datasets/retrieval.js'),
-            import('./datasets/resolution.js'),
+            import('./datasets/localize.js'),
             import('./harness/scoreRetrieval.js'),
         ]);
 
-    const suites = {};
+    let registry = null, registryError = null;
+    try { ({ assistantRegistry: registry } = await import('../../src/js/apps/index.js')); }
+    catch (err) { registryError = err; console.warn(`⚠️  Skipped resolution/integrity (registry import failed): ${err.message}`); }
+    const skipped = (suite) => ({ suite, skipped: true, reason: registryError.message });
 
-    // ── 1. Retrieval ──────────────────────────────────────────────────────────
     const bm25 = new BM25();
     for (const doc of FIXTURE_CORPUS) bm25.addDocument(doc.id, `${doc.title}. ${doc.abstract}`);
     bm25.build();
     const retrieve = (query, k) => bm25.search(query, k).map((r) => r.id);
-    suites.retrieval = scoreRetrieval(RETRIEVAL_DATASET, retrieve, 5);
 
-    // ── 2. Resolution + 3. Integrity (need the registries) ──────────────────────
-    try {
-        const { assistantRegistry } = await import('../../src/js/apps/index.js');
-        suites.resolution = scoreResolution(RESOLUTION_DATASET, assistantRegistry);
-        suites.integrity = scoreIntegrity(assistantRegistry);
-    } catch (err) {
-        console.warn(`⚠️  Skipped resolution/integrity (registry import failed): ${err.message}`);
-        suites.resolution = { suite: 'resolution', skipped: true, reason: err.message };
-        suites.integrity = { suite: 'integrity', skipped: true, reason: err.message };
-    }
+    // ── 1. Retrieval + 2. Resolution, per language ───────────────────────────────
+    const languages = Object.fromEntries(EVAL_LANGUAGES.map((lang) => {
+        const ds = evalDatasets(lang);
+        return [lang, {
+            retrieval: scoreRetrieval(ds.retrieval, retrieve, 5),
+            resolution: registry ? scoreResolution(ds.resolution, registry) : skipped('resolution'),
+        }];
+    }));
+    const { en, ...otherLanguages } = languages;
+    const suites = { ...en };
+
+    // ── 3. Integrity (language-independent) ─────────────────────────────────────
+    suites.integrity = registry ? scoreIntegrity(registry) : skipped('integrity');
 
     // ── 4. Scorer self-test ─────────────────────────────────────────────────────
     // The plan + answers suites can only *run* against the real in-browser model,
@@ -85,6 +90,7 @@ async function main() {
         generatedAt: new Date().toISOString(),
         source: 'node',
         suites,
+        languages: otherLanguages,
     };
     persist(scorecard);
     printReport(scorecard);
@@ -263,6 +269,16 @@ function printReport(scorecard) {
     if (it) console.log(it.skipped ? `  Integrity   skipped (${it.reason})` : `  Integrity   profiles=${it.total}  pass=${it.pass ? 'yes' : 'NO'}${it.problems?.length ? `\n    ${it.problems.join('\n    ')}` : ''}`);
     const sc = scorecard.suites.scorers;
     if (sc) console.log(`  Scorers     self-test pass=${sc.pass ? 'yes' : 'NO'}${sc.problems?.length ? `\n    ${sc.problems.join('\n    ')}` : ''}`);
+
+    for (const [lang, s] of Object.entries(scorecard.languages ?? {})) {
+        const en = scorecard.suites;
+        console.log(`\n  [${lang}] vs [en] (not gated)`);
+        console.log(`  Retrieval   hit@1=${fmt(s.retrieval.hit1)} vs ${fmt(en.retrieval.hit1)}  hit@3=${fmt(s.retrieval.hit3)} vs ${fmt(en.retrieval.hit3)}  MRR=${fmt(s.retrieval.mrr)} vs ${fmt(en.retrieval.mrr)}`);
+        if (!s.resolution.skipped) console.log(`  Resolution  accuracy=${fmt(s.resolution.accuracy)} vs ${fmt(en.resolution.accuracy)}`);
+        for (const suite of Object.values(s)) {
+            if (suite.failures?.length) console.log(`    ${suite.suite} failures: ${suite.failures.map((f) => JSON.stringify(f.query ?? f.input)).join(', ')}`);
+        }
+    }
 
     for (const suite of Object.values(scorecard.suites)) {
         if (suite.failures?.length) {

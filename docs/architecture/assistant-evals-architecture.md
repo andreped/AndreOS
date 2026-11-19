@@ -221,6 +221,7 @@ app a free trend history.
 ```text
 tests/evals/
 ├── datasets/            📁 golden truth (data only)
+│   ├── localize.js          picks English or Norwegian (`no` field) per run
 │   ├── routing.js
 │   ├── commands.js
 │   ├── plans.js             multi-shot conversations
@@ -278,6 +279,34 @@ separately (`config.model`, `config.planner`), and both are part of the config
 key, so the **Experiments** tab shows one row per setup with *score · time per
 call* for each task — e.g. routing by a decision model vs by a 2B LLM.
 
+## 6c. Languages (English and Norwegian)
+
+The routing, commands, plan, retrieval and resolution sets are **bilingual**: each
+row keeps its English text and has a Norwegian (Bokmål) translation in `no`
+(an override object when the expectation changes too, e.g. a web-search target).
+[`datasets/localize.js`](../../tests/evals/datasets/localize.js) picks one language
+(`evalDatasets(lang)`) and fails loudly if a translation is missing. Answers are
+English only for now.
+
+Two languages are recorded per run, both in the config and on the config key:
+
+| Field | Meaning | Key suffix | Set by |
+|---|---|---|---|
+| `evalLang` | language of the eval inputs | `·eval:no` | Evals app picker · `EVAL_LANG` |
+| `promptLang` | router/planner prompt language | `·prompt:no` / `·prompt:auto` | `auto` in the app · `PROMPT_LANG` |
+
+English adds no suffix, so runs from before this existed group with new English
+runs and read as `en`. The Experiments tab tags each row `input:` / `prompt:`, and
+trend sparklines only use runs in the same input language.
+
+- **Node (`runNode.js`)** scores retrieval + resolution in both languages; English
+  gates CI, Norwegian is reported next to it (`scorecard.languages.no`).
+- **Evals app** — the English / Norsk picker sets the input language of a live run.
+- **CLI** — `EVAL_LANG=no` and `PROMPT_LANG=en|no|auto` (default `auto`).
+
+Why prompts follow the message language, with the benchmark:
+[ADR 0003](../adr/0003-language-matched-planner-prompts.md).
+
 ---
 
 ## 7. How a run happens
@@ -307,6 +336,7 @@ call* for each task — e.g. routing by a decision model vs by a 2B LLM.
 ```bash
 VELA_DIR=models/vela3.1-onnx/pico-150m node tests/evals/decisionPlanner.experiment.mjs   # decision model (browser engine, CPU)
 LLM_MODEL=qwen3.5:2b [LLM_CPU=1] node tests/evals/decisionPlanner.experiment.mjs         # chat-model prompts via Ollama
+LLM_MODEL=qwen3.5:2b EVAL_LANG=no PROMPT_LANG=no node tests/evals/decisionPlanner.experiment.mjs  # Norwegian inputs, fixed prompt language
 DEV=1 VELA_DIR=… node tests/evals/decisionPlanner.experiment.mjs                          # dev set only, nothing saved
 ```
 

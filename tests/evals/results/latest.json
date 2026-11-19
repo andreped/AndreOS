@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-18T15:42:30.265Z",
+  "generatedAt": "2026-11-19T08:17:32.086Z",
   "source": "node",
   "suites": {
     "retrieval": {
@@ -14,7 +14,7 @@
     },
     "resolution": {
       "suite": "resolution",
-      "total": 17,
+      "total": 15,
       "accuracy": 1,
       "failures": []
     },
@@ -29,6 +29,86 @@
       "total": 17,
       "pass": 1,
       "problems": []
+    }
+  },
+  "languages": {
+    "no": {
+      "retrieval": {
+        "suite": "retrieval",
+        "total": 10,
+        "k": 5,
+        "hit1": 0.4,
+        "hit3": 0.4,
+        "recall": 0.4,
+        "mrr": 0.4,
+        "failures": [
+          {
+            "query": "programvare for dyp læring på helsnittbilder",
+            "expected": [
+              "fastpathology"
+            ],
+            "ranked": []
+          },
+          {
+            "query": "segmentering av brystkreft i histopatologi",
+            "expected": [
+              "h2g-net"
+            ],
+            "ranked": []
+          },
+          {
+            "query": "fargenormalisering av histopatologiske bilder",
+            "expected": [
+              "torchstain"
+            ],
+            "ranked": []
+          },
+          {
+            "query": "generere kliniske notater fra pasientsamtaler",
+            "expected": [
+              "clinical-nlp-summary"
+            ],
+            "ranked": []
+          },
+          {
+            "query": "segmentering av gigapikselbilder med nevrale nettverk",
+            "expected": [
+              "h2g-net",
+              "fastpathology"
+            ],
+            "ranked": []
+          },
+          {
+            "query": "norsk tale til strukturert sammendrag",
+            "expected": [
+              "clinical-nlp-summary"
+            ],
+            "ranked": []
+          }
+        ]
+      },
+      "resolution": {
+        "suite": "resolution",
+        "total": 15,
+        "accuracy": 0.8,
+        "failures": [
+          {
+            "input": "publikasjoner",
+            "expected": "research",
+            "predicted": null
+          },
+          {
+            "input": "artikler",
+            "expected": "research",
+            "predicted": null
+          },
+          {
+            "input": "CV-en",
+            "expected": "resume",
+            "predicted": null
+          }
+        ]
+      }
     }
   }
 }

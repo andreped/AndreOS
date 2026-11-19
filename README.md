@@ -83,7 +83,8 @@ See [docs/architecture/decision-models.md](docs/architecture/decision-models.md)
 | Multi-step | `"open chat and ask which day is it"` | — |
 | Help | `"help"` | `"hjelp"` |
 
-Compound commands are parsed by the LLM when loaded. Speech model, language and mode are configurable in Settings → Speech.
+Compound commands are parsed by the LLM when loaded, with an English or Norwegian prompt picked per message
+([ADR 0003](docs/adr/0003-language-matched-planner-prompts.md)). Speech model, language and mode are configurable in Settings → Speech.
 
 **Realtime dictation (experimental):** pick **Nemotron 3.5 ASR** in Settings → Speech and your words appear in the
 chat field *as you speak*; press Send mid-sentence to send what's there and stop listening. It runs fully in the

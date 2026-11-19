@@ -8070,5 +8070,2070 @@
         }
       }
     }
+  },
+  {
+    "generatedAt": "2026-11-19T08:09:54.884Z",
+    "source": "llm-planner",
+    "config": {
+      "model": "qwen3.5:2b",
+      "backend": "ollama",
+      "reasoning": "none",
+      "language": "en",
+      "evalLang": "en",
+      "promptLang": "en",
+      "repeats": 1
+    },
+    "configKey": "qwen3.5:2b·ollama·r:none·en",
+    "runtimeMs": 33441.805208000005,
+    "suites": {
+      "routing": {
+        "suite": "routing",
+        "total": 26,
+        "accuracy": 0.9615384615384616,
+        "precision": 0.9285714285714286,
+        "recall": 1,
+        "f1": 0.962962962962963,
+        "confusion": {
+          "tp": 13,
+          "fp": 1,
+          "fn": 0,
+          "tn": 12
+        },
+        "byTag": {
+          "open": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "window": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "browse": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "research-action": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "bio": {
+            "total": 7,
+            "accuracy": 1
+          },
+          "research-question": {
+            "total": 3,
+            "accuracy": 0.6666666666666666
+          },
+          "skills": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "contact": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "tricky": {
+            "total": 5,
+            "accuracy": 1
+          },
+          "meta": {
+            "total": 1,
+            "accuracy": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "summarize his PhD research",
+            "expected": "direct",
+            "predicted": "command"
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 26,
+          "meanMs": 449.73688626923064,
+          "p50Ms": 354.227167,
+          "p95Ms": 362.21866699999964,
+          "minMs": 350.91862500000025,
+          "maxMs": 2814.296083
+        }
+      },
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.8571428571428571,
+        "actionF1": 0.8571428571428571,
+        "precision": 0.8571428571428571,
+        "recall": 0.8571428571428571,
+        "targetAccuracy": 1,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 0.3333333333333333,
+            "actionF1": 0.3333333333333333
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "close this window",
+            "expected": [
+              "close"
+            ],
+            "predicted": [],
+            "f1": 0
+          },
+          {
+            "input": "minimize",
+            "expected": [
+              "minimize"
+            ],
+            "predicted": [
+              "close"
+            ],
+            "f1": 0
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 14,
+          "meanMs": 667.6256667142861,
+          "p50Ms": 616.7719579999994,
+          "p95Ms": 871.6202499999999,
+          "minMs": 507.73979099999997,
+          "maxMs": 978.5454580000005
+        }
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.7777777777777778,
+        "turnExactMatch": 0.9090909090909091,
+        "turnF1": 0.9090909090909091,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.7777777777777778
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 1
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 1
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.5
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 1
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.75
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "open:projects"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [],
+                "exact": false
+              }
+            ]
+          },
+          {
+            "id": "projects-to-skills-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "open:projects"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [],
+                "exact": false
+              }
+            ]
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 22,
+          "meanMs": 563.2743276363634,
+          "p50Ms": 553.6495830000022,
+          "p95Ms": 645.3279169999987,
+          "minMs": 482.12049999999726,
+          "maxMs": 645.8131250000006
+        }
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-19T08:10:27.131Z",
+    "source": "llm-planner",
+    "config": {
+      "model": "qwen3.5:2b",
+      "backend": "ollama",
+      "reasoning": "none",
+      "language": "en",
+      "evalLang": "en",
+      "promptLang": "no",
+      "repeats": 1
+    },
+    "configKey": "qwen3.5:2b·ollama·r:none·en·prompt:no",
+    "runtimeMs": 32156.207333,
+    "suites": {
+      "routing": {
+        "suite": "routing",
+        "total": 26,
+        "accuracy": 0.8461538461538461,
+        "precision": 0.7647058823529411,
+        "recall": 1,
+        "f1": 0.8666666666666666,
+        "confusion": {
+          "tp": 13,
+          "fp": 4,
+          "fn": 0,
+          "tn": 9
+        },
+        "byTag": {
+          "open": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "window": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "browse": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "research-action": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "bio": {
+            "total": 7,
+            "accuracy": 1
+          },
+          "research-question": {
+            "total": 3,
+            "accuracy": 0
+          },
+          "skills": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "contact": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "tricky": {
+            "total": 5,
+            "accuracy": 0.8
+          },
+          "meta": {
+            "total": 1,
+            "accuracy": 0
+          }
+        },
+        "failures": [
+          {
+            "input": "summarize his PhD research",
+            "expected": "direct",
+            "predicted": "command"
+          },
+          {
+            "input": "how many publications does he have?",
+            "expected": "direct",
+            "predicted": "command"
+          },
+          {
+            "input": "explain what FastPathology is",
+            "expected": "direct",
+            "predicted": "command"
+          },
+          {
+            "input": "what can you do?",
+            "expected": "direct",
+            "predicted": "command"
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 26,
+          "meanMs": 384.25348569230766,
+          "p50Ms": 381.75666699999965,
+          "p95Ms": 387.87354199999993,
+          "minMs": 376.1920419999997,
+          "maxMs": 457.673167
+        }
+      },
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.8571428571428571,
+        "actionF1": 0.8571428571428571,
+        "precision": 0.8571428571428571,
+        "recall": 0.8571428571428571,
+        "targetAccuracy": 1,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 0.6666666666666666,
+            "actionF1": 0.6666666666666666
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 0.5,
+            "actionF1": 0.5
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "close this window",
+            "expected": [
+              "close"
+            ],
+            "predicted": [
+              "minimize"
+            ],
+            "f1": 0
+          },
+          {
+            "input": "search the web for digital pathology",
+            "expected": [
+              "browse:digital pathology"
+            ],
+            "predicted": [
+              "browse:digital patologi"
+            ],
+            "f1": 0
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 14,
+          "meanMs": 655.3400685714288,
+          "p50Ms": 576.762834000001,
+          "p95Ms": 823.5206670000007,
+          "minMs": 509.0501669999994,
+          "maxMs": 1192.2504580000004
+        }
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.6666666666666666,
+        "turnExactMatch": 0.8181818181818182,
+        "turnF1": 0.8484848484848484,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.6666666666666666
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 0.6666666666666666
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 0.6
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.5
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 1
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.5
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "open:projects"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "minimize"
+                ],
+                "exact": false
+              }
+            ]
+          },
+          {
+            "id": "research-drilldown-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:research"
+                ],
+                "predicted": [
+                  "open:research"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open_paper:2"
+                ],
+                "predicted": [
+                  "open:research",
+                  "browse:scholar"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "browse:github.com/andreped",
+                  "chat"
+                ],
+                "exact": false
+              }
+            ]
+          },
+          {
+            "id": "resume-then-ask-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:resume"
+                ],
+                "predicted": [
+                  "open:resume"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "open:resume"
+                ],
+                "exact": false
+              }
+            ]
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 22,
+          "meanMs": 590.3357216818181,
+          "p50Ms": 582.5333749999991,
+          "p95Ms": 667.6049170000006,
+          "minMs": 507.71929199999795,
+          "maxMs": 875.377292000001
+        }
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-19T08:10:58.304Z",
+    "source": "llm-planner",
+    "config": {
+      "model": "qwen3.5:2b",
+      "backend": "ollama",
+      "reasoning": "none",
+      "language": "en",
+      "evalLang": "no",
+      "promptLang": "en",
+      "repeats": 1
+    },
+    "configKey": "qwen3.5:2b·ollama·r:none·en·eval:no",
+    "runtimeMs": 31102.604166,
+    "suites": {
+      "routing": {
+        "suite": "routing",
+        "total": 26,
+        "accuracy": 0.6923076923076923,
+        "precision": 0.6190476190476191,
+        "recall": 1,
+        "f1": 0.7647058823529412,
+        "confusion": {
+          "tp": 13,
+          "fp": 8,
+          "fn": 0,
+          "tn": 5
+        },
+        "byTag": {
+          "open": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "window": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "browse": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "research-action": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "bio": {
+            "total": 7,
+            "accuracy": 0.5714285714285714
+          },
+          "research-question": {
+            "total": 3,
+            "accuracy": 0
+          },
+          "skills": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "contact": {
+            "total": 1,
+            "accuracy": 0
+          },
+          "tricky": {
+            "total": 5,
+            "accuracy": 0.4
+          },
+          "meta": {
+            "total": 1,
+            "accuracy": 0
+          }
+        },
+        "failures": [
+          {
+            "input": "hva gjør André hos DIPS?",
+            "expected": "direct",
+            "predicted": "command"
+          },
+          {
+            "input": "oppsummer doktorgradsforskningen hans",
+            "expected": "direct",
+            "predicted": "command"
+          },
+          {
+            "input": "hvor mange publikasjoner har han?",
+            "expected": "direct",
+            "predicted": "command"
+          },
+          {
+            "input": "er han tilgjengelig for konsulentoppdrag?",
+            "expected": "direct",
+            "predicted": "command"
+          },
+          {
+            "input": "forklar hva FastPathology er",
+            "expected": "direct",
+            "predicted": "command"
+          },
+          {
+            "input": "kan du fortelle meg om prosjektene hans",
+            "expected": "direct",
+            "predicted": "command"
+          },
+          {
+            "input": "hva kan du gjøre?",
+            "expected": "direct",
+            "predicted": "command"
+          },
+          {
+            "input": "vis meg hva han jobbet med hos SINTEF",
+            "expected": "direct",
+            "predicted": "command"
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 26,
+          "meanMs": 361.5152451538463,
+          "p50Ms": 359.08779200000026,
+          "p95Ms": 375.41537500000004,
+          "minMs": 350.14274999999975,
+          "maxMs": 410.076708
+        }
+      },
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.5,
+        "actionF1": 0.5357142857142857,
+        "precision": 0.5357142857142857,
+        "recall": 0.5357142857142857,
+        "targetAccuracy": 0.7222222222222222,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 0.5714285714285714,
+            "actionF1": 0.6428571428571429
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 0,
+            "actionF1": 0
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 0.5,
+            "actionF1": 0.5
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 0.75,
+            "actionF1": 0.875
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "åpne CV-en",
+            "expected": [
+              "open:resume"
+            ],
+            "predicted": [
+              "browse:linkedin.com/in/andré-pedersen"
+            ],
+            "f1": 0
+          },
+          {
+            "input": "vis ferdigheter",
+            "expected": [
+              "open:skills"
+            ],
+            "predicted": [
+              "chat"
+            ],
+            "f1": 0
+          },
+          {
+            "input": "lukk dette vinduet",
+            "expected": [
+              "close"
+            ],
+            "predicted": [],
+            "f1": 0
+          },
+          {
+            "input": "minimer",
+            "expected": [
+              "minimize"
+            ],
+            "predicted": [],
+            "f1": 0
+          },
+          {
+            "input": "vis skrivebordet",
+            "expected": [
+              "desktop"
+            ],
+            "predicted": [],
+            "f1": 0
+          },
+          {
+            "input": "søk på nettet etter digital patologi",
+            "expected": [
+              "browse:digital patologi"
+            ],
+            "predicted": [
+              "browse:digital pathology"
+            ],
+            "f1": 0
+          },
+          {
+            "input": "åpne CV-en og så åpne forskning",
+            "expected": [
+              "open:resume",
+              "open:research"
+            ],
+            "predicted": [
+              "open:resume",
+              "chat"
+            ],
+            "f1": 0.5
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 14,
+          "meanMs": 612.2751457857146,
+          "p50Ms": 579.3697499999998,
+          "p95Ms": 765.2277910000012,
+          "minMs": 493.15350000000035,
+          "maxMs": 793.4699580000015
+        }
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.2222222222222222,
+        "turnExactMatch": 0.6363636363636364,
+        "turnF1": 0.6727272727272727,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.2222222222222222
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 0.3333333333333333
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 0.2
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 0.5
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 0
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0
+          }
+        },
+        "failures": [
+          {
+            "id": "resume-then-ask",
+            "turns": [
+              {
+                "expected": [
+                  "open:resume"
+                ],
+                "predicted": [
+                  "browse:linkedin.com/in/andré-pedersen"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "open:projects"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [],
+                "exact": false
+              }
+            ]
+          },
+          {
+            "id": "paper-pronoun",
+            "turns": [
+              {
+                "expected": [
+                  "open:research",
+                  "open_paper:5"
+                ],
+                "predicted": [
+                  "open:research",
+                  "open_paper:5",
+                  "chat"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "research-drilldown-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:research"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open_paper:2"
+                ],
+                "predicted": [
+                  "open:research"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "resume-then-ask-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:resume"
+                ],
+                "predicted": [
+                  "browse:linkedin.com/in/andré-pedersen"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "github-then-desktop-casual",
+            "turns": [
+              {
+                "expected": [
+                  "browse:github.com/andreped"
+                ],
+                "predicted": [
+                  "browse:github.com/andreped"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "desktop"
+                ],
+                "predicted": [
+                  "close"
+                ],
+                "exact": false
+              }
+            ]
+          },
+          {
+            "id": "projects-to-skills-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "open:projects"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [],
+                "exact": false
+              }
+            ]
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 22,
+          "meanMs": 596.6075642272727,
+          "p50Ms": 598.4627909999981,
+          "p95Ms": 675.2848330000015,
+          "minMs": 499.4619160000002,
+          "maxMs": 798.0169170000008
+        }
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-19T08:11:29.889Z",
+    "source": "llm-planner",
+    "config": {
+      "model": "qwen3.5:2b",
+      "backend": "ollama",
+      "reasoning": "none",
+      "language": "en",
+      "evalLang": "no",
+      "promptLang": "no",
+      "repeats": 1
+    },
+    "configKey": "qwen3.5:2b·ollama·r:none·en·prompt:no·eval:no",
+    "runtimeMs": 31506.89375,
+    "suites": {
+      "routing": {
+        "suite": "routing",
+        "total": 26,
+        "accuracy": 0.8461538461538461,
+        "precision": 0.8,
+        "recall": 0.9230769230769231,
+        "f1": 0.8571428571428571,
+        "confusion": {
+          "tp": 12,
+          "fp": 3,
+          "fn": 1,
+          "tn": 10
+        },
+        "byTag": {
+          "open": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "window": {
+            "total": 3,
+            "accuracy": 0.6666666666666666
+          },
+          "browse": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "research-action": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "bio": {
+            "total": 7,
+            "accuracy": 1
+          },
+          "research-question": {
+            "total": 3,
+            "accuracy": 0
+          },
+          "skills": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "contact": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "tricky": {
+            "total": 5,
+            "accuracy": 1
+          },
+          "meta": {
+            "total": 1,
+            "accuracy": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "minimer vinduet",
+            "expected": "command",
+            "predicted": "direct"
+          },
+          {
+            "input": "oppsummer doktorgradsforskningen hans",
+            "expected": "direct",
+            "predicted": "command"
+          },
+          {
+            "input": "hvor mange publikasjoner har han?",
+            "expected": "direct",
+            "predicted": "command"
+          },
+          {
+            "input": "forklar hva FastPathology er",
+            "expected": "direct",
+            "predicted": "command"
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 26,
+          "meanMs": 398.3787595769231,
+          "p50Ms": 395.7402920000004,
+          "p95Ms": 407.685958,
+          "minMs": 387.3084999999992,
+          "maxMs": 478.27783300000004
+        }
+      },
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.9285714285714286,
+        "actionF1": 0.9285714285714286,
+        "precision": 0.9285714285714286,
+        "recall": 0.9285714285714286,
+        "targetAccuracy": 1,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 0.6666666666666666,
+            "actionF1": 0.6666666666666666
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "lukk dette vinduet",
+            "expected": [
+              "close"
+            ],
+            "predicted": [],
+            "f1": 0
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 14,
+          "meanMs": 588.2168749285712,
+          "p50Ms": 554.7487499999988,
+          "p95Ms": 716.7734579999997,
+          "minMs": 472.5624169999992,
+          "maxMs": 807.4722919999986
+        }
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.5555555555555556,
+        "turnExactMatch": 0.7727272727272727,
+        "turnF1": 0.8030303030303029,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.5555555555555556
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 0.6666666666666666
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 0.6
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.25
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 1
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.25
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "open:projects"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "minimize"
+                ],
+                "exact": false
+              }
+            ]
+          },
+          {
+            "id": "research-drilldown-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:research"
+                ],
+                "predicted": [
+                  "browse:scholar"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open_paper:2"
+                ],
+                "predicted": [
+                  "open:research"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "chat"
+                ],
+                "exact": true
+              }
+            ]
+          },
+          {
+            "id": "resume-then-ask-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:resume"
+                ],
+                "predicted": [
+                  "open:resume"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "open:resume",
+                  "chat"
+                ],
+                "exact": false
+              }
+            ]
+          },
+          {
+            "id": "projects-to-skills-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "open:projects"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "minimize"
+                ],
+                "exact": false
+              }
+            ]
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 22,
+          "meanMs": 586.7760131818176,
+          "p50Ms": 580.4705409999988,
+          "p95Ms": 663.2925419999992,
+          "minMs": 515.1238749999975,
+          "maxMs": 725.7386669999978
+        }
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-19T08:15:19.549Z",
+    "source": "llm-planner",
+    "config": {
+      "model": "qwen3.5:2b",
+      "backend": "ollama",
+      "reasoning": "none",
+      "language": "en",
+      "evalLang": "en",
+      "promptLang": "auto",
+      "repeats": 1
+    },
+    "configKey": "qwen3.5:2b·ollama·r:none·en·prompt:auto",
+    "runtimeMs": 29804.109708,
+    "suites": {
+      "routing": {
+        "suite": "routing",
+        "total": 26,
+        "accuracy": 0.9615384615384616,
+        "precision": 0.9285714285714286,
+        "recall": 1,
+        "f1": 0.962962962962963,
+        "confusion": {
+          "tp": 13,
+          "fp": 1,
+          "fn": 0,
+          "tn": 12
+        },
+        "byTag": {
+          "open": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "window": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "browse": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "research-action": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "bio": {
+            "total": 7,
+            "accuracy": 1
+          },
+          "research-question": {
+            "total": 3,
+            "accuracy": 0.6666666666666666
+          },
+          "skills": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "contact": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "tricky": {
+            "total": 5,
+            "accuracy": 1
+          },
+          "meta": {
+            "total": 1,
+            "accuracy": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "summarize his PhD research",
+            "expected": "direct",
+            "predicted": "command"
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 26,
+          "meanMs": 356.3008060769231,
+          "p50Ms": 348.6519590000007,
+          "p95Ms": 354.4178750000001,
+          "minMs": 345.22570800000017,
+          "maxMs": 550.9955
+        }
+      },
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.9285714285714286,
+        "actionF1": 0.9285714285714286,
+        "precision": 0.9285714285714286,
+        "recall": 0.9285714285714286,
+        "targetAccuracy": 1,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 0.6666666666666666,
+            "actionF1": 0.6666666666666666
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "close this window",
+            "expected": [
+              "close"
+            ],
+            "predicted": [],
+            "f1": 0
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 14,
+          "meanMs": 571.8476488571431,
+          "p50Ms": 542.3634590000001,
+          "p95Ms": 695.5667920000014,
+          "minMs": 469.6259169999994,
+          "maxMs": 765.222749999999
+        }
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.7777777777777778,
+        "turnExactMatch": 0.9090909090909091,
+        "turnF1": 0.9090909090909091,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.7777777777777778
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 1
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 1
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.5
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 1
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.75
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "open:projects"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [],
+                "exact": false
+              }
+            ]
+          },
+          {
+            "id": "projects-to-skills-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "open:projects"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [],
+                "exact": false
+              }
+            ]
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 22,
+          "meanMs": 569.1235075454548,
+          "p50Ms": 554.0301660000005,
+          "p95Ms": 625.3399580000005,
+          "minMs": 486.8013749999991,
+          "maxMs": 748.7636659999989
+        }
+      }
+    }
+  },
+  {
+    "generatedAt": "2026-11-19T08:15:51.317Z",
+    "source": "llm-planner",
+    "config": {
+      "model": "qwen3.5:2b",
+      "backend": "ollama",
+      "reasoning": "none",
+      "language": "en",
+      "evalLang": "no",
+      "promptLang": "auto",
+      "repeats": 1
+    },
+    "configKey": "qwen3.5:2b·ollama·r:none·en·prompt:auto·eval:no",
+    "runtimeMs": 31673.508416,
+    "suites": {
+      "routing": {
+        "suite": "routing",
+        "total": 26,
+        "accuracy": 0.8461538461538461,
+        "precision": 0.8,
+        "recall": 0.9230769230769231,
+        "f1": 0.8571428571428571,
+        "confusion": {
+          "tp": 12,
+          "fp": 3,
+          "fn": 1,
+          "tn": 10
+        },
+        "byTag": {
+          "open": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "window": {
+            "total": 3,
+            "accuracy": 0.6666666666666666
+          },
+          "browse": {
+            "total": 3,
+            "accuracy": 1
+          },
+          "research-action": {
+            "total": 4,
+            "accuracy": 1
+          },
+          "bio": {
+            "total": 7,
+            "accuracy": 1
+          },
+          "research-question": {
+            "total": 3,
+            "accuracy": 0
+          },
+          "skills": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "contact": {
+            "total": 1,
+            "accuracy": 1
+          },
+          "tricky": {
+            "total": 5,
+            "accuracy": 1
+          },
+          "meta": {
+            "total": 1,
+            "accuracy": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "minimer vinduet",
+            "expected": "command",
+            "predicted": "direct"
+          },
+          {
+            "input": "oppsummer doktorgradsforskningen hans",
+            "expected": "direct",
+            "predicted": "command"
+          },
+          {
+            "input": "hvor mange publikasjoner har han?",
+            "expected": "direct",
+            "predicted": "command"
+          },
+          {
+            "input": "forklar hva FastPathology er",
+            "expected": "direct",
+            "predicted": "command"
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 26,
+          "meanMs": 392.08643903846144,
+          "p50Ms": 390.50954099999944,
+          "p95Ms": 397.11008300000003,
+          "minMs": 376.59241700000075,
+          "maxMs": 460.634208
+        }
+      },
+      "commands": {
+        "suite": "commands",
+        "total": 14,
+        "exactMatch": 0.9285714285714286,
+        "actionF1": 0.9285714285714286,
+        "precision": 0.9285714285714286,
+        "recall": 0.9285714285714286,
+        "targetAccuracy": 1,
+        "byTag": {
+          "open": {
+            "total": 7,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "window": {
+            "total": 3,
+            "exactMatch": 0.6666666666666666,
+            "actionF1": 0.6666666666666666
+          },
+          "browse": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "compound": {
+            "total": 4,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "chat": {
+            "total": 3,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "research": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          },
+          "open_paper": {
+            "total": 2,
+            "exactMatch": 1,
+            "actionF1": 1
+          }
+        },
+        "failures": [
+          {
+            "input": "lukk dette vinduet",
+            "expected": [
+              "close"
+            ],
+            "predicted": [
+              "minimize"
+            ],
+            "f1": 0
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 14,
+          "meanMs": 592.0523482142852,
+          "p50Ms": 553.5504169999986,
+          "p95Ms": 718.631374999999,
+          "minMs": 495.88920900000085,
+          "maxMs": 819.5372089999983
+        }
+      },
+      "plan": {
+        "suite": "plan",
+        "total": 9,
+        "turns": 22,
+        "planExactMatch": 0.5555555555555556,
+        "turnExactMatch": 0.7272727272727273,
+        "turnF1": 0.7878787878787878,
+        "byTag": {
+          "multishot": {
+            "total": 9,
+            "planExactMatch": 0.5555555555555556
+          },
+          "research": {
+            "total": 3,
+            "planExactMatch": 0.6666666666666666
+          },
+          "context-carryover": {
+            "total": 5,
+            "planExactMatch": 0.6
+          },
+          "open": {
+            "total": 4,
+            "planExactMatch": 0.25
+          },
+          "switch": {
+            "total": 2,
+            "planExactMatch": 0
+          },
+          "browse": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "window": {
+            "total": 2,
+            "planExactMatch": 1
+          },
+          "open_paper": {
+            "total": 1,
+            "planExactMatch": 1
+          },
+          "paraphrase": {
+            "total": 4,
+            "planExactMatch": 0.25
+          }
+        },
+        "failures": [
+          {
+            "id": "projects-to-skills",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "open:projects"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "minimize"
+                ],
+                "exact": false
+              }
+            ]
+          },
+          {
+            "id": "research-drilldown-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:research"
+                ],
+                "predicted": [
+                  "browse:scholar"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "open_paper:2"
+                ],
+                "predicted": [
+                  "open:research"
+                ],
+                "exact": false
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "open:research",
+                  "chat"
+                ],
+                "exact": false
+              }
+            ]
+          },
+          {
+            "id": "resume-then-ask-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:resume"
+                ],
+                "predicted": [
+                  "open:resume"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "chat"
+                ],
+                "predicted": [
+                  "open:resume",
+                  "chat"
+                ],
+                "exact": false
+              }
+            ]
+          },
+          {
+            "id": "projects-to-skills-casual",
+            "turns": [
+              {
+                "expected": [
+                  "open:projects"
+                ],
+                "predicted": [
+                  "open:projects"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "open:skills"
+                ],
+                "predicted": [
+                  "open:skills"
+                ],
+                "exact": true
+              },
+              {
+                "expected": [
+                  "close"
+                ],
+                "predicted": [
+                  "minimize"
+                ],
+                "exact": false
+              }
+            ]
+          }
+        ],
+        "model": "qwen3.5:2b",
+        "latency": {
+          "n": 22,
+          "meanMs": 599.375784,
+          "p50Ms": 593.0620829999971,
+          "p95Ms": 721.3962080000019,
+          "minMs": 519.5742910000008,
+          "maxMs": 743.2316659999997
+        }
+      }
+    }
   }
 ]
