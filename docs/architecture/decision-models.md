@@ -40,7 +40,7 @@ plan checklist UI and the evals don't care which planner made it.
 |---|---|---|
 | Router + planner | [`decisionPlanner.js`](../../src/js/assistant/engine/decisionPlanner.js) | `routeWithDecisions`, `planWithDecisions` — the questions, option descriptions and slot filling |
 | Browser engine | [`vela.js`](../../src/js/assistant/engine/vela.js) | `loadVela({ baseUrl }).decide(state, questions)` — render, tokenise, ONNX forward, softmax |
-| LLM planner (alternative) | [`llmPlanner.js`](../../src/js/assistant/engine/llmPlanner.js) | the chat model's router/planner prompts, shared with the CLI experiment |
+| LLM planner (alternative) | [`llmPlanner.js`](../../src/js/assistant/engine/llmPlanner.js) | the chat model's router/planner prompts (English + Norwegian, picked per message — [prompts.md](./prompts.md)), shared with the CLI experiment |
 | Wiring | [`chat.js`](../../src/js/assistant/engine/chat.js) | `routeIntent` / `parseCommand` use the decision model when Settings → Command planner = *Decision model*; fall back to the chat model on failure |
 | Setting | [`Settings.js`](../../src/js/platform/services/Settings.js) | `getPlanner()`, `DECISION_MODEL`, `getPlannerModelId()` |
 | UI source tags | [`VoiceCommandManager.js`](../../src/js/assistant/voice/VoiceCommandManager.js) | ⚡ *Quick action* (rules / decision model) vs 🧠 *Planned / Answered by the AI* |
@@ -155,6 +155,8 @@ VELA_DIR=models/vela3.1-onnx/pico-150m node tests/evals/decisionPlanner.experime
 DEV=1 VELA_DIR=models/vela3.1-onnx/pico-150m node tests/evals/decisionPlanner.experiment.mjs
 # the chat model's prompts on a local Ollama model (add LLM_CPU=1 for CPU only)
 LLM_MODEL=qwen3.5:2b node tests/evals/decisionPlanner.experiment.mjs
+# any of the above on the Norwegian golden sets; PROMPT_LANG=en|no|auto fixes the LLM prompt language
+EVAL_LANG=no LLM_MODEL=qwen3.5:2b node tests/evals/decisionPlanner.experiment.mjs
 ```
 
 Both use [`harness/plannerSuites.js`](../../tests/evals/harness/plannerSuites.js),
@@ -167,7 +169,8 @@ and show in the Evals app's **Experiments** tab.
 ## 7. Limits
 
 - Request splitting and slot filling use **English-only** text patterns: Norwegian
-  routing works, Norwegian multi-step plans don't yet.
+  routing works, Norwegian multi-step plans don't yet. (The chat-model planner has
+  Norwegian prompts picked per message — [ADR 0003](../adr/0003-language-matched-planner-prompts.md).)
 - The planner sees the **focused window**, not the conversation history.
 - Decision models are sensitive to **option wording** (pico-380m moved from 57% to
   79% on commands and from 67% to 56% on plans with the same wording change). Tune on

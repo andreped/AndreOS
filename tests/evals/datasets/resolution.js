@@ -3,27 +3,26 @@
  *
  * The assistant must map a spoken/typed app name to the correct app id before
  * it can open or act on it. `expected: null` means the phrase should NOT resolve
- * to any app (avoids false positives).
+ * to any app (avoids false positives). `no` is the Norwegian (Bokmål) input;
+ * see localize.js.
  */
 
-/** @type {{ input: string, expected: string|null, tags?: string[] }[]} */
+/** @type {{ input: string, no: string, expected: string|null, tags?: string[] }[]} */
 export const RESOLUTION_DATASET = [
-    { input: 'research', expected: 'research' },
-    { input: 'publications', expected: 'research' },
-    { input: 'papers', expected: 'research' },
-    { input: 'forskning', expected: 'research', tags: ['norwegian'] },
-    { input: 'resume', expected: 'resume' },
-    { input: 'cv', expected: 'resume', tags: ['alias'] },
-    { input: 'projects', expected: 'projects' },
-    { input: 'skills', expected: 'skills' },
-    { input: 'contact', expected: 'contact' },
-    { input: 'settings', expected: 'settings' },
-    { input: 'preferences', expected: 'settings', tags: ['alias'] },
-    { input: 'innstillinger', expected: 'settings', tags: ['norwegian'] },
-    { input: 'about', expected: 'about' },
-    { input: 'browser', expected: 'browser' },
+    { input: 'research', no: 'forskning', expected: 'research' },
+    { input: 'publications', no: 'publikasjoner', expected: 'research' },
+    { input: 'papers', no: 'artikler', expected: 'research' },
+    { input: 'resume', no: 'cv', expected: 'resume' },
+    { input: 'cv', no: 'CV-en', expected: 'resume', tags: ['alias'] },
+    { input: 'projects', no: 'prosjekter', expected: 'projects' },
+    { input: 'skills', no: 'ferdigheter', expected: 'skills' },
+    { input: 'contact', no: 'kontakt', expected: 'contact' },
+    { input: 'settings', no: 'innstillinger', expected: 'settings' },
+    { input: 'preferences', no: 'preferanser', expected: 'settings', tags: ['alias'] },
+    { input: 'about', no: 'om meg', expected: 'about' },
+    { input: 'browser', no: 'nettleser', expected: 'browser' },
     // Negative cases — must not resolve to an app.
-    { input: 'ask andre', expected: null, tags: ['negative'] },
-    { input: 'the weather in Oslo', expected: null, tags: ['negative'] },
-    { input: 'banana', expected: null, tags: ['negative'] },
+    { input: 'ask andre', no: 'spør andré', expected: null, tags: ['negative'] },
+    { input: 'the weather in Oslo', no: 'været i Oslo', expected: null, tags: ['negative'] },
+    { input: 'banana', no: 'banan', expected: null, tags: ['negative'] },
 ];

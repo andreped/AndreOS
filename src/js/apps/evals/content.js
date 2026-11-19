@@ -168,6 +168,10 @@ export function render() {
             <div class="evals-spacer"></div>
             <button class="evals-btn secondary" id="evals-export" title="Download the current scorecard as JSON">⬇ Export</button>
             <button class="evals-btn secondary" id="evals-publish" style="display:none" title="Publish this run to the cloud experiment store (dev only)">☁ Publish</button>
+            <select class="evals-btn secondary" id="evals-lang" aria-label="Eval language" title="Language of the eval inputs">
+                <option value="en">English</option>
+                <option value="no">Norsk</option>
+            </select>
             <button class="evals-btn" id="evals-run">▶ Run live evals</button>
         </div>
 

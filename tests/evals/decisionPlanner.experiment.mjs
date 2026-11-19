@@ -11,6 +11,10 @@
  *         VELA_DIR=models/vela3.1-onnx/pico-150m [VELA_FILE=onnx/model.onnx] node tests/evals/decisionPlanner.experiment.mjs
  *   or, LLM only (the app's router/planner prompts, llmPlanner.js) on a local Ollama model:
  *         LLM_MODEL=qwen3.5:2b [LLM_CPU=1] [OLLAMA_URL=http://127.0.0.1:11434] node tests/evals/decisionPlanner.experiment.mjs
+ *   any mode on the Norwegian translations of the golden sets (own config key, so en/no compare side by side):
+ *         EVAL_LANG=no node tests/evals/decisionPlanner.experiment.mjs
+ *   LLM mode with a fixed router/planner prompt language (default auto = per message, as in the app):
+ *         LLM_MODEL=qwen3.5:2b PROMPT_LANG=en|no|auto [EVAL_LANG=no] node tests/evals/decisionPlanner.experiment.mjs
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
@@ -51,6 +55,7 @@ async function decide(state, questions) {
 // LLM-only mode: same prompts and generation settings as chat.js, served by Ollama.
 const LLM = process.env.LLM_MODEL;
 const LLM_CPU = !!process.env.LLM_CPU; // num_gpu: 0 → no layers offloaded, pure CPU
+const PROMPT_LANG = process.env.PROMPT_LANG ?? 'auto'; // auto = per-message detection, as in the app
 async function complete(prompt, { maxTokens, temperature, think }) {
     const res = await fetch(`${process.env.OLLAMA_URL ?? 'http://127.0.0.1:11434'}/api/chat`, {
         method: 'POST',
@@ -60,7 +65,7 @@ async function complete(prompt, { maxTokens, temperature, think }) {
     return (await res.json()).message.content;
 }
 async function llmPlan(text, history) {
-    try { return parsePlan(await complete(plannerPrompt(text, history, apps.map((a) => a.id)), PLANNER_GEN)); }
+    try { return parsePlan(await complete(plannerPrompt(text, history, apps.map((a) => a.id), PROMPT_LANG), PLANNER_GEN)); }
     catch { return null; } // malformed JSON counts as no plan, as in the app
 }
 
@@ -77,14 +82,14 @@ if (process.env.DEV) {
 }
 
 const { scorecard, rows } = await runPlannerSuites(LLM ? {
-    route: (text) => complete(routerPrompt(text), ROUTER_GEN).then(parseRoute),
+    route: (text) => complete(routerPrompt(text, [], PROMPT_LANG), ROUTER_GEN).then(parseRoute),
     plan: (text, _activeApp, history) => llmPlan(text, history),
 } : {
     route: (text) => routeWithDecisions(text, { decide }),
     plan: (text, activeApp) => planWithDecisions(text, { decide, apps, activeApp }),
 }, () => (LLM
-    ? { model: LLM, planner: LLM, backend: LLM_CPU ? 'ollama·cpu' : 'ollama', source: 'llm-planner' }
-    : { model: null, planner: server.model ?? 'unknown', backend: `decision·${server.device ?? '?'}`, source: 'decision-planner' }));
+    ? { model: LLM, planner: LLM, backend: LLM_CPU ? 'ollama·cpu' : 'ollama', source: 'llm-planner', promptLang: PROMPT_LANG }
+    : { model: null, planner: server.model ?? 'unknown', backend: `decision·${server.device ?? '?'}`, source: 'decision-planner' }), process.env.EVAL_LANG ?? 'en');
 const { configKey, runtimeMs, suites: { routing, commands, plan: planSuite } } = scorecard;
 
 const expPath = new URL('./results/experiments.json', import.meta.url);

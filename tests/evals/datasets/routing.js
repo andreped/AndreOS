@@ -7,41 +7,41 @@
  *
  * Tags group cases so the scorecard shows which categories are weak. Add rows
  * freely — this is the single source of truth for routing quality.
+ *
+ * `no` is the Norwegian (Bokmål) input; see localize.js.
  */
 
-/** @type {{ input: string, expected: 'command'|'direct', tags?: string[] }[]} */
+/** @type {{ input: string, no: string, expected: 'command'|'direct', tags?: string[] }[]} */
 export const ROUTING_DATASET = [
     // ── Clear commands ──────────────────────────────────────────────────────
-    { input: 'open research', expected: 'command', tags: ['open'] },
-    { input: 'open the resume', expected: 'command', tags: ['open'] },
-    { input: 'show me the projects app', expected: 'command', tags: ['open'] },
-    { input: 'close this window', expected: 'command', tags: ['window'] },
-    { input: 'minimize the window', expected: 'command', tags: ['window'] },
-    { input: 'show desktop', expected: 'command', tags: ['window'] },
-    { input: 'go to github.com', expected: 'command', tags: ['browse'] },
-    { input: 'search the web for medical imaging', expected: 'command', tags: ['browse'] },
-    { input: 'sort by most cited', expected: 'command', tags: ['research-action'] },
-    { input: 'open the third paper', expected: 'command', tags: ['research-action'] },
-    { input: 'filter to only journals', expected: 'command', tags: ['research-action'] },
-    { input: 'åpne forskning', expected: 'command', tags: ['open', 'norwegian'] },
-    { input: 'lukk vinduet', expected: 'command', tags: ['window', 'norwegian'] },
+    { input: 'open research', no: 'åpne forskning', expected: 'command', tags: ['open'] },
+    { input: 'open the resume', no: 'åpne CV-en', expected: 'command', tags: ['open'] },
+    { input: 'show me the projects app', no: 'vis meg prosjekt-appen', expected: 'command', tags: ['open'] },
+    { input: 'close this window', no: 'lukk dette vinduet', expected: 'command', tags: ['window'] },
+    { input: 'minimize the window', no: 'minimer vinduet', expected: 'command', tags: ['window'] },
+    { input: 'show desktop', no: 'vis skrivebordet', expected: 'command', tags: ['window'] },
+    { input: 'go to github.com', no: 'gå til github.com', expected: 'command', tags: ['browse'] },
+    { input: 'search the web for medical imaging', no: 'søk på nettet etter medisinsk bildebehandling', expected: 'command', tags: ['browse'] },
+    { input: 'sort by most cited', no: 'sorter etter flest siteringer', expected: 'command', tags: ['research-action'] },
+    { input: 'open the third paper', no: 'åpne den tredje artikkelen', expected: 'command', tags: ['research-action'] },
+    { input: 'filter to only journals', no: 'filtrer til bare tidsskrifter', expected: 'command', tags: ['research-action'] },
 
     // ── Clear direct asks ───────────────────────────────────────────────────
-    { input: 'who is André?', expected: 'direct', tags: ['bio'] },
-    { input: 'tell me about his experience', expected: 'direct', tags: ['bio'] },
-    { input: 'what does André do at DIPS?', expected: 'direct', tags: ['bio'] },
-    { input: 'summarize his PhD research', expected: 'direct', tags: ['research-question'] },
-    { input: 'what programming languages does he know?', expected: 'direct', tags: ['skills'] },
-    { input: 'how many publications does he have?', expected: 'direct', tags: ['research-question'] },
-    { input: 'is he available for consulting?', expected: 'direct', tags: ['contact'] },
-    { input: 'explain what FastPathology is', expected: 'direct', tags: ['research-question'] },
-    { input: 'why did he move into healthcare AI?', expected: 'direct', tags: ['bio'] },
-    { input: 'fortell meg om utdanningen hans', expected: 'direct', tags: ['bio', 'norwegian'] },
+    { input: 'who is André?', no: 'hvem er André?', expected: 'direct', tags: ['bio'] },
+    { input: 'tell me about his experience', no: 'fortell meg om erfaringen hans', expected: 'direct', tags: ['bio'] },
+    { input: 'what does André do at DIPS?', no: 'hva gjør André hos DIPS?', expected: 'direct', tags: ['bio'] },
+    { input: 'summarize his PhD research', no: 'oppsummer doktorgradsforskningen hans', expected: 'direct', tags: ['research-question'] },
+    { input: 'what programming languages does he know?', no: 'hvilke programmeringsspråk kan han?', expected: 'direct', tags: ['skills'] },
+    { input: 'how many publications does he have?', no: 'hvor mange publikasjoner har han?', expected: 'direct', tags: ['research-question'] },
+    { input: 'is he available for consulting?', no: 'er han tilgjengelig for konsulentoppdrag?', expected: 'direct', tags: ['contact'] },
+    { input: 'explain what FastPathology is', no: 'forklar hva FastPathology er', expected: 'direct', tags: ['research-question'] },
+    { input: 'why did he move into healthcare AI?', no: 'hvorfor gikk han over til KI i helsevesenet?', expected: 'direct', tags: ['bio'] },
+    { input: 'tell me about his education', no: 'fortell meg om utdanningen hans', expected: 'direct', tags: ['bio'] },
 
     // ── Ambiguous / tricky (the router should still get these) ───────────────
-    { input: 'can you tell me about his projects', expected: 'direct', tags: ['tricky', 'bio'] },
-    { input: 'find pathology papers', expected: 'command', tags: ['tricky', 'research-action'] },
-    { input: 'what can you do?', expected: 'direct', tags: ['tricky', 'meta'] },
-    { input: 'show me what he worked on at SINTEF', expected: 'direct', tags: ['tricky', 'bio'] },
-    { input: 'take me to his github', expected: 'command', tags: ['tricky', 'browse'] },
+    { input: 'can you tell me about his projects', no: 'kan du fortelle meg om prosjektene hans', expected: 'direct', tags: ['tricky', 'bio'] },
+    { input: 'find pathology papers', no: 'finn patologiartikler', expected: 'command', tags: ['tricky', 'research-action'] },
+    { input: 'what can you do?', no: 'hva kan du gjøre?', expected: 'direct', tags: ['tricky', 'meta'] },
+    { input: 'show me what he worked on at SINTEF', no: 'vis meg hva han jobbet med hos SINTEF', expected: 'direct', tags: ['tricky', 'bio'] },
+    { input: 'take me to his github', no: 'ta meg til GitHub-en hans', expected: 'command', tags: ['tricky', 'browse'] },
 ];

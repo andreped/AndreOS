@@ -22,11 +22,25 @@ export const HEADLINE_METRIC = {
  * Snapshot the run's configuration (the "params" of the experiment) and derive a
  * stable key so runs with the same config group together across time. `model` is
  * the chat model (answers); `planner` the model that routes/plans, when different.
+ * `language` is the reply-language setting; `evalLang` the language of the eval inputs;
+ * `promptLang` the language of the router/planner prompts.
  */
-export function snapshotConfig({ model, planner, backend, reasoning, language, repeats }) {
-    const config = { model, planner: planner && planner !== model ? planner : undefined, backend, reasoning, language, repeats };
-    const configKey = `${model ?? 'no-chat'}${config.planner ? `·planner:${config.planner}` : ''}·${backend}·r:${reasoning}·${language}`;
+export function snapshotConfig({ model, planner, backend, reasoning, language, evalLang = 'en', promptLang = 'en', repeats }) {
+    const config = { model, planner: planner && planner !== model ? planner : undefined, backend, reasoning, language, evalLang, promptLang, repeats };
+    // English adds no suffix, so runs from before bilingual evals group with new English runs.
+    const configKey = `${model ?? 'no-chat'}${config.planner ? `·planner:${config.planner}` : ''}·${backend}·r:${reasoning}·${language}`
+        + `${promptLang !== 'en' ? `·prompt:${promptLang}` : ''}${evalLang !== 'en' ? `·eval:${evalLang}` : ''}`;
     return { config, configKey };
+}
+
+/** Eval input language of a run (scorecard or cloud row); runs predating it were English. */
+export function evalLangOf(run) {
+    return /·eval:(\w+)$/.exec(run?.configKey ?? run?.config_key ?? '')?.[1] ?? 'en';
+}
+
+/** Router/planner prompt language of a run; runs predating it used English prompts. */
+export function promptLangOf(run) {
+    return /·prompt:(\w+)/.exec(run?.configKey ?? run?.config_key ?? '')?.[1] ?? 'en';
 }
 
 /**

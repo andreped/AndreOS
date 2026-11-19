@@ -19,11 +19,7 @@ import { ActiveContext } from '../../assistant/retrieval/ActiveContext.js';
 import { resolveResearchIntent } from '../../assistant/researchContext.js';
 
 import { FIXTURE_CORPUS } from '../../../../tests/evals/datasets/fixtureCorpus.js';
-import { RETRIEVAL_DATASET } from '../../../../tests/evals/datasets/retrieval.js';
-import { RESOLUTION_DATASET } from '../../../../tests/evals/datasets/resolution.js';
-import { ROUTING_DATASET } from '../../../../tests/evals/datasets/routing.js';
-import { COMMANDS_DATASET } from '../../../../tests/evals/datasets/commands.js';
-import { PLANS_DATASET } from '../../../../tests/evals/datasets/plans.js';
+import { evalDatasets, evalLanguage } from '../../../../tests/evals/datasets/localize.js';
 import { ANSWERS_DATASET } from '../../../../tests/evals/datasets/answers.js';
 
 import { buildRetrievalRow, summariseRetrieval } from '../../../../tests/evals/harness/scoreRetrieval.js';
@@ -34,13 +30,15 @@ import { scoreAnswerRow, summariseAnswers } from '../../../../tests/evals/harnes
 import { routeLabel } from '../../../../tests/evals/harness/normalize.js';
 import { mean, stdev, majority, mode, passAtK, repeat } from '../../../../tests/evals/harness/stats.js';
 import { getModelId, getReasoningEffort, getLLMLanguage, isCpuModel, getPlannerModelId } from '../../platform/services/Settings.js';
-import { snapshotConfig, makeTimer, headlineMetrics, suiteModel, suiteLatency } from './experiment.js';
+import { snapshotConfig, makeTimer, headlineMetrics, suiteModel, suiteLatency, evalLangOf, promptLangOf } from './experiment.js';
 
 // How many times each LLM sample is re-run to measure nondeterminism. Real
 // model calls vary run-to-run, so a single sample is misleading — we repeat and
 // report both the central metric and its run-to-run stability. Deterministic
 // suites ignore this (their output never changes).
 const REPEATS = 3;
+
+const LANG_LABEL = { en: 'English', no: 'Norwegian' };
 
 // ── Per-suite display config (headline metric, threshold, description) ─────────
 const SUITE_META = {
@@ -63,20 +61,20 @@ const RUN_ORDER = ['retrieval', 'resolution', 'integrity', 'routing', 'commands'
 // failure carries to identify which sample it was. Integrity is handled inline
 // (a single synthetic sample driven by its pass flag).
 const RUN_SAMPLES = {
-    retrieval:  { rows: () => RETRIEVAL_DATASET.map((c) => ({ label: c.query, id: c.query })),  failId: (f) => f.query },
-    resolution: { rows: () => RESOLUTION_DATASET.map((c) => ({ label: c.input, id: c.input })), failId: (f) => f.input },
-    routing:    { rows: () => ROUTING_DATASET.map((c) => ({ label: c.input, id: c.input })),    failId: (f) => f.input },
-    commands:   { rows: () => COMMANDS_DATASET.map((c) => ({ label: c.input, id: c.input })),   failId: (f) => f.input },
-    plan:       { rows: () => PLANS_DATASET.map((c) => ({ label: c.id, id: c.id })),            failId: (f) => f.id },
+    retrieval:  { rows: (ds) => ds.retrieval.map((c) => ({ label: c.query, id: c.query })),  failId: (f) => f.query },
+    resolution: { rows: (ds) => ds.resolution.map((c) => ({ label: c.input, id: c.input })), failId: (f) => f.input },
+    routing:    { rows: (ds) => ds.routing.map((c) => ({ label: c.input, id: c.input })),    failId: (f) => f.input },
+    commands:   { rows: (ds) => ds.commands.map((c) => ({ label: c.input, id: c.input })),   failId: (f) => f.input },
+    plan:       { rows: (ds) => ds.plans.map((c) => ({ label: c.id, id: c.id })),            failId: (f) => f.id },
     answers:    { rows: () => ANSWERS_DATASET.map((c) => ({ label: c.question, id: c.id })),    failId: (f) => f.id },
 };
 
 // Rebuild one Run-panel suite (labels + per-sample pass/fail/skip statuses) from
 // a committed/last scorecard suite. Failed samples are those whose id appears in
 // the suite's failure list; everything else counts as passed.
-function reconstructSuite(key, suite) {
+function reconstructSuite(key, suite, ds) {
     if (suite.skipped) {
-        const labels = RUN_SAMPLES[key] ? RUN_SAMPLES[key].rows().map((r) => r.label) : [];
+        const labels = RUN_SAMPLES[key] ? RUN_SAMPLES[key].rows(ds).map((r) => r.label) : [];
         return { key, labels, statuses: labels.map(() => 'skip'), status: 'skip', reason: suite.reason ?? 'skipped' };
     }
     if (key === 'integrity') {
@@ -85,7 +83,7 @@ function reconstructSuite(key, suite) {
     }
     const cfg = RUN_SAMPLES[key];
     const failed = new Set((suite.failures ?? []).map(cfg.failId));
-    const rows = cfg.rows();
+    const rows = cfg.rows(ds);
     return {
         key,
         labels: rows.map((r) => r.label),
@@ -113,11 +111,11 @@ async function loadCommittedRuns() {
     return { runs, latest };
 }
 
-/** The newest committed run scored with the current settings (chat model + planner), or null. */
-function runForSettings(runs) {
+/** The newest committed run scored with the current settings (chat model + planner) in `lang`, or null. */
+function runForSettings(runs, lang) {
     const chat = getModelId(), planner = getPlannerModelId();
     return runs
-        .filter((sc) => sc.config?.model === chat && (sc.config.planner ?? sc.config.model) === planner)
+        .filter((sc) => sc.config?.model === chat && (sc.config.planner ?? sc.config.model) === planner && evalLangOf(sc) === lang)
         .sort((a, b) => new Date(b.generatedAt) - new Date(a.generatedAt))[0] ?? null;
 }
 
@@ -149,6 +147,9 @@ export function setupEvalsWindow(winEl) {
     const datasetEl  = winEl.querySelector('#evals-dataset');
     const dsTabsEl   = winEl.querySelector('#evals-ds-tabs');
     const runIndicator = winEl.querySelector('#evals-run-indicator');
+    const langSel    = winEl.querySelector('#evals-lang');
+    langSel.value = evalLanguage(getLLMLanguage());
+    const evalLang = () => langSel.value;
 
     // Experiments panel (cloud store)
     const expListEl   = winEl.querySelector('#evals-experiments');
@@ -170,6 +171,7 @@ export function setupEvalsWindow(winEl) {
     const checklistHead = winEl.querySelector('#evals-checklist-head');
 
     let current = null;   // the scorecard currently on screen
+    let committed = [];   // committed runs, re-picked when the eval language changes
     let history = [];     // trend history
     let running = false;
     let runAborted = false; // set by Stop button / window close to halt a live run
@@ -229,7 +231,8 @@ export function setupEvalsWindow(winEl) {
                 import('../../../../tests/evals/results/history.json').catch(() => ({ default: [] })),
             ]);
             committedHistory = hist.default ?? [];
-            current = runForSettings(runs) ?? latest;
+            committed = runs;
+            current = runForSettings(runs, evalLang()) ?? latest;
         } catch { /* no committed scorecard yet */ }
 
         // Merge the visitor's private local runs into the trend history only.
@@ -241,6 +244,15 @@ export function setupEvalsWindow(winEl) {
         if (current) { paint(); showLastRun(current); }
         else statusEl.textContent = 'No results yet — click “Run live evals”.';
     })();
+
+    langSel.addEventListener('click', (e) => e.stopPropagation());
+    langSel.addEventListener('change', () => {
+        paintDataset();
+        if (running) return;
+        const pick = runForSettings(committed, evalLang());
+        if (pick) { current = pick; showLastRun(pick); }
+        if (current) paint();
+    });
 
     // ── Live-run state + reporter (drives the Run panel) ───────────────────────
     // runState keeps every suite's labels + per-sample statuses, so the user can
@@ -302,8 +314,9 @@ export function setupEvalsWindow(winEl) {
         if (running || !scorecard?.suites) return;
         const order = RUN_ORDER.filter((k) => scorecard.suites[k]);
         if (!order.length) return;
+        const ds = evalDatasets(evalLangOf(scorecard));
         runState = {
-            suites: order.map((k) => reconstructSuite(k, scorecard.suites[k])),
+            suites: order.map((k) => reconstructSuite(k, scorecard.suites[k], ds)),
             total: order.length, completed: order.length,
             runningIdx: -1, activeIdx: 0, follow: false,
         };
@@ -429,7 +442,7 @@ export function setupEvalsWindow(winEl) {
         runProgress.style.display = ''; // let CSS drive the flex column layout
         activateTab('run');
         try {
-            current = await runLive(reporter, () => runAborted);
+            current = await runLive(reporter, () => runAborted, evalLang());
             reporter.onAllDone();
             const entry = historyEntry(current);
             history = [...history, entry];
@@ -583,7 +596,9 @@ export function setupEvalsWindow(winEl) {
                 return `<tr data-run-id="${l.id}" title="Load this run's scorecard">
                     <td><b>${escapeHtml(main)}</b>${planner}<br><span class="eval-ds-tag">${escapeHtml(l.backend ?? '?')}</span>`
                     + `<span class="eval-ds-tag">reason:${escapeHtml(l.reasoning ?? '?')}</span>`
-                    + `<span class="eval-ds-tag">${escapeHtml(l.language ?? '?')}</span></td>`
+                    + `<span class="eval-ds-tag" title="Language of the eval inputs">input:${evalLangOf(l)}</span>`
+                    + `<span class="eval-ds-tag" title="Router/planner prompt language">prompt:${promptLangOf(l)}</span>`
+                    + `<span class="eval-ds-tag" title="Reply-language setting">reply:${escapeHtml(l.language ?? '?')}</span></td>`
                     + `<td>${g.count}</td>${metricCells}`
                     + `<td>${new Date(l.created_at).toLocaleString()}</td></tr>`;
             }).join('');
@@ -617,13 +632,15 @@ export function setupEvalsWindow(winEl) {
     function paint() {
         if (!current) return;
         const when = new Date(current.generatedAt).toLocaleString();
-        sourceEl.textContent = `· ${current.source} · ${when}`;
+        sourceEl.textContent = `· ${current.source} · ${when} · ${LANG_LABEL[evalLangOf(current)] ?? evalLangOf(current)}`;
         if (!running) statusEl.textContent = summaryLine(current);
         paintSetup();
 
+        const lang = evalLangOf(current);
+        const langHistory = history.filter((h) => (h.evalLang ?? 'en') === lang);
         grid.innerHTML = SUITE_ORDER
             .filter((k) => current.suites[k])
-            .map((k) => cardHtml(k, current.suites[k], history))
+            .map((k) => cardHtml(k, current.suites[k], langHistory))
             .join('');
 
         const failsHtml = SUITE_ORDER
@@ -645,12 +662,12 @@ export function setupEvalsWindow(winEl) {
         const el = winEl.querySelector('#evals-setup');
         if (!el) return;
         const { model, planner } = current.config ?? {};
-        const ran = { chat: model ?? null, planner: planner ?? model ?? null };
-        const now = { chat: getModelId(), planner: getPlannerModelId() };
-        const describe = ({ chat, planner: p }) => !chat && !p ? 'no models (deterministic suites only)'
+        const ran = { chat: model ?? null, planner: planner ?? model ?? null, lang: evalLangOf(current) };
+        const now = { chat: getModelId(), planner: getPlannerModelId(), lang: evalLang() };
+        const describe = ({ chat, planner: p, lang }) => (!chat && !p ? 'no models (deterministic suites only)'
             : p && p !== chat ? `${chat ? shortModel(chat) : 'no chat model'} · planner ${shortModel(p)}`
-            : `${shortModel(chat)} (chat + planner)`;
-        const same = ran.chat === now.chat && ran.planner === now.planner;
+            : `${shortModel(chat)} (chat + planner)`) + ` · ${LANG_LABEL[lang] ?? lang} inputs`;
+        const same = ran.chat === now.chat && ran.planner === now.planner && ran.lang === now.lang;
         el.classList.toggle('mismatch', !same);
         el.textContent = same
             ? `Scored with your current setup: ${describe(now)}.`
@@ -661,7 +678,7 @@ export function setupEvalsWindow(winEl) {
         dsTabsEl.innerHTML = DATASET_SECTIONS.map((s, i) =>
             `<button class="eval-suite-tab${i === dsActiveIdx ? ' active' : ''}" data-ds="${i}">${s.title}</button>`,
         ).join('');
-        datasetEl.innerHTML = dsSectionHtml(DATASET_SECTIONS[dsActiveIdx]);
+        datasetEl.innerHTML = dsSectionHtml(DATASET_SECTIONS[dsActiveIdx], evalDatasets(evalLang()));
     }
 
     function cardHtml(key, suite, hist) {
@@ -729,12 +746,12 @@ export function setupEvalsWindow(winEl) {
 // tab is refocused; fall back to a timer when hidden so it keeps progressing.
 const raf = () => new Promise((r) => document.hidden ? setTimeout(r, 0) : requestAnimationFrame(() => r()));
 
-async function runLive(reporter, shouldAbort = () => false) {
+async function runLive(reporter, shouldAbort = () => false, lang = 'en') {
     const suites = {};
     const chat = /** @type {any} */ (window).OSAssistant;
     let engineReady = !!chat && chat.currentModelId != null;
     const timer = makeTimer();
-    const runners = buildRunners(chat, shouldAbort, timer);
+    const runners = buildRunners(chat, shouldAbort, timer, lang);
 
     reporter.onInit(runners.map((r) => ({ key: r.key, samples: r.samples })));
 
@@ -750,10 +767,11 @@ async function runLive(reporter, shouldAbort = () => false) {
         if (shouldAbort()) throw new Error('aborted');
         const rn = runners[idx];
         reporter.onSuiteStart(idx);
-        if (rn.needsModel && !engineReady) {
-            const reason = 'AI model not loaded (still downloading or failed) — try again once it\'s ready';
-            suites[rn.key] = { suite: rn.key, skipped: true, reason };
-            reporter.onSuiteSkip(idx, reason);
+        const skip = rn.skip ?? (rn.needsModel && !engineReady
+            ? 'AI model not loaded (still downloading or failed) — try again once it\'s ready' : null);
+        if (skip) {
+            suites[rn.key] = { suite: rn.key, skipped: true, reason: skip };
+            reporter.onSuiteSkip(idx, skip);
             await raf();
             continue;
         }
@@ -773,6 +791,8 @@ async function runLive(reporter, shouldAbort = () => false) {
         backend: isCpuModel(modelId) ? 'wllama-cpu' : 'webgpu',
         reasoning: getReasoningEffort(),
         language: getLLMLanguage(),
+        evalLang: lang,
+        promptLang: 'auto', // chat.js picks the router/planner prompt per message
         repeats: REPEATS,
     });
     for (const [k, s] of Object.entries(suites)) if (!s.skipped) s.model = suiteModel(k, { config });
@@ -780,26 +800,28 @@ async function runLive(reporter, shouldAbort = () => false) {
 }
 
 /** Ordered suite runners — deterministic suites first (instant), model suites last. */
-function buildRunners(chat, shouldAbort = () => false, timer = makeTimer()) {
+function buildRunners(chat, shouldAbort = () => false, timer = makeTimer(), lang = 'en') {
+    const ds = evalDatasets(lang);
     return [
-        { key: 'retrieval',  samples: RETRIEVAL_DATASET.map((c) => c.query), run: retrievalRunner },
-        { key: 'resolution', samples: RESOLUTION_DATASET.map((c) => c.input), run: resolutionRunner },
+        { key: 'retrieval',  samples: ds.retrieval.map((c) => c.query), run: (emit) => retrievalRunner(emit, ds.retrieval) },
+        { key: 'resolution', samples: ds.resolution.map((c) => c.input), run: (emit) => resolutionRunner(emit, ds.resolution) },
         { key: 'integrity',  samples: ['Registry structure & capabilities'], run: integrityRunner },
-        { key: 'routing',  needsModel: true, samples: ROUTING_DATASET.map((c) => c.input),  run: (emit) => routingRunner(emit, chat, shouldAbort, timer) },
-        { key: 'commands', needsModel: true, samples: COMMANDS_DATASET.map((c) => c.input), run: (emit) => commandsRunner(emit, chat, shouldAbort, timer) },
-        { key: 'plan',     needsModel: true, samples: PLANS_DATASET.map((c) => c.id),       run: (emit) => planRunner(emit, chat, shouldAbort, timer) },
-        { key: 'answers',  needsModel: true, samples: ANSWERS_DATASET.map((c) => c.question), run: (emit) => answersRunner(emit, chat, shouldAbort, timer) },
+        { key: 'routing',  needsModel: true, samples: ds.routing.map((c) => c.input),  run: (emit) => routingRunner(emit, ds.routing, chat, shouldAbort, timer) },
+        { key: 'commands', needsModel: true, samples: ds.commands.map((c) => c.input), run: (emit) => commandsRunner(emit, ds.commands, chat, shouldAbort, timer) },
+        { key: 'plan',     needsModel: true, samples: ds.plans.map((c) => c.id),       run: (emit) => planRunner(emit, ds.plans, chat, shouldAbort, timer) },
+        { key: 'answers',  needsModel: true, samples: ANSWERS_DATASET.map((c) => c.question), run: (emit) => answersRunner(emit, chat, shouldAbort, timer),
+            skip: lang !== 'en' ? `Answers are not translated to ${LANG_LABEL[lang] ?? lang} yet` : undefined },
     ];
 }
 
-async function retrievalRunner(emit) {
+async function retrievalRunner(emit, dataset) {
     const bm25 = new BM25();
     for (const d of FIXTURE_CORPUS) bm25.addDocument(d.id, `${d.title}. ${d.abstract}`);
     bm25.build();
     const retrieve = (q, k) => bm25.search(q, k).map((r) => r.id);
     const rows = [];
-    for (let i = 0; i < RETRIEVAL_DATASET.length; i++) {
-        const row = buildRetrievalRow(RETRIEVAL_DATASET[i], retrieve, 5);
+    for (let i = 0; i < dataset.length; i++) {
+        const row = buildRetrievalRow(dataset[i], retrieve, 5);
         rows.push(row);
         emit(i, row.hit3 ? 'pass' : 'fail');
         await raf();
@@ -807,10 +829,10 @@ async function retrievalRunner(emit) {
     return summariseRetrieval(rows, 5);
 }
 
-async function resolutionRunner(emit) {
+async function resolutionRunner(emit, dataset) {
     const rows = [];
-    for (let i = 0; i < RESOLUTION_DATASET.length; i++) {
-        const c = RESOLUTION_DATASET[i];
+    for (let i = 0; i < dataset.length; i++) {
+        const c = dataset[i];
         const predicted = assistantRegistry.resolveId(c.input) ?? null;
         const correct = predicted === (c.expected ?? null);
         rows.push({ input: c.input, expected: c.expected ?? null, predicted, correct });
@@ -833,13 +855,13 @@ async function integrityRunner(emit) {
     return result;
 }
 
-async function routingRunner(emit, chat, shouldAbort = () => false, timer = makeTimer()) {
+async function routingRunner(emit, dataset, chat, shouldAbort = () => false, timer = makeTimer()) {
     const rows = [];
     const consistencies = [];
     const passAtKs = [];
-    for (let i = 0; i < ROUTING_DATASET.length; i++) {
+    for (let i = 0; i < dataset.length; i++) {
         if (shouldAbort()) throw new Error('aborted');
-        const c = ROUTING_DATASET[i];
+        const c = dataset[i];
         const expected = routeLabel(c.expected);
         // Repeat to expose nondeterminism: take the majority label, and record
         // how consistent the runs were + whether any run got it right (pass@k).
@@ -855,13 +877,13 @@ async function routingRunner(emit, chat, shouldAbort = () => false, timer = make
     return summariseRouting(rows, { stability: mean(consistencies), passAtK: mean(passAtKs), repeats: REPEATS });
 }
 
-async function commandsRunner(emit, chat, shouldAbort = () => false, timer = makeTimer()) {
+async function commandsRunner(emit, dataset, chat, shouldAbort = () => false, timer = makeTimer()) {
     const rows = [];
     const stabilities = [];
     const passAtKs = [];
-    for (let i = 0; i < COMMANDS_DATASET.length; i++) {
+    for (let i = 0; i < dataset.length; i++) {
         if (shouldAbort()) throw new Error('aborted');
-        const c = COMMANDS_DATASET[i];
+        const c = dataset[i];
         // Repeat, score each run, then take the modal action plan as the
         // representative. Stability = how often the modal plan recurred.
         const runs = await repeat(async () => buildRow(c, (await timer.run('commands', () => chat.parseCommand(c.input, []))) ?? []), REPEATS);
@@ -887,7 +909,7 @@ function contextualAction(text, activeApp) {
 }
 
 // ── Multi-shot planning: whole conversations, history carried across turns ────
-async function planRunner(emit, chat, shouldAbort = () => false, timer = makeTimer()) {
+async function planRunner(emit, dataset, chat, shouldAbort = () => false, timer = makeTimer()) {
     // Mirror the live pipeline: when an app is focused, resolve context-app
     // commands deterministically (as _parseContextual does) BEFORE the LLM —
     // otherwise the eval unfairly forces the planner to handle turns production
@@ -897,9 +919,9 @@ async function planRunner(emit, chat, shouldAbort = () => false, timer = makeTim
     const cases = [];
     const stabilities = [];
     const passAtKs = [];
-    for (let i = 0; i < PLANS_DATASET.length; i++) {
+    for (let i = 0; i < dataset.length; i++) {
         if (shouldAbort()) throw new Error('aborted');
-        const c = PLANS_DATASET[i];
+        const c = dataset[i];
         // Repeat the whole conversation; take the modal plan-correctness outcome.
         const runs = await repeat(() => scorePlanCase(c, predictTurn), REPEATS);
         const { item: rep, consistency } = mode(runs, (r) => String(r.planExact));
@@ -1001,6 +1023,7 @@ function historyEntry(scorecard) {
     return {
         generatedAt: scorecard.generatedAt,
         source: scorecard.source,
+        evalLang: evalLangOf(scorecard),
         summary: Object.fromEntries(
             Object.entries(scorecard.suites).map(([k, v]) => [k, v.skipped ? null : v[SUITE_META[k]?.metric]]),
         ),
@@ -1026,17 +1049,17 @@ function failureTable(suite) {
 
 // ── Dataset inspector ─ renders the golden datasets that drive each suite ──────
 const DATASET_SECTIONS = [
-    { title: 'Routing', desc: 'command vs ask', rows: () => ROUTING_DATASET, cols: [
+    { title: 'Routing', desc: 'command vs ask', rows: (ds) => ds.routing, cols: [
         ['Input', (c) => escapeHtml(c.input)],
         ['Expected', (c) => `<code>${c.expected}</code>`],
         ['Tags', (c) => dsTags(c.tags)],
     ] },
-    { title: 'Commands', desc: 'right actions · single-shot', rows: () => COMMANDS_DATASET, cols: [
+    { title: 'Commands', desc: 'right actions · single-shot', rows: (ds) => ds.commands, cols: [
         ['Input', (c) => escapeHtml(c.input)],
         ['Expected actions', (c) => `<code>${escapeHtml(JSON.stringify(c.expectedActions))}</code>`],
         ['Tags', (c) => dsTags(c.tags)],
     ] },
-    { title: 'Plan', desc: 'right plan · multi-shot', rows: () => PLANS_DATASET, cols: [
+    { title: 'Plan', desc: 'right plan · multi-shot', rows: (ds) => ds.plans, cols: [
         ['Conversation', (c) => `<code>${escapeHtml(c.id)}</code>`],
         ['Turns', (c) => c.turns.map((t, i) => `${i + 1}. ${escapeHtml(t.user)} → <code>${escapeHtml(JSON.stringify(t.expectedActions))}</code>`).join('<br>')],
         ['Tags', (c) => dsTags(c.tags)],
@@ -1047,12 +1070,12 @@ const DATASET_SECTIONS = [
         ['Key points', (c) => (c.keyPoints ?? []).map((k) => `<code>${escapeHtml(k)}</code>`).join(' ')],
         ['Tags', (c) => dsTags(c.tags)],
     ] },
-    { title: 'Retrieval', desc: 'BM25 paper ranking', rows: () => RETRIEVAL_DATASET, cols: [
+    { title: 'Retrieval', desc: 'BM25 paper ranking', rows: (ds) => ds.retrieval, cols: [
         ['Query', (c) => escapeHtml(c.query)],
         ['Relevant docs', (c) => c.relevant.map((id) => `<code>${escapeHtml(id)}</code>`).join(' ')],
         ['Tags', (c) => dsTags(c.tags)],
     ] },
-    { title: 'Resolution', desc: 'app name → id', rows: () => RESOLUTION_DATASET, cols: [
+    { title: 'Resolution', desc: 'app name → id', rows: (ds) => ds.resolution, cols: [
         ['Input', (c) => escapeHtml(c.input)],
         ['Expected', (c) => (c.expected == null ? '<code>null</code>' : `<code>${escapeHtml(c.expected)}</code>`)],
         ['Tags', (c) => dsTags(c.tags)],
@@ -1063,8 +1086,8 @@ const DATASET_SECTIONS = [
     ] },
 ];
 
-function dsSectionHtml(s) {
-    const rows = s.rows();
+function dsSectionHtml(s, ds) {
+    const rows = s.rows(ds);
     const head = `<tr>${s.cols.map(([h]) => `<th>${h}</th>`).join('')}</tr>`;
     const body = rows.map((r) => `<tr>${s.cols.map(([, fn]) => `<td>${fn(r)}</td>`).join('')}</tr>`).join('');
     return `<div class="eval-ds-section">
