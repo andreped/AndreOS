@@ -2,6 +2,7 @@
  * Settings — shared settings store used by chat.js, SettingsWindow, and VoiceCommandManager.
  * All reads/writes go through localStorage under SETTINGS_KEY.
  */
+import { LANGUAGES } from '../../lang/index.js';
 
 export const SETTINGS_KEY     = 'andreos_settings';
 export const DEFAULT_MODEL_ID = 'Qwen3.5-2B-q4f16_1-MLC';
@@ -107,15 +108,13 @@ export const WHISPER_MODELS = [
 ];
 
 export const TRANSCRIBE_LANGUAGES = [
-    { id: 'auto',      label: 'Auto-detect' },
-    { id: 'english',   label: 'English' },
-    { id: 'norwegian', label: 'Norwegian' },
+    { id: 'auto', label: 'Auto-detect' },
+    ...LANGUAGES.map((l) => ({ id: l.whisper, label: l.name })),
 ];
 
 export const LLM_LANGUAGES = [
     { id: 'auto', label: 'Auto (match user)' },
-    { id: 'en',   label: 'English' },
-    { id: 'no',   label: 'Norwegian' },
+    ...LANGUAGES.map((l) => ({ id: l.id, label: l.name })),
 ];
 
 /**

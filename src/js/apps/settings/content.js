@@ -1,5 +1,7 @@
 /** Settings window content (AI engine + speech configuration). */
-import { MODELS, CPU_MODELS } from '../../platform/services/Settings.js';
+import { MODELS, CPU_MODELS, LLM_LANGUAGES, TRANSCRIBE_LANGUAGES } from '../../platform/services/Settings.js';
+
+const langPills = (langs) => langs.map((l) => `<button class="lang-pill" data-lang="${l.id}">${l.label}</button>`).join('');
 
 export function render() {
     const modelCard = (m) => `
@@ -92,11 +94,7 @@ export function render() {
                     </div>
 
                     <h3 class="settings-subsection-title">Response Language</h3>
-                    <div class="lang-pills" id="llm-lang-pills">
-                        <button class="lang-pill" data-lang="auto">Auto (match user)</button>
-                        <button class="lang-pill" data-lang="en">English</button>
-                        <button class="lang-pill" data-lang="no">Norwegian</button>
-                    </div>
+                    <div class="lang-pills" id="llm-lang-pills">${langPills(LLM_LANGUAGES)}</div>
 
                     <div class="settings-apply-row">
                         <span class="settings-apply-status"></span>
@@ -141,11 +139,7 @@ export function render() {
                     </div>
 
                     <h3 class="settings-subsection-title">Transcription Language</h3>
-                    <div class="lang-pills" id="transcribe-lang-pills">
-                        <button class="lang-pill" data-lang="auto">Auto-detect</button>
-                        <button class="lang-pill" data-lang="english">English</button>
-                        <button class="lang-pill" data-lang="norwegian">Norwegian</button>
-                    </div>
+                    <div class="lang-pills" id="transcribe-lang-pills">${langPills(TRANSCRIBE_LANGUAGES)}</div>
 
                     <h3 class="settings-subsection-title">Transcription Mode</h3>
                     <div class="lang-pills" id="transcribe-mode-pills">

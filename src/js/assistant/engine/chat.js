@@ -9,6 +9,7 @@ import { getModelId, MODELS, getLLMLanguage, CUSTOM_MODELS, getReasoningEffort, 
 import { appRegistry } from "../../apps/index.js";
 import { planWithDecisions, routeWithDecisions } from "./decisionPlanner.js";
 import { routerPrompt, parseRoute, ROUTER_GEN, plannerPrompt, parsePlan, PLANNER_GEN } from "./llmPlanner.js";
+import { replyInstruction } from "../../lang/index.js";
 
 const MODEL_ID = getModelId(); // resolved from Settings at load time — re-read on retry()
 
@@ -325,10 +326,7 @@ async function sendMessage(winEl, userText) {
         typingBubbles.set(w, b);
     });
 
-    const langSetting = getLLMLanguage();
-    const langInstruction = langSetting === 'no' ? '\n\nAlways respond in Norwegian (Bokmål).'
-        : langSetting === 'en' ? '\n\nAlways respond in English.'
-        : '';
+    const langInstruction = replyInstruction(getLLMLanguage());
 
     const activeCtx    = ActiveContext.getContextBlock(userText);
     // Only the profile sections relevant to the question (not the whole bio).
@@ -721,10 +719,7 @@ window.OSAssistant = {
                 return;
             }
         }
-        const langSetting = getLLMLanguage();
-        const langInstruction = langSetting === 'no' ? '\n\nAlways respond in Norwegian (Bokmål).'
-            : langSetting === 'en' ? '\n\nAlways respond in English.'
-            : '';
+        const langInstruction = replyInstruction(getLLMLanguage());
         const effort = REASONING_LEVELS.find(l => l.id === getReasoningEffort()) ?? REASONING_LEVELS[0];
         const activeCtx  = ActiveContext.getContextBlock(text);
         const { prompt: profile, headings } = buildProfileContext(text);
@@ -794,10 +789,7 @@ window.OSAssistant = {
      */
     async answer(text, { history = [], temperature = 0.7 } = {}) {
         if (engineState !== 'ready') return null;
-        const langSetting = getLLMLanguage();
-        const langInstruction = langSetting === 'no' ? '\n\nAlways respond in Norwegian (Bokmål).'
-            : langSetting === 'en' ? '\n\nAlways respond in English.'
-            : '';
+        const langInstruction = replyInstruction(getLLMLanguage());
         const activeCtx  = ActiveContext.getContextBlock(text);
         const { prompt: profile, headings } = buildProfileContext(text);
         const ragContext = (activeCtx || !headings.includes('Research & Publications')) ? '' : ragEngine.query(text);

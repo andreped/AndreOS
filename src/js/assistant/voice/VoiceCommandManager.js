@@ -18,6 +18,7 @@ import { VoiceEngine }       from './VoiceEngine.js';
 import { isVoiceAIEnabled, getWhisperModel, getTranscribeLang, getTranscribeMode, getPlanner, WHISPER_MODELS } from '../../platform/services/Settings.js';
 import { appRegistry }       from '../../apps/registry/AppRegistry.js';
 import { assistantRegistry } from '../registry/AssistantRegistry.js';
+import { LANGUAGES, voicePhrases } from '../../lang/index.js';
 
 // Notification-column mic icon — matches the sidebar's transcription mic.
 const MIC_ICON = `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -37,44 +38,22 @@ const SOURCES = {
 };
 
 /**
- * OS-level voice commands (window management + help).
- * App-open commands are generated from the App Registry at match time
- * (see `_parse()`), so adding a new app never touches this file.
+ * OS-level voice commands (window management + help). Phrases come from every
+ * language in src/js/lang/. App-open commands are generated from the App Registry
+ * at match time (see `_parse()`), so adding a new app never touches this file.
  *
  * @type {Array<{ intent: string, args?: Record<string,string>, keywords: string[] }>}
  */
-const COMMAND_REGISTRY = [
-    // ── App-open commands come from the App Registry (see _parse) ──
-    // ── Window management ──────────────────────────────────────────────────────
-    {
-        intent: 'close',
-        keywords: [
-            'close window', 'close this', 'close app', 'shut down',
-            'lukk vinduet', 'lukk appen', 'avslutt', 'steng',
-        ],
-    },
-    {
-        intent: 'minimize',
-        keywords: [
-            'minimize window', 'minimise window', 'hide window',
-            'minimer vinduet', 'skjul vinduet',
-        ],
-    },
-    {
-        intent: 'desktop',
-        keywords: [
-            'show desktop', 'clear desktop', 'hide all windows',
-            'vis skrivebordet', 'skjul alle vinduer',
-        ],
-    },
-    {
-        intent: 'help',
-        keywords: [
-            'help', 'voice commands', 'what can you do', 'list commands',
-            'hjelp', 'kommandoer', 'hva kan du gjøre',
-        ],
-    },
-];
+const COMMAND_REGISTRY = ['close', 'minimize', 'desktop', 'help']
+    .map((intent) => ({ intent, keywords: voicePhrases(intent) }));
+
+// Multi-step signals: the keyword layer leaves these to the planner.
+const COMPOUND_SIGNALS = voicePhrases('compound');
+const alt = (key) => voicePhrases(key).join('|');
+const OS_VERBS = new RegExp(`^(?:${alt('osVerbs')})\\b`, 'i');
+// "open [app] and/,  ask/say/tell [message]"; accepts "and ask" and comma-separated "open X, ask Y".
+const OPEN_ASK = new RegExp(`(?:${alt('openVerbs')}) +([ \\w]+?) *(?:, *(?:and +)?|${voicePhrases('and').map((a) => `${a} +`).join('|')})(?:${alt('askVerbs')}) +(.+)`, 'i');
+const CHAT_SHORTCUT = new RegExp(`(?:${alt('chatVerbs')})\\s+(?:andr[^\\s,]+|chat|(?:os\\s+)?assistant|bot)[\\s,]+(.+)`, 'i');
 
 /**
  * Returns true if the utterance starts with a recognised OS action verb
@@ -85,7 +64,6 @@ const COMMAND_REGISTRY = [
  * Examples that fail:  "can you summarize", "what is", "tell me about"
  */
 function _looksLikeOSCommand(rawText) {
-    const OS_VERBS = /^(?:open|close|show|hide|minimize|maximise|maximize|navigate|go\s+to|search|sort|filter|browse|launch|select|find|start|stop|turn|display|åpne|lukk|vis|søk|minimer|naviger|gå\s+til)\b/i;
     const FILLER   = /^(?:can\s+you|could\s+you|please|hey|just|would\s+you|will\s+you)\s+/i;
     const stripped = rawText.trim().replace(FILLER, '').trim();
     return OS_VERBS.test(stripped);
@@ -552,11 +530,8 @@ export class VoiceCommandManager {
             return [{ a: 'search', t: desktopSearch[1].trim() }];
         }
 
-        // "open [app] and/,  ask/say/tell [message]" — English + Norwegian verbs
-        // Accepts both "and ask" and comma-separated "open X, ask Y"
-        const openAsk = t.match(
-            /(?:open|show|launch|åpne|vis) +([ \w]+?) *(?:, *(?:and +)?|and +|og +)(?:ask|say|tell|send|message|spør|si|fortell|send) +(.+)/i
-        );
+        // "open [app] and/,  ask/say/tell [message]" — verbs from every language
+        const openAsk = t.match(OPEN_ASK);
         if (openAsk) {
             const app = this._resolveApp(openAsk[1].trim());
             const msg = openAsk[2].trim();
@@ -707,7 +682,7 @@ export class VoiceCommandManager {
     /**
      * Detect an explicit "ask <assistant> <question>" phrasing and return the
      * bare question, or null. Recognises André plus the assistant's brand
-     * names (chat, assistant, os assistant, bot), in English and Norwegian.
+     * names (chat, assistant, os assistant, bot), with the ask verbs of every language.
      * No ^ anchor — Whisper sometimes prepends whitespace; [\s,]+ tolerates the
      * comma Whisper often inserts ("Ask chat, …"); andr[^\s,]+ matches any
      * Whisper rendering (André, Andrea, Andrés…) including accents \w misses.
@@ -715,9 +690,7 @@ export class VoiceCommandManager {
      * @returns {string|null}
      */
     _parseChatShortcut(rawText) {
-        const m = rawText.match(
-            /(?:ask|tell|message|spør)\s+(?:andr[^\s,]+|chat|(?:os\s+)?assistant|bot)[\s,]+(.+)/i
-        );
+        const m = rawText.match(CHAT_SHORTCUT);
         const message = m?.[1].trim();
         return message && message.length > 2 ? message : null;
     }
@@ -741,16 +714,6 @@ export class VoiceCommandManager {
 
         // Compound-command signals — skip keyword matching and let the LLM
         // parse multi-step intent ("open chat and ask X", "open research then show Y")
-        const COMPOUND_SIGNALS = [
-            'and ask', 'and say', 'and tell', 'and send', 'and search',
-            'and then', 'then open', 'then ask', 'then show', 'then close',
-            'after that', 'followed by',
-            'og spør', 'og si', 'og åpne', 'og fortell', // Norwegian
-            'go to', 'navigate to', 'browse to', 'search for', 'search the web', 'search online',
-            // Comma-separated compound: "open X, ask Y" (comma → space after normalise)
-            ' ask ', ' say ', ' tell ',
-            ' spør ', ' si ', ' fortell ', // Norwegian comma-separated
-        ];
         if (COMPOUND_SIGNALS.some(s => text.includes(s))) return null;
 
         const APP_LABELS = {
@@ -822,14 +785,9 @@ export class VoiceCommandManager {
     }
 
     _showHelp() {
-        const lines = [
-            '"open resume" / "åpne CV"',
-            '"open chat" / "snakk med André"',
-            '"open projects" / "prosjekter"',
-            '"close window" / "lukk vinduet"',
-            '"minimize window" / "minimer vinduet"',
-            '"show desktop" / "vis skrivebordet"',
-        ];
+        // One line per example, each language's phrasing side by side: '"open resume" / "åpne CV"'.
+        const examples = LANGUAGES.map(l => l.voice?.helpExamples).filter(Boolean);
+        const lines = examples[0].map((_, i) => examples.map(e => e[i]).filter(Boolean).join(' / '));
         this._notifications.push(
             'Voice Commands',
             lines.join('  ·  '),
