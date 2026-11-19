@@ -1,18 +1,16 @@
 /**
  * LangButton
  *
- * A compact taskbar tray button that lets users quickly switch between
- * English and Norwegian for both transcription (Whisper) and LLM responses.
+ * A compact taskbar tray button that lets users quickly switch the language
+ * (src/js/lang/) for both transcription (Whisper) and LLM responses.
  * Detailed per-feature control remains in the Settings window.
  *
  * Only renders on desktop (hidden via CSS on mobile — users use Settings there).
  */
 import { getTranscribeLang, saveSettings } from '../services/Settings.js';
+import { LANGUAGES } from '../../lang/index.js';
 
-const LANGS = [
-    { id: 'en', label: 'EN', name: 'English',   transcribe: 'english',   llm: 'en' },
-    { id: 'no', label: 'NO', name: 'Norsk',      transcribe: 'norwegian', llm: 'no' },
-];
+const LANGS = LANGUAGES.map((l) => ({ id: l.id, label: l.short, name: l.nativeName, transcribe: l.whisper, llm: l.id }));
 
 export class LangButton {
     constructor() {

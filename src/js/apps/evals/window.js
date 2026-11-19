@@ -20,6 +20,7 @@ import { resolveResearchIntent } from '../../assistant/researchContext.js';
 
 import { FIXTURE_CORPUS } from '../../../../tests/evals/datasets/fixtureCorpus.js';
 import { evalDatasets, evalLanguage } from '../../../../tests/evals/datasets/localize.js';
+import { language } from '../../lang/index.js';
 import { ANSWERS_DATASET } from '../../../../tests/evals/datasets/answers.js';
 
 import { buildRetrievalRow, summariseRetrieval } from '../../../../tests/evals/harness/scoreRetrieval.js';
@@ -38,7 +39,7 @@ import { snapshotConfig, makeTimer, headlineMetrics, suiteModel, suiteLatency, e
 // suites ignore this (their output never changes).
 const REPEATS = 3;
 
-const LANG_LABEL = { en: 'English', no: 'Norwegian' };
+const langName = (id) => language(id).name;
 
 // ── Per-suite display config (headline metric, threshold, description) ─────────
 const SUITE_META = {
@@ -632,7 +633,7 @@ export function setupEvalsWindow(winEl) {
     function paint() {
         if (!current) return;
         const when = new Date(current.generatedAt).toLocaleString();
-        sourceEl.textContent = `· ${current.source} · ${when} · ${LANG_LABEL[evalLangOf(current)] ?? evalLangOf(current)}`;
+        sourceEl.textContent = `· ${current.source} · ${when} · ${langName(evalLangOf(current))}`;
         if (!running) statusEl.textContent = summaryLine(current);
         paintSetup();
 
@@ -666,7 +667,7 @@ export function setupEvalsWindow(winEl) {
         const now = { chat: getModelId(), planner: getPlannerModelId(), lang: evalLang() };
         const describe = ({ chat, planner: p, lang }) => (!chat && !p ? 'no models (deterministic suites only)'
             : p && p !== chat ? `${chat ? shortModel(chat) : 'no chat model'} · planner ${shortModel(p)}`
-            : `${shortModel(chat)} (chat + planner)`) + ` · ${LANG_LABEL[lang] ?? lang} inputs`;
+            : `${shortModel(chat)} (chat + planner)`) + ` · ${langName(lang)} inputs`;
         const same = ran.chat === now.chat && ran.planner === now.planner && ran.lang === now.lang;
         el.classList.toggle('mismatch', !same);
         el.textContent = same
@@ -810,7 +811,7 @@ function buildRunners(chat, shouldAbort = () => false, timer = makeTimer(), lang
         { key: 'commands', needsModel: true, samples: ds.commands.map((c) => c.input), run: (emit) => commandsRunner(emit, ds.commands, chat, shouldAbort, timer) },
         { key: 'plan',     needsModel: true, samples: ds.plans.map((c) => c.id),       run: (emit) => planRunner(emit, ds.plans, chat, shouldAbort, timer) },
         { key: 'answers',  needsModel: true, samples: ANSWERS_DATASET.map((c) => c.question), run: (emit) => answersRunner(emit, chat, shouldAbort, timer),
-            skip: lang !== 'en' ? `Answers are not translated to ${LANG_LABEL[lang] ?? lang} yet` : undefined },
+            skip: lang !== 'en' ? `Answers are not translated to ${langName(lang)} yet` : undefined },
     ];
 }
 

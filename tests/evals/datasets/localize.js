@@ -13,8 +13,8 @@ import { PLANS_DATASET } from './plans.js';
 
 export const EVAL_LANGUAGES = ['en', 'no'];
 
-/** Dataset language for a Settings LLM language ('auto' | 'en' | 'no'). */
-export const evalLanguage = (setting) => (setting === 'no' ? 'no' : 'en');
+/** Dataset language for a Settings LLM language ('auto' or a language id). */
+export const evalLanguage = (setting) => (EVAL_LANGUAGES.includes(setting) ? setting : 'en');
 
 function pick(rows, lang, field) {
     if (lang === 'en') return rows;

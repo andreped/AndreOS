@@ -396,5 +396,15 @@
       "integrity": 1,
       "scorers": 1
     }
+  },
+  {
+    "generatedAt": "2026-11-19T08:54:15.109Z",
+    "source": "node",
+    "summary": {
+      "retrieval": 1,
+      "resolution": 1,
+      "integrity": 1,
+      "scorers": 1
+    }
   }
 ]

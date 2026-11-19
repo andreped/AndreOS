@@ -8,6 +8,9 @@
  *
  * Structure + scoped styles only; window.js owns all data and behaviour.
  */
+import { EVAL_LANGUAGES } from '../../../../tests/evals/datasets/localize.js';
+import { language } from '../../lang/index.js';
+
 export function render() {
     return `
     <div class="evals-app">
@@ -169,8 +172,7 @@ export function render() {
             <button class="evals-btn secondary" id="evals-export" title="Download the current scorecard as JSON">⬇ Export</button>
             <button class="evals-btn secondary" id="evals-publish" style="display:none" title="Publish this run to the cloud experiment store (dev only)">☁ Publish</button>
             <select class="evals-btn secondary" id="evals-lang" aria-label="Eval language" title="Language of the eval inputs">
-                <option value="en">English</option>
-                <option value="no">Norsk</option>
+                ${EVAL_LANGUAGES.map((id) => `<option value="${id}">${language(id).nativeName}</option>`).join('')}
             </select>
             <button class="evals-btn" id="evals-run">▶ Run live evals</button>
         </div>

@@ -13,6 +13,7 @@
     "preview": "vite preview",
     "eval": "node tests/evals/runNode.js",
     "eval:experiment": "node tests/evals/experiment.selfcheck.mjs",
+    "eval:lang": "node tests/evals/lang.selfcheck.mjs",
     "eval:publish": "node scripts/publish-eval.mjs"
   },
   "repository": {

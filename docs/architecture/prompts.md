@@ -28,8 +28,8 @@ On the CPU backend, plainly conversational text skips ① and ② to keep the KV
 
 | # | Task | Built in | Called from | Output | Generation |
 |---|---|---|---|---|---|
-| ① | Router | `routerPrompt()` in [llmPlanner.js](../../src/js/assistant/engine/llmPlanner.js) | `routeIntent()` in [chat.js](../../src/js/assistant/engine/chat.js) | `command` / `direct` | `ROUTER_GEN`: 8 tokens, temp 0, no thinking |
-| ② | Planner | `plannerPrompt()` in llmPlanner.js | `parseCommand()` in chat.js | JSON array of actions | `PLANNER_GEN`: 150 tokens, temp 0.1, no thinking |
+| ① | Router | `routerPrompt()` in [llmPlanner.js](../../src/js/assistant/engine/llmPlanner.js), text in `src/js/lang/<id>.js` | `routeIntent()` in [chat.js](../../src/js/assistant/engine/chat.js) | `command` / `direct` | `ROUTER_GEN`: 8 tokens, temp 0, no thinking |
+| ② | Planner | `plannerPrompt()` in llmPlanner.js, text in `src/js/lang/<id>.js` | `parseCommand()` in chat.js | JSON array of actions | `PLANNER_GEN`: 150 tokens, temp 0.1, no thinking |
 | ③ | Answer | `buildProfileContext()` in [andre-profile.js](../../src/js/assistant/engine/andre-profile.js) + RAG in chat.js | `sendMessage()`, `querySidebar()`, `answer()` | free text | 512 tokens (more with reasoning), temp 0.7 |
 
 **Router and planner** are single `user` messages: instructions, rules, few-shot
@@ -60,13 +60,22 @@ Two independent mechanisms:
 
 | What | How the language is chosen | Where |
 |---|---|---|
-| Router + planner **prompt** | per message: `promptLanguage(text)` → `en` or `no` (default `auto`) | llmPlanner.js |
-| Answer **reply language** | Settings → LLM language: `no` / `en` append "Always respond in …"; `auto` adds nothing, so the model mirrors the visitor | chat.js |
+| Router + planner **prompt** | per message: `detectLanguage(text)` → a language id (default `auto`) | llmPlanner.js + [src/js/lang/](../../src/js/lang/index.js) |
+| Answer **reply language** | Settings → LLM language: a language appends its `reply` line ("Always respond in …"); `auto` adds nothing, so the model mirrors the visitor | `replyInstruction()` in src/js/lang/ |
 
-The router and the planner each have an English and a Norwegian prompt (`ROUTER.en/no`,
-`PLANNER.en/no`). Only the wording, rules and examples change. The output contract
-stays English, so parsing is the same for both. The Norwegian planner adds one rule
-mapping Norwegian app names to ids (forskning → research, CV → resume, …).
+All language-specific text lives in **`src/js/lang/`**, one file per language
+(`en.js`, `no.js`) registered in `index.js`: labels, the Whisper name, the reply line,
+detection markers, the router and planner prompts, and the voice keyword phrases.
+`llmPlanner.js` only picks the language and fills in history and the message.
+Settings, the taskbar language button, the Evals picker and the voice keyword layer
+are generated from the registry. To add a language: copy `no.js`, translate it,
+register it, add eval translations, run `npm run eval:lang`
+(checklist in `.github/instructions/languages.instructions.md`).
+
+Each language has its own router and planner prompt. Only the wording, rules and
+examples change. The output contract stays English, so parsing is the same for all.
+The Norwegian planner adds one rule mapping Norwegian app names to ids
+(forskning → research, CV → resume, …).
 
 The prompt follows the **message**, not the setting, because a mismatch costs
 points in both directions. With `qwen3.5:2b`, Norwegian input on the English prompt
@@ -74,9 +83,10 @@ scored 50% exact on commands and 22% on plans, versus 93% / 56% on the Norwegian
 prompt. A Norwegian prompt on English input lost 11 points on routing and plans.
 Full numbers: [ADR 0003](../adr/0003-language-matched-planner-prompts.md).
 
-`promptLanguage()` is a keyword check (æ/ø/å or common Norwegian words). It
-picked the right language for every routing, command and plan input in both
-eval sets. It misses Norwegian with none of those words (bare nouns like "forskning").
+`detectLanguage()` checks each language's `markers` (for Norwegian: æ/ø/å or common
+words); English is the fallback. It picked the right language for every routing,
+command and plan input in both eval sets (asserted by `npm run eval:lang`). It misses
+Norwegian with none of those words (bare nouns like "forskning").
 
 The answer prompt (profile, rules) is English for both languages. The model replies
 in Norwegian when asked to. The profile and paper retrieval are English BM25, so
@@ -84,8 +94,8 @@ Norwegian questions retrieve worse (retrieval hit@3: 40% for Norwegian vs 100% f
 
 ## 4. Changing a prompt
 
-- **Change both languages together.** A rule or example added to `ROUTER.en`
-  / `PLANNER.en` belongs in `.no` too, and the reverse.
+- **Change every language together.** A rule or example added to one language's
+  `router` / `planner` in `src/js/lang/` belongs in the others too.
 - **Keep the English prompts stable unless you mean to change them.** Their scores
   are the baseline for every earlier run.
 - **Don't copy eval cases into examples.** Tune on the dev set

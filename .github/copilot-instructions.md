@@ -5,6 +5,7 @@ Modular guidance lives in [.github/instructions/](instructions/). Files with
 touch matching files.
 
 - **Always on:** [ponytail.instructions.md](instructions/ponytail.instructions.md) — lazy senior dev mode (how we decide what to build and how small the diff should be).
+- **Scoped:** [adding-an-app.instructions.md](instructions/adding-an-app.instructions.md) — new apps; [languages.instructions.md](instructions/languages.instructions.md) — language text, prompts, adding a language.
 
 Add new topic-specific rules as their own `*.instructions.md` file with an
 `applyTo` glob rather than growing this file.
